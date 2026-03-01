@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: var(--md-sys-color-primary);
+  --color-on-primary: var(--md-sys-color-on-primary);
+  --color-primary-container: var(--md-sys-color-primary-container);
+  --color-on-primary-container: var(--md-sys-color-on-primary-container);
+  --color-surface: var(--md-sys-color-surface);
+  --color-on-surface: var(--md-sys-color-on-surface);
+  --color-surface-variant: var(--md-sys-color-surface-variant);
+  --color-on-surface-variant: var(--md-sys-color-on-surface-variant);
+  --color-outline: var(--md-sys-color-outline);
+  --color-background: var(--md-sys-color-background);
+  --color-on-background: var(--md-sys-color-on-background);
+  --color-error: var(--md-sys-color-error);
+  --color-on-error: var(--md-sys-color-on-error);
+}
+
+@layer base {
+  /* HIDE SCROLLBARS GLOBALLY FOR APP-LIKE FEEL */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera, and Android WebView */
+  }
+
+  :root {
+    --md-sys-color-primary: #6750A4;
+    --md-sys-color-on-primary: #FFFFFF;
+    --md-sys-color-primary-container: #EADDFF;
+    --md-sys-color-on-primary-container: #21005D;
+    --md-sys-color-surface: #FEF7FF;
+    --md-sys-color-on-surface: #1D1B20;
+    --md-sys-color-surface-variant: #E7E0EC;
+    --md-sys-color-on-surface-variant: #49454F;
+    --md-sys-color-outline: #79747E;
+    --md-sys-color-background: #FEF7FF;
+    --md-sys-color-on-background: #1D1B20;
+    --md-sys-color-error: #B3261E;
+    --md-sys-color-on-error: #FFFFFF;
+  }
+
+  .dark {
+    --md-sys-color-primary: #D0BCFF;
+    --md-sys-color-on-primary: #381E72;
+    --md-sys-color-primary-container: #4F378B;
+    --md-sys-color-on-primary-container: #EADDFF;
+    --md-sys-color-surface: #141218;
+    --md-sys-color-on-surface: #E6E0E9;
+    --md-sys-color-surface-variant: #49454F;
+    --md-sys-color-on-surface-variant: #CAC4D0;
+    --md-sys-color-outline: #938F99;
+    --md-sys-color-background: #141218;
+    --md-sys-color-on-background: #E6E0E9;
+    --md-sys-color-error: #F2B8B5;
+    --md-sys-color-on-error: #601410;
+  }
+
+  body {
+    background-color: var(--md-sys-color-background);
+    color: var(--md-sys-color-on-background);
+    font-family: 'Inter', system-ui, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Material 3 Typography Utilities */
+  .m3-display-large { font-size: 57px; line-height: 64px; letter-spacing: -0.25px; font-weight: 400; }
+  .m3-display-medium { font-size: 45px; line-height: 52px; letter-spacing: 0px; font-weight: 400; }
+  .m3-display-small { font-size: 36px; line-height: 44px; letter-spacing: 0px; font-weight: 400; }
+  
+  .m3-headline-large { font-size: 32px; line-height: 40px; letter-spacing: 0px; font-weight: 400; }
+  .m3-headline-medium { font-size: 28px; line-height: 36px; letter-spacing: 0px; font-weight: 400; }
+  .m3-headline-small { font-size: 24px; line-height: 32px; letter-spacing: 0px; font-weight: 400; }
+  
+  .m3-title-large { font-size: 22px; line-height: 28px; letter-spacing: 0px; font-weight: 400; }
+  .m3-title-medium { font-size: 16px; line-height: 24px; letter-spacing: 0.15px; font-weight: 500; }
+  .m3-title-small { font-size: 14px; line-height: 20px; letter-spacing: 0.1px; font-weight: 500; }
+  
+  .m3-label-large { font-size: 14px; line-height: 20px; letter-spacing: 0.1px; font-weight: 500; }
+  .m3-label-medium { font-size: 12px; line-height: 16px; letter-spacing: 0.5px; font-weight: 500; }
+  .m3-label-small { font-size: 11px; line-height: 16px; letter-spacing: 0.5px; font-weight: 500; }
+  
+  .m3-body-large { font-size: 16px; line-height: 24px; letter-spacing: 0.5px; font-weight: 400; }
+  .m3-body-medium { font-size: 14px; line-height: 20px; letter-spacing: 0.25px; font-weight: 400; }
+  .m3-body-small { font-size: 12px; line-height: 16px; letter-spacing: 0.4px; font-weight: 400; }
+
+  /* Font size overrides */
+  .font-size-small { font-size: 90%; }
+  .font-size-medium { font-size: 100%; }
+  .font-size-large { font-size: 110%; }
+}
