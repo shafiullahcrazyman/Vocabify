@@ -1,0 +1,22 @@
+{
+  "name": "Vocabify",
+  "short_name": "Vocabify",
+  "start_url": "/Vocabify/",
+  "scope": "/Vocabify/",
+  "display": "standalone",
+  "background_color": "#674fa3",
+  "theme_color": "#674fa3",
+  "icons": [
+    {
+      "src": "/Vocabify/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/Vocabify/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
