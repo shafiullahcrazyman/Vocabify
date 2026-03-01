@@ -1,0 +1,110 @@
+[
+  {
+    "id": "1",
+    "noun": "Beauty",
+    "verb": "Beautify",
+    "adjective": "Beautiful",
+    "adverb": "Beautifully",
+    "meaning_bn": "সৌন্দর্য",
+    "example": "She is beautiful and always tries to beautify her surroundings.",
+    "level": "easy",
+    "theme": "Personality",
+    "letter": "B"
+  },
+  {
+    "id": "2",
+    "noun": "Creation",
+    "verb": "Create",
+    "adjective": "Creative",
+    "adverb": "Creatively",
+    "meaning_bn": "সৃষ্টি",
+    "example": "His creative mind helped him create a masterpiece.",
+    "level": "medium",
+    "theme": "Actions",
+    "letter": "C"
+  },
+  {
+    "id": "3",
+    "noun": "Happiness",
+    "verb": "Gladden",
+    "adjective": "Happy",
+    "adverb": "Happily",
+    "meaning_bn": "সুখ",
+    "example": "They lived happily ever after.",
+    "level": "easy",
+    "theme": "Emotions",
+    "letter": "H"
+  },
+  {
+    "id": "4",
+    "noun": "Technology",
+    "verb": "",
+    "adjective": "Technological",
+    "adverb": "Technologically",
+    "meaning_bn": "প্রযুক্তি",
+    "example": "Technological advancements have changed the world.",
+    "level": "medium",
+    "theme": "Technology",
+    "letter": "T"
+  },
+  {
+    "id": "5",
+    "noun": "Nature",
+    "verb": "Naturalize",
+    "adjective": "Natural",
+    "adverb": "Naturally",
+    "meaning_bn": "প্রকৃতি",
+    "example": "It comes naturally to her.",
+    "level": "easy",
+    "theme": "Nature",
+    "letter": "N"
+  },
+  {
+    "id": "6",
+    "noun": "Success",
+    "verb": "Succeed",
+    "adjective": "Successful",
+    "adverb": "Successfully",
+    "meaning_bn": "সাফল্য",
+    "example": "She successfully completed the project.",
+    "level": "medium",
+    "theme": "Actions",
+    "letter": "S"
+  },
+  {
+    "id": "7",
+    "noun": "Danger",
+    "verb": "Endanger",
+    "adjective": "Dangerous",
+    "adverb": "Dangerously",
+    "meaning_bn": "বিপদ",
+    "example": "He drives dangerously fast.",
+    "level": "easy",
+    "theme": "Nature",
+    "letter": "D"
+  },
+  {
+    "id": "8",
+    "noun": "Intelligence",
+    "verb": "",
+    "adjective": "Intelligent",
+    "adverb": "Intelligently",
+    "meaning_bn": "বুদ্ধিমত্তা",
+    "example": "She intelligently solved the complex puzzle.",
+    "level": "hard",
+    "theme": "Personality",
+    "letter": "I"
+  },
+  {
+    "id": "9",
+    "noun": "Talk",
+    "verb": "Talk",
+    "adjective": "Talkative",
+    "adverb": "x",
+    "meaning_bn": "কথা বলা",
+    "example": "He is very talkative and loves to talk about technology.",
+    "level": "easy",
+    "theme": "Actions",
+    "letter": "T"
+  }
+]
