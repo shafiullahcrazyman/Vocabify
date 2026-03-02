@@ -30,7 +30,8 @@ const defaultSettings: AppSettings = {
   offlineMode: true,
   hapticsEnabled: true,
   animationsEnabled: true,
-  autoPronounce: false,
+  autoPronounce: false, // <--- DEFAULT IS OFF
+  hideLearnedWords: false, // <--- DEFAULT IS OFF
 };
 
 const defaultFilters: FilterOptions = {
@@ -48,11 +49,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [progress, setProgress] = useLocalStorage<{ learned: string[] }>('vocab_progress', { learned: [] });
   const [userAvatar, setUserAvatar] = useLocalStorage<string | null>('vocab_user_avatar', null);
   const [favorites, setFavorites] = useLocalStorage<string[]>('vocab_favorites', []);
-  
-  // CHANGED: Use useLocalStorage instead of useState so filters persist across app reloads
-  const [filters, setFilters] = useLocalStorage<FilterOptions>('vocab_filters', defaultFilters);
-  
-  // Search query remains a standard state so it correctly clears on full reload
+  const [filters, setFilters] = useState<FilterOptions>(defaultFilters);
   const [searchQuery, setSearchQuery] = useState('');
   const [runTour, setRunTour] = useState(false);
 
