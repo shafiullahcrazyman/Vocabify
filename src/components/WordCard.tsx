@@ -70,7 +70,8 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
       <div className="flex justify-between items-start">
         <div className="flex-1 pr-2">
           <div className="flex items-center gap-2">
-            <h3 className="text-[24px] leading-7 font-bold text-on-surface tracking-tight">{mainWord}</h3>
+            {/* ADDED: capitalize class here */}
+            <h3 className="text-[24px] leading-7 font-bold text-on-surface tracking-tight capitalize">{mainWord}</h3>
             <button
               onClick={(e) => playAudio(e, mainWord)}
               className="p-1.5 rounded-full hover:bg-on-surface/10 text-on-surface-variant transition-colors"
@@ -83,19 +84,19 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
         </div>
       </div>
 
-      {/* Chips for Parts of Speech (Color Coded or Muted) */}
+      {/* Chips for Parts of Speech - ADDED capitalize span around the word output */}
       <div className="flex flex-wrap gap-2 mt-2">
         <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.noun) ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300' : 'bg-surface-variant/30 text-on-surface-variant/50 dark:bg-surface-variant/10'}`}>
-          n. {isValid(word.noun) ? word.noun : 'None'}
+          n. <span className="capitalize">{isValid(word.noun) ? word.noun : 'None'}</span>
         </span>
         <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.verb) ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-surface-variant/30 text-on-surface-variant/50 dark:bg-surface-variant/10'}`}>
-          v. {isValid(word.verb) ? word.verb : 'None'}
+          v. <span className="capitalize">{isValid(word.verb) ? word.verb : 'None'}</span>
         </span>
         <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.adjective) ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300' : 'bg-surface-variant/30 text-on-surface-variant/50 dark:bg-surface-variant/10'}`}>
-          adj. {isValid(word.adjective) ? word.adjective : 'None'}
+          adj. <span className="capitalize">{isValid(word.adjective) ? word.adjective : 'None'}</span>
         </span>
         <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.adverb) ? 'bg-purple-500/10 text-purple-700 dark:text-purple-300' : 'bg-surface-variant/30 text-on-surface-variant/50 dark:bg-surface-variant/10'}`}>
-          adv. {isValid(word.adverb) ? word.adverb : 'None'}
+          adv. <span className="capitalize">{isValid(word.adverb) ? word.adverb : 'None'}</span>
         </span>
       </div>
 
@@ -114,7 +115,7 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
           }`}></span>
           {word.level}
         </span>
-        <span className="text-[12px] text-on-surface-variant/70 font-medium">
+        <span className="text-[12px] text-on-surface-variant/70 font-medium capitalize">
           • {word.theme}
         </span>
       </div>
