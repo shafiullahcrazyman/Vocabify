@@ -8,8 +8,6 @@ import { Filter as FilterIcon } from 'lucide-react';
 
 export const Home: React.FC = () => {
   const { words, searchQuery, filters, settings, progress } = useAppContext();
-  
-  // FIX: Track the actual Word ID instead of a numbered index to prevent crashes
   const [activeWordId, setActiveWordId] = useState<string | null>(null);
 
   // Check if any filters or search query are active
@@ -28,21 +26,25 @@ export const Home: React.FC = () => {
     if (!hasActiveFilters) return [];
 
     return words.filter((word) => {
-      // 1. Search filter overrides everything
-      if (searchQuery) {
+      
+      // 1. UNIVERSAL SEARCH: If the user is searching, ONLY check the search query.
+      // We immediately return the result and completely IGNORE all other filters below!
+      if (searchQuery.trim() !== '') {
         const query = searchQuery.toLowerCase();
-        const matchesSearch = 
+        return (
           (word.noun?.toLowerCase().includes(query)) ||
           (word.verb?.toLowerCase().includes(query)) ||
           (word.adjective?.toLowerCase().includes(query)) ||
           (word.adverb?.toLowerCase().includes(query)) ||
-          (word.meaning_bn.includes(query));
-        if (!matchesSearch) return false;
+          (word.meaning_bn.includes(query))
+        );
       }
 
+      // --- Everything below this line ONLY runs if the search bar is EMPTY ---
+
       // 2. SMART DYNAMIC HIDE: 
-      // Hide if learned, UNLESS the user is actively reading this exact card right now!
-      if (!searchQuery && settings.hideLearnedWords && progress.learned.includes(word.id)) {
+      // Hide if learned, UNLESS the user is actively reading this exact card right now
+      if (settings.hideLearnedWords && progress.learned.includes(word.id)) {
         if (word.id !== activeWordId) {
           return false;
         }
@@ -67,7 +69,6 @@ export const Home: React.FC = () => {
 
       return true;
     });
-  // Note: activeWordId is now in the dependency array so the list updates gracefully!
   }, [words, searchQuery, filters, hasActiveFilters, settings.hideLearnedWords, progress.learned, activeWordId]);
 
   // Find where the currently active word is in the new filtered list
