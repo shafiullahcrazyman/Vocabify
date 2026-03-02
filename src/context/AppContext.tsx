@@ -30,8 +30,8 @@ const defaultSettings: AppSettings = {
   offlineMode: true,
   hapticsEnabled: true,
   animationsEnabled: true,
-  autoPronounce: false, // <--- DEFAULT IS OFF
-  hideLearnedWords: false, // <--- DEFAULT IS OFF
+  autoPronounce: false,
+  hideLearnedWords: false, // <-- Feature: Hide learned words setting
 };
 
 const defaultFilters: FilterOptions = {
@@ -49,7 +49,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [progress, setProgress] = useLocalStorage<{ learned: string[] }>('vocab_progress', { learned: [] });
   const [userAvatar, setUserAvatar] = useLocalStorage<string | null>('vocab_user_avatar', null);
   const [favorites, setFavorites] = useLocalStorage<string[]>('vocab_favorites', []);
-  const [filters, setFilters] = useState<FilterOptions>(defaultFilters);
+  
+  // FIX: This line guarantees filters are saved to persistent cache memory!
+  const [filters, setFilters] = useLocalStorage<FilterOptions>('vocab_filters', defaultFilters);
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [runTour, setRunTour] = useState(false);
 
