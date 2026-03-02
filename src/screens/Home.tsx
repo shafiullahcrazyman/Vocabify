@@ -7,7 +7,7 @@ import { WordOverlay } from '../components/WordOverlay';
 import { Filter as FilterIcon } from 'lucide-react';
 
 export const Home: React.FC = () => {
-  const { words, searchQuery, filters, settings } = useAppContext();
+  const { words, searchQuery, filters, settings, progress } = useAppContext();
   const [selectedWordIndex, setSelectedWordIndex] = useState<number | null>(null);
 
   // Check if any filters or search query are active
@@ -27,7 +27,7 @@ export const Home: React.FC = () => {
     if (!hasActiveFilters) return [];
 
     return words.filter((word) => {
-      // Search filter
+      // 1. Search filter (We check this FIRST)
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesSearch = 
@@ -36,15 +36,23 @@ export const Home: React.FC = () => {
           (word.adjective?.toLowerCase().includes(query)) ||
           (word.adverb?.toLowerCase().includes(query)) ||
           (word.meaning_bn.includes(query));
+        
+        // If they are searching and this word DOES NOT match, drop it.
         if (!matchesSearch) return false;
       }
 
-      // Category filters
+      // 2. Hide Learned Words (ONLY if they are NOT searching)
+      // By adding !searchQuery, we ensure that if they explicitly search for a word, it will always show up!
+      if (!searchQuery && settings.hideLearnedWords && progress.learned.includes(word.id)) {
+        return false;
+      }
+
+      // 3. Category filters
       if (filters.level.length > 0 && !filters.level.includes(word.level)) return false;
       if (filters.theme.length > 0 && !filters.theme.includes(word.theme)) return false;
       if (filters.letter.length > 0 && !filters.letter.includes(word.letter)) return false;
       
-      // POS filter
+      // 4. POS filter
       if (filters.pos.length > 0) {
         const hasPos = filters.pos.some(pos => {
           if (pos === 'noun' && word.noun) return true;
@@ -58,7 +66,7 @@ export const Home: React.FC = () => {
 
       return true;
     });
-  }, [words, searchQuery, filters, hasActiveFilters]);
+  }, [words, searchQuery, filters, hasActiveFilters, settings.hideLearnedWords, progress.learned]);
 
   const handleNext = () => {
     if (selectedWordIndex !== null && selectedWordIndex < filteredWords.length - 1) {
