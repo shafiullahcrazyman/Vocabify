@@ -60,9 +60,9 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
             <h1 className="text-[22px] font-medium text-on-surface truncate">{title}</h1>
           </div>
         ) : (
-          // REMOVED focus-within:ring-2 focus-within:ring-primary/20 
-          // KEPT focus-within:bg-surface focus-within:shadow-md for true M3 styling
-          <div className="tour-search-bar flex-1 min-w-0 flex items-center bg-surface-variant rounded-full px-4 h-14 shadow-sm transition-all duration-300 focus-within:shadow-md focus-within:bg-surface relative">
+          // REMOVED focus-within:bg-surface so it stays grey!
+          // KEPT focus-within:shadow-md so it just gets a subtle depth pop when clicked
+          <div className="tour-search-bar flex-1 min-w-0 flex items-center bg-surface-variant rounded-full px-4 h-14 shadow-sm transition-all duration-300 focus-within:shadow-md relative">
             <input
               type="text"
               placeholder="Search words..."
