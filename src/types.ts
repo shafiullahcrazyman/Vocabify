@@ -20,6 +20,7 @@ export interface AppSettings {
   hapticsEnabled: boolean;
   animationsEnabled: boolean;
   autoPronounce: boolean;
+  hideLearnedWords: boolean; // <--- NEW ADDITION
 }
 
 export interface FilterOptions {
