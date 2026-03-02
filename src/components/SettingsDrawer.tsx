@@ -180,6 +180,30 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                   </div>
                 </label>
               </div>
+              
+              {/* Hide Learned Words */}
+              <div className="pt-4 border-t border-outline/10">
+                <label className="flex justify-between items-center cursor-pointer">
+                  <div>
+                    <p className="m3-body-large text-on-surface">Hide Learned Words</p>
+                    <p className="m3-body-small text-on-surface-variant">Don't show words I already know</p>
+                  </div>
+                  <div className="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                    <input
+                      type="checkbox"
+                      checked={settings.hideLearnedWords ?? false}
+                      onChange={(e) => handleToggle('hideLearnedWords', e.target.checked)}
+                      className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                      style={{
+                        right: settings.hideLearnedWords ? '0' : '1.5rem',
+                        borderColor: settings.hideLearnedWords ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline)',
+                        background: settings.hideLearnedWords ? 'var(--md-sys-color-primary)' : 'white'
+                      }}
+                    />
+                    <label className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors duration-300 ${settings.hideLearnedWords ? 'bg-primary-container' : 'bg-surface-variant'}`}></label>
+                  </div>
+                </label>
+              </div>
 
               {/* Restart Tour */}
               <div className="pt-4 border-t border-outline/10 pb-8">
