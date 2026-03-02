@@ -40,11 +40,6 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
 
   return (
     <>
-      {/* 
-        Use w-full and max-w-full to ensure it doesn't overflow the screen.
-        Reduce horizontal padding on very small screens (px-2 sm:px-4).
-        Reduce gap on small screens (gap-2 sm:gap-4).
-      */}
       <header className="sticky top-0 z-30 bg-background text-on-surface px-3 sm:px-4 py-3 flex items-center gap-3 sm:gap-4 w-full max-w-full overflow-hidden">
         {/* Left: Hamburger Menu */}
         <button 
@@ -65,7 +60,9 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
             <h1 className="text-[22px] font-medium text-on-surface truncate">{title}</h1>
           </div>
         ) : (
-          <div className="tour-search-bar flex-1 min-w-0 flex items-center bg-surface-variant rounded-full px-4 h-14 shadow-sm transition-all duration-300 focus-within:shadow-md focus-within:bg-surface focus-within:ring-2 focus-within:ring-primary/20 relative">
+          // REMOVED focus-within:ring-2 focus-within:ring-primary/20 
+          // KEPT focus-within:bg-surface focus-within:shadow-md for true M3 styling
+          <div className="tour-search-bar flex-1 min-w-0 flex items-center bg-surface-variant rounded-full px-4 h-14 shadow-sm transition-all duration-300 focus-within:shadow-md focus-within:bg-surface relative">
             <input
               type="text"
               placeholder="Search words..."
