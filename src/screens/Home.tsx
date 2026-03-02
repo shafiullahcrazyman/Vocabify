@@ -8,7 +8,9 @@ import { Filter as FilterIcon } from 'lucide-react';
 
 export const Home: React.FC = () => {
   const { words, searchQuery, filters, settings, progress } = useAppContext();
-  const [selectedWordIndex, setSelectedWordIndex] = useState<number | null>(null);
+  
+  // FIX: Track the actual Word ID instead of a numbered index to prevent crashes
+  const [activeWordId, setActiveWordId] = useState<string | null>(null);
 
   // Check if any filters or search query are active
   const hasActiveFilters = useMemo(() => {
@@ -23,11 +25,10 @@ export const Home: React.FC = () => {
 
   // Filter and search logic
   const filteredWords = useMemo(() => {
-    // If no filters are active, return empty array to show placeholder
     if (!hasActiveFilters) return [];
 
     return words.filter((word) => {
-      // 1. Search filter (We check this FIRST)
+      // 1. Search filter overrides everything
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesSearch = 
@@ -36,15 +37,15 @@ export const Home: React.FC = () => {
           (word.adjective?.toLowerCase().includes(query)) ||
           (word.adverb?.toLowerCase().includes(query)) ||
           (word.meaning_bn.includes(query));
-        
-        // If they are searching and this word DOES NOT match, drop it.
         if (!matchesSearch) return false;
       }
 
-      // 2. Hide Learned Words (ONLY if they are NOT searching)
-      // By adding !searchQuery, we ensure that if they explicitly search for a word, it will always show up!
+      // 2. SMART DYNAMIC HIDE: 
+      // Hide if learned, UNLESS the user is actively reading this exact card right now!
       if (!searchQuery && settings.hideLearnedWords && progress.learned.includes(word.id)) {
-        return false;
+        if (word.id !== activeWordId) {
+          return false;
+        }
       }
 
       // 3. Category filters
@@ -66,18 +67,27 @@ export const Home: React.FC = () => {
 
       return true;
     });
-  }, [words, searchQuery, filters, hasActiveFilters, settings.hideLearnedWords, progress.learned]);
+  // Note: activeWordId is now in the dependency array so the list updates gracefully!
+  }, [words, searchQuery, filters, hasActiveFilters, settings.hideLearnedWords, progress.learned, activeWordId]);
+
+  // Find where the currently active word is in the new filtered list
+  const activeIndex = filteredWords.findIndex(w => w.id === activeWordId);
+  const activeWord = activeIndex >= 0 ? filteredWords[activeIndex] : null;
 
   const handleNext = () => {
-    if (selectedWordIndex !== null && selectedWordIndex < filteredWords.length - 1) {
-      setSelectedWordIndex(selectedWordIndex + 1);
+    if (activeIndex >= 0 && activeIndex < filteredWords.length - 1) {
+      setActiveWordId(filteredWords[activeIndex + 1].id);
     }
   };
 
   const handlePrev = () => {
-    if (selectedWordIndex !== null && selectedWordIndex > 0) {
-      setSelectedWordIndex(selectedWordIndex - 1);
+    if (activeIndex > 0) {
+      setActiveWordId(filteredWords[activeIndex - 1].id);
     }
+  };
+
+  const handleClose = () => {
+    setActiveWordId(null);
   };
 
   return (
@@ -124,7 +134,7 @@ export const Home: React.FC = () => {
                   key={word.id}
                   word={word}
                   position={position}
-                  onClick={() => setSelectedWordIndex(index)}
+                  onClick={() => setActiveWordId(word.id)}
                 />
               );
             })}
@@ -132,14 +142,14 @@ export const Home: React.FC = () => {
         )}
       </main>
 
-      {selectedWordIndex !== null && (
+      {activeWord && (
         <WordOverlay
-          word={filteredWords[selectedWordIndex]}
-          onClose={() => setSelectedWordIndex(null)}
+          word={activeWord}
+          onClose={handleClose}
           onNext={handleNext}
           onPrev={handlePrev}
-          hasNext={selectedWordIndex < filteredWords.length - 1}
-          hasPrev={selectedWordIndex > 0}
+          hasNext={activeIndex < filteredWords.length - 1}
+          hasPrev={activeIndex > 0}
         />
       )}
     </motion.div>
