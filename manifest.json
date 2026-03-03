@@ -5,7 +5,6 @@
   "scope": "/Vocabify/",
   "display": "standalone",
   "background_color": "#674fa3",
-  "theme_color": "#674fa3",
   "icons": [
     {
       "src": "/Vocabify/icon.png",
