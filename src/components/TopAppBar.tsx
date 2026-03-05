@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { User, Info, PlayCircle } from 'lucide-react';
+import { User, Info, PlayCircle, X } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { SettingsDrawer } from './SettingsDrawer';
 import { TipsOverlay } from './TipsOverlay';
@@ -41,7 +41,6 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
   return (
     <>
       <header className="sticky top-0 z-30 bg-background text-on-surface px-3 sm:px-4 py-3 flex items-center gap-3 sm:gap-4 w-full max-w-full overflow-hidden">
-        {/* Left: Hamburger Menu */}
         <button 
           onClick={handleMenuClick}
           className="tour-menu-btn w-10 h-10 flex items-center justify-center rounded-xl hover:bg-surface-variant transition-all duration-200 active:scale-90 text-on-surface-variant flex-shrink-0"
@@ -54,22 +53,32 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
           </svg>
         </button>
         
-        {/* Middle: Search Bar or Title */}
         {title ? (
           <div className="flex-1 min-w-0 flex items-center justify-center h-14">
             <h1 className="text-[22px] font-medium text-on-surface truncate">{title}</h1>
           </div>
         ) : (
-          // REMOVED focus-within:bg-surface so it stays grey!
-          // KEPT focus-within:shadow-md so it just gets a subtle depth pop when clicked
           <div className="tour-search-bar flex-1 min-w-0 flex items-center bg-surface-variant rounded-full px-4 h-14 shadow-sm transition-all duration-300 focus-within:shadow-md relative">
             <input
               type="text"
               placeholder="Search words..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent border-none outline-none flex-1 w-full text-on-surface placeholder:text-on-surface-variant m3-body-large truncate pr-24"
+              className="bg-transparent border-none outline-none flex-1 w-full text-on-surface placeholder:text-on-surface-variant m3-body-large truncate pr-28"
             />
+            
+            {searchQuery.length > 0 && (
+              <button
+                onClick={() => {
+                  triggerHaptic(settings.hapticsEnabled);
+                  setSearchQuery('');
+                }}
+                className="absolute right-[88px] p-1.5 rounded-full hover:bg-on-surface/10 text-on-surface-variant transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+
             <div className="absolute right-2 flex items-center gap-1">
               <button
                 onClick={() => {
@@ -95,7 +104,6 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
           </div>
         )}
         
-        {/* Right: User Avatar */}
         <button 
           onClick={handleAvatarClick}
           className="tour-user-avatar rounded-full hover:bg-surface-variant transition-all duration-200 active:scale-90 flex-shrink-0 overflow-hidden w-10 h-10 flex items-center justify-center bg-surface-variant/50 border border-outline/10" 
@@ -112,7 +120,6 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
           )}
         </button>
         
-        {/* Hidden File Input for Avatar Upload */}
         <input 
           type="file" 
           ref={fileInputRef} 
