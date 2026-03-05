@@ -26,7 +26,7 @@ export const Home: React.FC = () => {
   const filteredWords = useMemo(() => {
     if (!hasActiveFilters) return [];
 
-    return words.filter((word) => {
+    let result = words.filter((word) => {
       
       // 1. UNIVERSAL SEARCH
       if (searchQuery.trim() !== '') {
@@ -57,7 +57,6 @@ export const Home: React.FC = () => {
 
         // If user picked BOTH a normal level (Easy) AND a CEFR level (C1)
         if (levelActive && cefrActive) {
-          // Show the word if it matches EITHER the Level OR the CEFR
           if (!matchesLevel && !matchesCefr) return false;
         } else if (levelActive) {
           if (!matchesLevel) return false;
@@ -84,6 +83,36 @@ export const Home: React.FC = () => {
 
       return true;
     });
+
+    // 6. SMART SORTING FOR SEARCH (This fixes the "Rat" vs "Accurate" issue)
+    if (searchQuery.trim() !== '') {
+      const query = searchQuery.toLowerCase();
+      
+      result.sort((a, b) => {
+        // Grab all word forms to test against
+        const getWords = (w: typeof words[0]) => [w.noun, w.verb, w.adjective, w.adverb].map(v => (v || '').toLowerCase());
+        
+        const aWords = getWords(a);
+        const bWords = getWords(b);
+
+        // Priority 1: EXACT Match (e.g., searching "rat" puts the actual word "rat" at the very top)
+        const aExact = aWords.includes(query);
+        const bExact = bWords.includes(query);
+        if (aExact && !bExact) return -1;
+        if (!aExact && bExact) return 1;
+
+        // Priority 2: STARTS WITH Match (e.g., searching "rat" puts "rating" above "accurate")
+        const aStarts = aWords.some(w => w.startsWith(query));
+        const bStarts = bWords.some(w => w.startsWith(query));
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+
+        // Priority 3: INCLUDES Match (It falls back to original order for words like "accurate")
+        return 0;
+      });
+    }
+
+    return result;
   }, [words, searchQuery, filters, hasActiveFilters, settings.hideLearnedWords, progress.learned, activeWordId]);
 
   const activeIndex = filteredWords.findIndex(w => w.id === activeWordId);
