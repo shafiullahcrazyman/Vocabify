@@ -7,7 +7,7 @@ export interface WordFamily {
   meaning_bn: string;
   example: string;
   level: 'easy' | 'medium' | 'hard';
-  cefr?: string; // <--- NEW: Dynamic CEFR string (A1, A2, B1, etc.)
+  cefr?: string; 
   theme: string;
   letter: string;
   imageUrl?: string;
@@ -26,8 +26,9 @@ export interface AppSettings {
 
 export interface FilterOptions {
   level: string[];
-  cefr: string[]; // <--- NEW: CEFR Filter state
+  cefr: string[]; 
   pos: string[];
   letter: string[];
   theme: string[];
+  favoritesOnly: boolean;
 }
