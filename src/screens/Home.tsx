@@ -1,119 +1,19 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
 import { TopAppBar } from '../components/TopAppBar';
 import { WordCard } from '../components/WordCard';
 import { WordOverlay } from '../components/WordOverlay';
 import { Filter as FilterIcon } from 'lucide-react';
+import { useWordFilter } from '../hooks/useWordFilter';
 
 export const Home: React.FC = () => {
-  const { words, searchQuery, filters, settings, progress } = useAppContext();
+  const { words, searchQuery, filters, settings, progress, favorites } = useAppContext();
   const [activeWordId, setActiveWordId] = useState<string | null>(null);
 
-  // Check if any filters or search query are active
-  const hasActiveFilters = useMemo(() => {
-    return (
-      searchQuery.trim() !== '' ||
-      filters.level.length > 0 ||
-      filters.cefr.length > 0 ||
-      filters.theme.length > 0 ||
-      filters.letter.length > 0 ||
-      filters.pos.length > 0
-    );
-  }, [searchQuery, filters]);
-
-  // Filter and search logic
-  const filteredWords = useMemo(() => {
-    if (!hasActiveFilters) return [];
-
-    let result = words.filter((word) => {
-      
-      // 1. UNIVERSAL SEARCH
-      if (searchQuery.trim() !== '') {
-        const query = searchQuery.toLowerCase();
-        return (
-          (word.noun?.toLowerCase().includes(query)) ||
-          (word.verb?.toLowerCase().includes(query)) ||
-          (word.adjective?.toLowerCase().includes(query)) ||
-          (word.adverb?.toLowerCase().includes(query)) ||
-          (word.meaning_bn.includes(query))
-        );
-      }
-
-      // 2. SMART DYNAMIC HIDE
-      if (settings.hideLearnedWords && progress.learned.includes(word.id)) {
-        if (word.id !== activeWordId) {
-          return false;
-        }
-      }
-
-      // 3. SMART DIFFICULTY LOGIC (Handles Level & CEFR acting together)
-      const levelActive = filters.level.length > 0;
-      const cefrActive = filters.cefr.length > 0;
-
-      if (levelActive || cefrActive) {
-        const matchesLevel = levelActive && filters.level.includes(word.level);
-        const matchesCefr = cefrActive && !!word.cefr && filters.cefr.includes(word.cefr);
-
-        // If user picked BOTH a normal level (Easy) AND a CEFR level (C1)
-        if (levelActive && cefrActive) {
-          if (!matchesLevel && !matchesCefr) return false;
-        } else if (levelActive) {
-          if (!matchesLevel) return false;
-        } else if (cefrActive) {
-          if (!matchesCefr) return false;
-        }
-      }
-
-      // 4. Other Category Filters
-      if (filters.theme.length > 0 && !filters.theme.includes(word.theme)) return false;
-      if (filters.letter.length > 0 && !filters.letter.includes(word.letter)) return false;
-      
-      // 5. POS filter
-      if (filters.pos.length > 0) {
-        const hasPos = filters.pos.some(pos => {
-          if (pos === 'noun' && word.noun) return true;
-          if (pos === 'verb' && word.verb) return true;
-          if (pos === 'adjective' && word.adjective) return true;
-          if (pos === 'adverb' && word.adverb) return true;
-          return false;
-        });
-        if (!hasPos) return false;
-      }
-
-      return true;
-    });
-
-    // 6. SMART SORTING FOR SEARCH (This fixes the "Rat" vs "Accurate" issue)
-    if (searchQuery.trim() !== '') {
-      const query = searchQuery.toLowerCase();
-      
-      result.sort((a, b) => {
-        // Grab all word forms to test against
-        const getWords = (w: typeof words[0]) => [w.noun, w.verb, w.adjective, w.adverb].map(v => (v || '').toLowerCase());
-        
-        const aWords = getWords(a);
-        const bWords = getWords(b);
-
-        // Priority 1: EXACT Match (e.g., searching "rat" puts the actual word "rat" at the very top)
-        const aExact = aWords.includes(query);
-        const bExact = bWords.includes(query);
-        if (aExact && !bExact) return -1;
-        if (!aExact && bExact) return 1;
-
-        // Priority 2: STARTS WITH Match (e.g., searching "rat" puts "rating" above "accurate")
-        const aStarts = aWords.some(w => w.startsWith(query));
-        const bStarts = bWords.some(w => w.startsWith(query));
-        if (aStarts && !bStarts) return -1;
-        if (!aStarts && bStarts) return 1;
-
-        // Priority 3: INCLUDES Match (It falls back to original order for words like "accurate")
-        return 0;
-      });
-    }
-
-    return result;
-  }, [words, searchQuery, filters, hasActiveFilters, settings.hideLearnedWords, progress.learned, activeWordId]);
+  const { filteredWords, hasActiveFilters } = useWordFilter(
+    words, searchQuery, filters, settings, progress, favorites, activeWordId
+  );
 
   const activeIndex = filteredWords.findIndex(w => w.id === activeWordId);
   const activeWord = activeIndex >= 0 ? filteredWords[activeIndex] : null;
