@@ -15,6 +15,7 @@ export const Home: React.FC = () => {
     return (
       searchQuery.trim() !== '' ||
       filters.level.length > 0 ||
+      filters.cefr.length > 0 || // <--- Added CEFR to check
       filters.theme.length > 0 ||
       filters.letter.length > 0 ||
       filters.pos.length > 0
@@ -27,8 +28,7 @@ export const Home: React.FC = () => {
 
     return words.filter((word) => {
       
-      // 1. UNIVERSAL SEARCH: If the user is searching, ONLY check the search query.
-      // We immediately return the result and completely IGNORE all other filters below!
+      // 1. UNIVERSAL SEARCH
       if (searchQuery.trim() !== '') {
         const query = searchQuery.toLowerCase();
         return (
@@ -40,10 +40,7 @@ export const Home: React.FC = () => {
         );
       }
 
-      // --- Everything below this line ONLY runs if the search bar is EMPTY ---
-
-      // 2. SMART DYNAMIC HIDE: 
-      // Hide if learned, UNLESS the user is actively reading this exact card right now
+      // 2. SMART DYNAMIC HIDE
       if (settings.hideLearnedWords && progress.learned.includes(word.id)) {
         if (word.id !== activeWordId) {
           return false;
@@ -55,6 +52,9 @@ export const Home: React.FC = () => {
       if (filters.theme.length > 0 && !filters.theme.includes(word.theme)) return false;
       if (filters.letter.length > 0 && !filters.letter.includes(word.letter)) return false;
       
+      // CEFR Filter Check
+      if (filters.cefr.length > 0 && (!word.cefr || !filters.cefr.includes(word.cefr))) return false;
+
       // 4. POS filter
       if (filters.pos.length > 0) {
         const hasPos = filters.pos.some(pos => {
@@ -71,7 +71,6 @@ export const Home: React.FC = () => {
     });
   }, [words, searchQuery, filters, hasActiveFilters, settings.hideLearnedWords, progress.learned, activeWordId]);
 
-  // Find where the currently active word is in the new filtered list
   const activeIndex = filteredWords.findIndex(w => w.id === activeWordId);
   const activeWord = activeIndex >= 0 ? filteredWords[activeIndex] : null;
 
