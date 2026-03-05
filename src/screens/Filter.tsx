@@ -19,10 +19,11 @@ export const Filter: React.FC = () => {
 
   const handleClearFilters = () => {
     triggerHaptic(settings.hapticsEnabled);
-    updateFilters({ level: [], cefr: [], pos: [], letter: [], theme: [] }); // <-- Added cefr here
+    updateFilters({ level: [], cefr: [], pos: [], letter: [], theme: [] });
   };
 
   const levels = ['easy', 'medium', 'hard'];
+  const cefrLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']; // <--- FIXED CEFR LEVELS
   const pos = ['noun', 'verb', 'adjective', 'adverb'];
   const letters = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
 
@@ -33,15 +34,6 @@ export const Filter: React.FC = () => {
       if (word.theme) themesSet.add(word.theme);
     });
     return Array.from(themesSet).sort();
-  }, [words]);
-
-  // Dynamically extract unique CEFR Levels (A1, A2, B1, etc.)
-  const dynamicCEFR = useMemo(() => {
-    const cefrSet = new Set<string>();
-    words.forEach(word => {
-      if (word.cefr) cefrSet.add(word.cefr);
-    });
-    return Array.from(cefrSet).sort(); // Sorts them alphabetically
   }, [words]);
 
   const FilterSection = ({ title, category, options }: { title: string, category: keyof typeof filters, options: string[] }) => (
@@ -86,12 +78,10 @@ export const Filter: React.FC = () => {
             <h2 className="m3-title-large">Categories</h2>
           </div>
           
-          <FilterSection title="Difficulty" category="level" options={levels} />
+          <FilterSection title="Difficulty Level" category="level" options={levels} />
           
-          {/* CEFR Dynamic Filter Section */}
-          {dynamicCEFR.length > 0 && (
-            <FilterSection title="CEFR Level" category="cefr" options={dynamicCEFR} />
-          )}
+          {/* CEFR Fixed Filter Section */}
+          <FilterSection title="CEFR English Level" category="cefr" options={cefrLevels} />
 
           <FilterSection title="Part of Speech" category="pos" options={pos} />
           
