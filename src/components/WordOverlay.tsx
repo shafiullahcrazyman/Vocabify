@@ -192,31 +192,38 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
               <p className="m3-body-large text-on-surface italic leading-relaxed">"{word.example}"</p>
             </div>
 
-            {/* REMOVED SOLID BACKGROUNDS, BLENDED INTO TEXT WITH BULLET POINT SEPARATOR */}
-            <div className="flex items-center flex-wrap gap-3 pt-2 pl-2">
-              <div className="flex items-center text-[13px] font-bold uppercase tracking-wider text-on-surface-variant">
-                <span className={`w-2 h-2 rounded-full mr-2 ${
+            {/* Metadata Section */}
+            <div className="flex flex-wrap gap-2">
+              {/* DYNAMIC COLOR TAG */}
+              <span className={`px-4 py-1.5 rounded-full m3-label-medium font-bold uppercase tracking-wider flex items-center gap-2 w-fit ${
+                word.level === 'easy' ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' :
+                word.level === 'medium' ? 'bg-orange-500/15 text-orange-800 dark:text-orange-300' :
+                'bg-red-500/15 text-red-700 dark:text-red-300'
+              }`}>
+                <span className={`w-2 h-2 rounded-full ${
                   word.level === 'easy' ? 'bg-emerald-500' :
                   word.level === 'medium' ? 'bg-orange-500' :
                   'bg-red-500'
                 }`}></span>
                 {word.level}
                 
-                {/* DYNAMIC CEFR BADGE */}
+                {/* DYNAMIC CEFR BADGE (Colored border to match) */}
                 {word.cefr && (
-                  <span className="ml-2 pl-2 border-l-2 border-outline/30 text-primary">
+                  <span className={`ml-1 pl-2 border-l-2 uppercase ${
+                    word.level === 'easy' ? 'border-emerald-500/30' :
+                    word.level === 'medium' ? 'border-orange-500/30' :
+                    'border-red-500/30'
+                  }`}>
                     {word.cefr}
                   </span>
                 )}
-              </div>
-
-              <span className="text-on-surface-variant/40 text-[12px]">•</span>
-
-              <div className="text-[13px] text-on-surface-variant font-medium capitalize">
+              </span>
+              
+              {/* Theme Tag (Remains original grey surface-variant) */}
+              <span className="px-4 py-1.5 bg-surface-variant text-on-surface-variant rounded-full m3-label-medium capitalize">
                 Theme: {word.theme}
-              </div>
+              </span>
             </div>
-
           </div>
         </div>
 
