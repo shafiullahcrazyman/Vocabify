@@ -31,6 +31,14 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
     }
   };
 
+  // SMART DYNAMIC FONT SIZING FOR CARDS
+  const getDynamicTitleSize = (text: string) => {
+    const len = text.length;
+    if (len <= 10) return 'text-[24px]';
+    if (len <= 14) return 'text-[20px]';
+    return 'text-[18px]';
+  };
+
   const playAudio = (e: React.MouseEvent, text: string) => {
     e.stopPropagation();
     triggerHaptic(settings.hapticsEnabled);
@@ -57,18 +65,20 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
       className={`bg-surface-variant/40 hover:bg-surface-variant/70 ${getRoundedClass()} p-5 cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.97] flex flex-col gap-3 relative overflow-hidden border border-transparent hover:border-outline/10`}
     >
       <div className="flex justify-between items-start">
-        <div className="flex-1 pr-2">
-          <div className="flex items-center gap-2">
-            <h3 className="text-[24px] leading-7 font-bold text-on-surface tracking-tight capitalize">{mainWord}</h3>
+        <div className="flex-1 pr-2 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className={`${getDynamicTitleSize(mainWord)} leading-tight font-bold text-on-surface tracking-tight capitalize truncate`}>
+              {mainWord}
+            </h3>
             <button
               onClick={(e) => playAudio(e, mainWord)}
-              className="p-1.5 rounded-full hover:bg-on-surface/10 text-on-surface-variant transition-colors"
+              className="p-1.5 rounded-full hover:bg-on-surface/10 text-on-surface-variant transition-colors flex-shrink-0"
               aria-label="Pronounce word"
             >
               <Volume2 className="w-5 h-5" />
             </button>
           </div>
-          <p className="text-[16px] font-medium text-primary mt-1">{word.meaning_bn}</p>
+          <p className="text-[16px] font-medium text-primary mt-1 truncate">{word.meaning_bn}</p>
         </div>
       </div>
 
@@ -91,14 +101,13 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
         "{word.example}"
       </p>
 
-      {/* Footer / Meta Info */}
       <div className="mt-auto pt-2 flex items-center gap-2">
         
-        {/* DYNAMIC COLOR TAG */}
+        {/* BEAUTIFUL SEMI-TRANSPARENT TINTED TAG */}
         <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center w-fit ${
-          word.level === 'easy' ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' :
-          word.level === 'medium' ? 'bg-orange-500/15 text-orange-800 dark:text-orange-300' :
-          'bg-red-500/15 text-red-700 dark:text-red-300'
+          word.level === 'easy' ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' :
+          word.level === 'medium' ? 'bg-orange-500/15 text-orange-800 dark:bg-orange-500/20 dark:text-orange-300' :
+          'bg-red-500/15 text-red-700 dark:bg-red-500/20 dark:text-red-300'
         }`}>
           <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
             word.level === 'easy' ? 'bg-emerald-500' :
@@ -107,7 +116,6 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
           }`}></span>
           {word.level}
           
-          {/* DYNAMIC CEFR BADGE */}
           {word.cefr && (
             <span className={`ml-1.5 pl-1.5 border-l uppercase ${
               word.level === 'easy' ? 'border-emerald-500/30' :
@@ -119,7 +127,7 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
           )}
         </span>
         
-        {/* Theme Tag (Remains original grey surface-variant) */}
+        {/* SOLID GREY TAG */}
         <span className="text-[12px] text-on-surface-variant/70 font-medium capitalize">
           • {word.theme}
         </span>

@@ -72,6 +72,14 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
 
   const mainWord = getValidWord(word.noun, word.verb, word.adjective, word.adverb);
 
+  // SMART DYNAMIC FONT SIZING FOR MODAL
+  const getOverlayTitleSize = (text: string) => {
+    const len = text.length;
+    if (len <= 9) return 'text-[40px]';
+    if (len <= 13) return 'text-[32px] sm:text-[40px]';
+    return 'text-[26px] sm:text-[36px]';
+  };
+
   const playAudio = (text: string) => {
     triggerHaptic(settings.hapticsEnabled);
     const utterance = new SpeechSynthesisUtterance(text);
@@ -120,11 +128,13 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
 
         <div className="flex-1 overflow-y-auto p-6">
           <div className="text-center mb-10 mt-4">
-            <div className="flex items-center justify-center gap-3 mb-2">
-              <h2 className="text-[40px] font-bold tracking-tight text-on-surface leading-none capitalize">{mainWord}</h2>
+            <div className="flex items-center justify-center gap-3 mb-2 px-2">
+              <h2 className={`${getOverlayTitleSize(mainWord)} font-bold tracking-tight text-on-surface leading-none capitalize break-words`}>
+                {mainWord}
+              </h2>
               <button
                 onClick={() => playAudio(mainWord)}
-                className="p-3 rounded-full hover:bg-primary/20 text-primary transition-all duration-200 active:scale-90 bg-primary-container/50"
+                className="p-3 rounded-full hover:bg-primary/20 text-primary transition-all duration-200 active:scale-90 bg-primary-container/50 flex-shrink-0"
                 aria-label="Pronounce word"
               >
                 <Volume2 className="w-7 h-7" />
@@ -142,7 +152,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                   <div className="flex items-center justify-between">
                     <span className={`text-[20px] font-semibold capitalize ${isValid(word.noun) ? 'text-on-surface' : 'text-on-surface-variant/50'}`}>{isValid(word.noun) ? word.noun : 'None'}</span>
                     {isValid(word.noun) && (
-                      <button onClick={() => playAudio(word.noun!)} className="p-2 rounded-full hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 transition-all duration-200 active:scale-90">
+                      <button onClick={() => playAudio(word.noun!)} className="p-2 rounded-full hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 transition-all duration-200 active:scale-90 flex-shrink-0">
                         <Volume2 className="w-5 h-5" />
                       </button>
                     )}
@@ -154,7 +164,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                   <div className="flex items-center justify-between">
                     <span className={`text-[20px] font-semibold capitalize ${isValid(word.verb) ? 'text-on-surface' : 'text-on-surface-variant/50'}`}>{isValid(word.verb) ? word.verb : 'None'}</span>
                     {isValid(word.verb) && (
-                      <button onClick={() => playAudio(word.verb!)} className="p-2 rounded-full hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 transition-all duration-200 active:scale-90">
+                      <button onClick={() => playAudio(word.verb!)} className="p-2 rounded-full hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 transition-all duration-200 active:scale-90 flex-shrink-0">
                         <Volume2 className="w-5 h-5" />
                       </button>
                     )}
@@ -166,7 +176,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                   <div className="flex items-center justify-between">
                     <span className={`text-[20px] font-semibold capitalize ${isValid(word.adjective) ? 'text-on-surface' : 'text-on-surface-variant/50'}`}>{isValid(word.adjective) ? word.adjective : 'None'}</span>
                     {isValid(word.adjective) && (
-                      <button onClick={() => playAudio(word.adjective!)} className="p-2 rounded-full hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 transition-all duration-200 active:scale-90">
+                      <button onClick={() => playAudio(word.adjective!)} className="p-2 rounded-full hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 transition-all duration-200 active:scale-90 flex-shrink-0">
                         <Volume2 className="w-5 h-5" />
                       </button>
                     )}
@@ -178,7 +188,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                   <div className="flex items-center justify-between">
                     <span className={`text-[20px] font-semibold capitalize ${isValid(word.adverb) ? 'text-on-surface' : 'text-on-surface-variant/50'}`}>{isValid(word.adverb) ? word.adverb : 'None'}</span>
                     {isValid(word.adverb) && (
-                      <button onClick={() => playAudio(word.adverb!)} className="p-2 rounded-full hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 transition-all duration-200 active:scale-90">
+                      <button onClick={() => playAudio(word.adverb!)} className="p-2 rounded-full hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 transition-all duration-200 active:scale-90 flex-shrink-0">
                         <Volume2 className="w-5 h-5" />
                       </button>
                     )}
@@ -192,13 +202,13 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
               <p className="m3-body-large text-on-surface italic leading-relaxed">"{word.example}"</p>
             </div>
 
-            {/* Metadata Section */}
             <div className="flex flex-wrap gap-2">
-              {/* DYNAMIC COLOR TAG */}
+              
+              {/* BEAUTIFUL SEMI-TRANSPARENT TINTED TAG */}
               <span className={`px-4 py-1.5 rounded-full m3-label-medium font-bold uppercase tracking-wider flex items-center gap-2 w-fit ${
-                word.level === 'easy' ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' :
-                word.level === 'medium' ? 'bg-orange-500/15 text-orange-800 dark:text-orange-300' :
-                'bg-red-500/15 text-red-700 dark:text-red-300'
+                word.level === 'easy' ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' :
+                word.level === 'medium' ? 'bg-orange-500/15 text-orange-800 dark:bg-orange-500/20 dark:text-orange-300' :
+                'bg-red-500/15 text-red-700 dark:bg-red-500/20 dark:text-red-300'
               }`}>
                 <span className={`w-2 h-2 rounded-full ${
                   word.level === 'easy' ? 'bg-emerald-500' :
@@ -207,7 +217,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                 }`}></span>
                 {word.level}
                 
-                {/* DYNAMIC CEFR BADGE (Colored border to match) */}
                 {word.cefr && (
                   <span className={`ml-1 pl-2 border-l-2 uppercase ${
                     word.level === 'easy' ? 'border-emerald-500/30' :
@@ -219,7 +228,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                 )}
               </span>
               
-              {/* Theme Tag (Remains original grey surface-variant) */}
+              {/* SOLID GREY TAG */}
               <span className="px-4 py-1.5 bg-surface-variant text-on-surface-variant rounded-full m3-label-medium capitalize">
                 Theme: {word.theme}
               </span>
