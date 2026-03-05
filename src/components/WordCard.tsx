@@ -19,21 +19,15 @@ const getValidWord = (...words: (string | undefined)[]) => {
 
 export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'only' }) => {
   const { settings } = useAppContext();
-  // Determine the main word to display (prefer noun, then verb, etc.)
   const mainWord = getValidWord(word.noun, word.verb, word.adjective, word.adverb);
   const isValid = (val?: string) => val && val.toLowerCase() !== 'x' && val.toLowerCase() !== 'none';
 
   const getRoundedClass = () => {
     switch (position) {
-      case 'first':
-        return 'rounded-t-[28px] rounded-b-[4px] sm:rounded-[24px]';
-      case 'middle':
-        return 'rounded-[4px] sm:rounded-[24px]';
-      case 'last':
-        return 'rounded-t-[4px] rounded-b-[28px] sm:rounded-[24px]';
-      case 'only':
-      default:
-        return 'rounded-[28px] sm:rounded-[24px]';
+      case 'first': return 'rounded-t-[28px] rounded-b-[4px] sm:rounded-[24px]';
+      case 'middle': return 'rounded-[4px] sm:rounded-[24px]';
+      case 'last': return 'rounded-t-[4px] rounded-b-[28px] sm:rounded-[24px]';
+      case 'only': default: return 'rounded-[28px] sm:rounded-[24px]';
     }
   };
 
@@ -42,16 +36,12 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
     triggerHaptic(settings.hapticsEnabled);
     const utterance = new SpeechSynthesisUtterance(text);
     
-    // Try to find a British female voice
     const voices = window.speechSynthesis.getVoices();
     const ukFemale = voices.find(v => v.lang === 'en-GB' && (v.name.toLowerCase().includes('female') || v.name.includes('Google UK English Female'))) 
       || voices.find(v => v.lang === 'en-GB');
       
-    if (ukFemale) {
-      utterance.voice = ukFemale;
-    } else {
-      utterance.lang = 'en-GB';
-    }
+    if (ukFemale) utterance.voice = ukFemale;
+    else utterance.lang = 'en-GB';
     
     window.speechSynthesis.speak(utterance);
   };
@@ -66,11 +56,9 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
       onClick={handleCardClick}
       className={`bg-surface-variant/40 hover:bg-surface-variant/70 ${getRoundedClass()} p-5 cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.97] flex flex-col gap-3 relative overflow-hidden border border-transparent hover:border-outline/10`}
     >
-      {/* Header: Word & Action */}
       <div className="flex justify-between items-start">
         <div className="flex-1 pr-2">
           <div className="flex items-center gap-2">
-            {/* ADDED: capitalize class here */}
             <h3 className="text-[24px] leading-7 font-bold text-on-surface tracking-tight capitalize">{mainWord}</h3>
             <button
               onClick={(e) => playAudio(e, mainWord)}
@@ -84,7 +72,6 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
         </div>
       </div>
 
-      {/* Chips for Parts of Speech - ADDED capitalize span around the word output */}
       <div className="flex flex-wrap gap-2 mt-2">
         <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.noun) ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300' : 'bg-surface-variant/30 text-on-surface-variant/50 dark:bg-surface-variant/10'}`}>
           n. <span className="capitalize">{isValid(word.noun) ? word.noun : 'None'}</span>
@@ -100,20 +87,26 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
         </span>
       </div>
 
-      {/* Example Sentence */}
       <p className="text-[14px] text-on-surface-variant leading-relaxed line-clamp-2 mt-1 italic">
         "{word.example}"
       </p>
 
       {/* Footer / Meta Info */}
       <div className="mt-auto pt-2 flex items-center gap-2">
-        <span className="px-2.5 py-1 bg-surface-variant text-on-surface rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit">
-          <span className={`w-1.5 h-1.5 rounded-full ${
+        <span className="px-2.5 py-1 bg-surface-variant text-on-surface rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center w-fit">
+          <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
             word.level === 'easy' ? 'bg-emerald-500' :
             word.level === 'medium' ? 'bg-orange-500' :
             'bg-red-500'
           }`}></span>
           {word.level}
+          
+          {/* DYNAMIC CEFR BADGE */}
+          {word.cefr && (
+            <span className="ml-1.5 pl-1.5 border-l border-outline/30 text-primary uppercase">
+              {word.cefr}
+            </span>
+          )}
         </span>
         <span className="text-[12px] text-on-surface-variant/70 font-medium capitalize">
           • {word.theme}
