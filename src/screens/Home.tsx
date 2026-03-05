@@ -15,7 +15,7 @@ export const Home: React.FC = () => {
     return (
       searchQuery.trim() !== '' ||
       filters.level.length > 0 ||
-      filters.cefr.length > 0 || // <--- Added CEFR to check
+      filters.cefr.length > 0 ||
       filters.theme.length > 0 ||
       filters.letter.length > 0 ||
       filters.pos.length > 0
@@ -47,15 +47,30 @@ export const Home: React.FC = () => {
         }
       }
 
-      // 3. Category filters
-      if (filters.level.length > 0 && !filters.level.includes(word.level)) return false;
+      // 3. SMART DIFFICULTY LOGIC (Handles Level & CEFR acting together)
+      const levelActive = filters.level.length > 0;
+      const cefrActive = filters.cefr.length > 0;
+
+      if (levelActive || cefrActive) {
+        const matchesLevel = levelActive && filters.level.includes(word.level);
+        const matchesCefr = cefrActive && !!word.cefr && filters.cefr.includes(word.cefr);
+
+        // If user picked BOTH a normal level (Easy) AND a CEFR level (C1)
+        if (levelActive && cefrActive) {
+          // Show the word if it matches EITHER the Level OR the CEFR
+          if (!matchesLevel && !matchesCefr) return false;
+        } else if (levelActive) {
+          if (!matchesLevel) return false;
+        } else if (cefrActive) {
+          if (!matchesCefr) return false;
+        }
+      }
+
+      // 4. Other Category Filters
       if (filters.theme.length > 0 && !filters.theme.includes(word.theme)) return false;
       if (filters.letter.length > 0 && !filters.letter.includes(word.letter)) return false;
       
-      // CEFR Filter Check
-      if (filters.cefr.length > 0 && (!word.cefr || !filters.cefr.includes(word.cefr))) return false;
-
-      // 4. POS filter
+      // 5. POS filter
       if (filters.pos.length > 0) {
         const hasPos = filters.pos.some(pos => {
           if (pos === 'noun' && word.noun) return true;
