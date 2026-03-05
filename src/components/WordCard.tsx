@@ -93,7 +93,13 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
 
       {/* Footer / Meta Info */}
       <div className="mt-auto pt-2 flex items-center gap-2">
-        <span className="px-2.5 py-1 bg-surface-variant text-on-surface rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center w-fit">
+        
+        {/* DYNAMIC COLOR TAG */}
+        <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center w-fit ${
+          word.level === 'easy' ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' :
+          word.level === 'medium' ? 'bg-orange-500/15 text-orange-800 dark:text-orange-300' :
+          'bg-red-500/15 text-red-700 dark:text-red-300'
+        }`}>
           <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
             word.level === 'easy' ? 'bg-emerald-500' :
             word.level === 'medium' ? 'bg-orange-500' :
@@ -103,11 +109,17 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
           
           {/* DYNAMIC CEFR BADGE */}
           {word.cefr && (
-            <span className="ml-1.5 pl-1.5 border-l border-outline/30 text-primary uppercase">
+            <span className={`ml-1.5 pl-1.5 border-l uppercase ${
+              word.level === 'easy' ? 'border-emerald-500/30' :
+              word.level === 'medium' ? 'border-orange-500/30' :
+              'border-red-500/30'
+            }`}>
               {word.cefr}
             </span>
           )}
         </span>
+        
+        {/* Theme Tag (Remains original grey surface-variant) */}
         <span className="text-[12px] text-on-surface-variant/70 font-medium capitalize">
           • {word.theme}
         </span>
