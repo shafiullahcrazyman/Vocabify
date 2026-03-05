@@ -34,7 +34,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
   const isLearned = progress.learned.includes(word.id);
   const [isTipsOpen, setIsTipsOpen] = useState(false);
 
-  // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -47,7 +46,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
 
   const isValid = (val?: string) => val && val.toLowerCase() !== 'x' && val.toLowerCase() !== 'none';
 
-  // Handle auto-pronounce
   useEffect(() => {
     if (settings.autoPronounce) {
       const wordsToPronounce: string[] = [];
@@ -58,28 +56,18 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
 
       if (wordsToPronounce.length > 0) {
         window.speechSynthesis.cancel();
-        
         wordsToPronounce.forEach((text) => {
           const utterance = new SpeechSynthesisUtterance(text);
-          
           const voices = window.speechSynthesis.getVoices();
           const ukFemale = voices.find(v => v.lang === 'en-GB' && (v.name.toLowerCase().includes('female') || v.name.includes('Google UK English Female'))) 
             || voices.find(v => v.lang === 'en-GB');
-            
-          if (ukFemale) {
-            utterance.voice = ukFemale;
-          } else {
-            utterance.lang = 'en-GB';
-          }
-          
+          if (ukFemale) utterance.voice = ukFemale;
+          else utterance.lang = 'en-GB';
           window.speechSynthesis.speak(utterance);
         });
       }
     }
-    
-    return () => {
-      window.speechSynthesis.cancel();
-    };
+    return () => window.speechSynthesis.cancel();
   }, [word, settings.autoPronounce]);
 
   const mainWord = getValidWord(word.noun, word.verb, word.adjective, word.adverb);
@@ -87,39 +75,18 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
   const playAudio = (text: string) => {
     triggerHaptic(settings.hapticsEnabled);
     const utterance = new SpeechSynthesisUtterance(text);
-    
     const voices = window.speechSynthesis.getVoices();
     const ukFemale = voices.find(v => v.lang === 'en-GB' && (v.name.toLowerCase().includes('female') || v.name.includes('Google UK English Female'))) 
       || voices.find(v => v.lang === 'en-GB');
-      
-    if (ukFemale) {
-      utterance.voice = ukFemale;
-    } else {
-      utterance.lang = 'en-GB';
-    }
-    
+    if (ukFemale) utterance.voice = ukFemale;
+    else utterance.lang = 'en-GB';
     window.speechSynthesis.speak(utterance);
   };
 
-  const handleClose = () => {
-    triggerHaptic(settings.hapticsEnabled);
-    onClose();
-  };
-
-  const handleMarkLearned = () => {
-    triggerHaptic(settings.hapticsEnabled);
-    markLearned(word.id);
-  };
-
-  const handlePrev = () => {
-    triggerHaptic(settings.hapticsEnabled);
-    onPrev();
-  };
-
-  const handleNext = () => {
-    triggerHaptic(settings.hapticsEnabled);
-    onNext();
-  };
+  const handleClose = () => { triggerHaptic(settings.hapticsEnabled); onClose(); };
+  const handleMarkLearned = () => { triggerHaptic(settings.hapticsEnabled); markLearned(word.id); };
+  const handlePrev = () => { triggerHaptic(settings.hapticsEnabled); onPrev(); };
+  const handleNext = () => { triggerHaptic(settings.hapticsEnabled); onNext(); };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
@@ -138,17 +105,12 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
         transition={settings.animationsEnabled ? { type: 'spring', damping: 25, stiffness: 300 } : { duration: 0.15, ease: "easeOut" }}
         className="relative bg-surface w-full max-w-2xl max-h-full rounded-[32px] shadow-2xl flex flex-col overflow-hidden"
       >
-        
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-outline/10">
           <button onClick={handleClose} className="p-2 rounded-full hover:bg-surface-variant text-on-surface-variant transition-all duration-200 active:scale-90">
             <X className="w-6 h-6" />
           </button>
           <button
-            onClick={() => {
-              triggerHaptic(settings.hapticsEnabled);
-              setIsTipsOpen(true);
-            }}
+            onClick={() => { triggerHaptic(settings.hapticsEnabled); setIsTipsOpen(true); }}
             className="p-2 rounded-full hover:bg-surface-variant text-primary transition-all duration-200 active:scale-90"
             aria-label="Grammar Tips"
           >
@@ -156,11 +118,9 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
           </button>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="text-center mb-10 mt-4">
             <div className="flex items-center justify-center gap-3 mb-2">
-              {/* ADDED: capitalize class here */}
               <h2 className="text-[40px] font-bold tracking-tight text-on-surface leading-none capitalize">{mainWord}</h2>
               <button
                 onClick={() => playAudio(mainWord)}
@@ -174,11 +134,9 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
           </div>
 
           <div className="space-y-6">
-            {/* Word Forms */}
             <div className="bg-surface-variant/30 rounded-3xl p-5">
               <h4 className="m3-title-medium text-on-surface mb-4">Word Forms</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Noun - ADDED capitalize class to the span */}
                 <div className={`flex flex-col p-4 rounded-2xl ${isValid(word.noun) ? 'bg-blue-500/10' : 'bg-surface-variant/20 dark:bg-surface-variant/10'}`}>
                   <span className={`text-[13px] font-bold uppercase tracking-widest mb-1 ${isValid(word.noun) ? 'text-blue-700 dark:text-blue-300' : 'text-on-surface-variant/50'}`}>Noun</span>
                   <div className="flex items-center justify-between">
@@ -191,7 +149,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                   </div>
                 </div>
                 
-                {/* Verb - ADDED capitalize class to the span */}
                 <div className={`flex flex-col p-4 rounded-2xl ${isValid(word.verb) ? 'bg-emerald-500/10' : 'bg-surface-variant/20 dark:bg-surface-variant/10'}`}>
                   <span className={`text-[13px] font-bold uppercase tracking-widest mb-1 ${isValid(word.verb) ? 'text-emerald-700 dark:text-emerald-300' : 'text-on-surface-variant/50'}`}>Verb</span>
                   <div className="flex items-center justify-between">
@@ -204,7 +161,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                   </div>
                 </div>
 
-                {/* Adjective - ADDED capitalize class to the span */}
                 <div className={`flex flex-col p-4 rounded-2xl ${isValid(word.adjective) ? 'bg-amber-500/10' : 'bg-surface-variant/20 dark:bg-surface-variant/10'}`}>
                   <span className={`text-[13px] font-bold uppercase tracking-widest mb-1 ${isValid(word.adjective) ? 'text-amber-700 dark:text-amber-300' : 'text-on-surface-variant/50'}`}>Adjective</span>
                   <div className="flex items-center justify-between">
@@ -217,7 +173,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                   </div>
                 </div>
 
-                {/* Adverb - ADDED capitalize class to the span */}
                 <div className={`flex flex-col p-4 rounded-2xl ${isValid(word.adverb) ? 'bg-purple-500/10' : 'bg-surface-variant/20 dark:bg-surface-variant/10'}`}>
                   <span className={`text-[13px] font-bold uppercase tracking-widest mb-1 ${isValid(word.adverb) ? 'text-purple-700 dark:text-purple-300' : 'text-on-surface-variant/50'}`}>Adverb</span>
                   <div className="flex items-center justify-between">
@@ -232,13 +187,12 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
               </div>
             </div>
 
-            {/* Example */}
             <div className="bg-primary-container/30 rounded-3xl p-5">
               <h4 className="m3-title-medium text-on-surface mb-2">Example</h4>
               <p className="m3-body-large text-on-surface italic leading-relaxed">"{word.example}"</p>
             </div>
 
-            {/* Metadata */}
+            {/* Metadata Section */}
             <div className="flex flex-wrap gap-2">
               <span className="px-4 py-1.5 bg-surface-variant text-on-surface rounded-full m3-label-medium font-bold uppercase tracking-wider flex items-center gap-2 w-fit">
                 <span className={`w-2 h-2 rounded-full ${
@@ -247,7 +201,15 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                   'bg-red-500'
                 }`}></span>
                 {word.level}
+                
+                {/* DYNAMIC CEFR BADGE */}
+                {word.cefr && (
+                  <span className="ml-1 pl-2 border-l-2 border-outline/30 text-primary uppercase">
+                    {word.cefr}
+                  </span>
+                )}
               </span>
+              
               <span className="px-4 py-1.5 bg-surface-variant text-on-surface-variant rounded-full m3-label-medium capitalize">
                 Theme: {word.theme}
               </span>
@@ -255,39 +217,24 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
           </div>
         </div>
 
-        {/* Footer Navigation */}
         <div className="p-4 border-t border-outline/10 flex justify-between items-center bg-surface">
-          <button
-            onClick={handlePrev}
-            disabled={!hasPrev}
-            className="flex items-center px-3 sm:px-4 py-2 rounded-full hover:bg-surface-variant disabled:opacity-50 disabled:cursor-not-allowed text-on-surface transition-all duration-200 active:scale-95"
-          >
+          <button onClick={handlePrev} disabled={!hasPrev} className="flex items-center px-3 sm:px-4 py-2 rounded-full hover:bg-surface-variant disabled:opacity-50 disabled:cursor-not-allowed text-on-surface transition-all duration-200 active:scale-95">
             <ChevronLeft className="w-5 h-5 mr-1" />
             <span className="m3-label-large">Previous</span>
           </button>
           
-          <button
-            onClick={handleMarkLearned}
-            className={`flex items-center justify-center p-3 sm:px-6 sm:py-2.5 rounded-full transition-all duration-200 active:scale-95 ${isLearned ? 'text-primary bg-primary-container' : 'text-on-surface-variant hover:bg-surface-variant'}`}
-            title={isLearned ? "Unmark as learned" : "Mark as learned"}
-          >
+          <button onClick={handleMarkLearned} className={`flex items-center justify-center p-3 sm:px-6 sm:py-2.5 rounded-full transition-all duration-200 active:scale-95 ${isLearned ? 'text-primary bg-primary-container' : 'text-on-surface-variant hover:bg-surface-variant'}`}>
             <CheckCircle2 className="w-6 h-6 sm:w-5 sm:h-5 sm:mr-2" />
             <span className="m3-label-large font-bold hidden sm:inline">{isLearned ? 'Learned' : 'Mark Learned'}</span>
           </button>
 
           {hasNext ? (
-            <button
-              onClick={handleNext}
-              className="flex items-center px-3 sm:px-4 py-2 rounded-full hover:bg-surface-variant text-on-surface transition-all duration-200 active:scale-95"
-            >
+            <button onClick={handleNext} className="flex items-center px-3 sm:px-4 py-2 rounded-full hover:bg-surface-variant text-on-surface transition-all duration-200 active:scale-95">
               <span className="m3-label-large">Next</span>
               <ChevronRight className="w-5 h-5 ml-1" />
             </button>
           ) : (
-            <button
-              onClick={handleClose}
-              className="flex items-center px-3 sm:px-4 py-2 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-200 active:scale-95"
-            >
+            <button onClick={handleClose} className="flex items-center px-3 sm:px-4 py-2 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-200 active:scale-95">
               <span className="m3-label-large font-bold">Done</span>
               <Check className="w-5 h-5 ml-1" />
             </button>
