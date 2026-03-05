@@ -36,10 +36,11 @@ const defaultSettings: AppSettings = {
 
 const defaultFilters: FilterOptions = {
   level: [],
-  cefr: [], // <--- NEW ADDITION
+  cefr: [], 
   pos: [],
   letter: [],
   theme: [],
+  favoritesOnly: false,
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
