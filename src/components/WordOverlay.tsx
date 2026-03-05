@@ -192,10 +192,10 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
               <p className="m3-body-large text-on-surface italic leading-relaxed">"{word.example}"</p>
             </div>
 
-            {/* Metadata Section */}
-            <div className="flex flex-wrap gap-2">
-              <span className="px-4 py-1.5 bg-surface-variant text-on-surface rounded-full m3-label-medium font-bold uppercase tracking-wider flex items-center gap-2 w-fit">
-                <span className={`w-2 h-2 rounded-full ${
+            {/* REMOVED SOLID BACKGROUNDS, BLENDED INTO TEXT WITH BULLET POINT SEPARATOR */}
+            <div className="flex items-center flex-wrap gap-3 pt-2 pl-2">
+              <div className="flex items-center text-[13px] font-bold uppercase tracking-wider text-on-surface-variant">
+                <span className={`w-2 h-2 rounded-full mr-2 ${
                   word.level === 'easy' ? 'bg-emerald-500' :
                   word.level === 'medium' ? 'bg-orange-500' :
                   'bg-red-500'
@@ -204,16 +204,19 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                 
                 {/* DYNAMIC CEFR BADGE */}
                 {word.cefr && (
-                  <span className="ml-1 pl-2 border-l-2 border-outline/30 text-primary uppercase">
+                  <span className="ml-2 pl-2 border-l-2 border-outline/30 text-primary">
                     {word.cefr}
                   </span>
                 )}
-              </span>
-              
-              <span className="px-4 py-1.5 bg-surface-variant text-on-surface-variant rounded-full m3-label-medium capitalize">
+              </div>
+
+              <span className="text-on-surface-variant/40 text-[12px]">•</span>
+
+              <div className="text-[13px] text-on-surface-variant font-medium capitalize">
                 Theme: {word.theme}
-              </span>
+              </div>
             </div>
+
           </div>
         </div>
 
