@@ -10,9 +10,8 @@ export const Filter: React.FC = () => {
 
   const toggleFilter = (category: keyof typeof filters, value: string) => {
     triggerHaptic(settings.hapticsEnabled);
-    if (category === 'favoritesOnly') return; // Handled separately
+    if (category === 'favoritesOnly') return;
     
-    // @ts-ignore - We know this is a string array based on the category check above
     const current = filters[category] as string[];
     const updated = current.includes(value)
       ? current.filter((v) => v !== value)
@@ -43,8 +42,7 @@ export const Filter: React.FC = () => {
       <h3 className="m3-title-medium text-on-surface mb-3">{title}</h3>
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => {
-          // @ts-ignore
-          const isSelected = filters[category].includes(opt);
+          const isSelected = (filters[category] as string[]).includes(opt);
           return (
             <button
               key={opt}
@@ -85,7 +83,8 @@ export const Filter: React.FC = () => {
               <label className="flex justify-between items-center cursor-pointer">
                 <div>
                   <p className="m3-body-large text-on-surface font-medium flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-error" /> 
+                    {/* VIBE: Filled Rose-500 for that red-pink solid look */}
+                    <Heart className="w-5 h-5 fill-rose-500 text-rose-500" /> 
                     Favorites Only
                   </p>
                   <p className="m3-body-small text-on-surface-variant">Show only words I've saved</p>
