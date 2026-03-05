@@ -1,8 +1,9 @@
 import React from 'react';
 import { WordFamily } from '../types';
-import { Volume2 } from 'lucide-react';
+import { Volume2, Heart } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import { useAppContext } from '../context/AppContext';
+import { useTTS } from '../hooks/useTTS';
 
 interface WordCardProps {
   word: WordFamily;
@@ -18,7 +19,10 @@ const getValidWord = (...words: (string | undefined)[]) => {
 };
 
 export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'only' }) => {
-  const { settings } = useAppContext();
+  const { settings, favorites, toggleFavorite } = useAppContext();
+  const { speak, isPlaying } = useTTS();
+  const isFavorite = favorites.includes(word.id);
+
   const mainWord = getValidWord(word.noun, word.verb, word.adjective, word.adverb);
   const isValid = (val?: string) => val && val.toLowerCase() !== 'x' && val.toLowerCase() !== 'none';
 
@@ -31,7 +35,6 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
     }
   };
 
-  // SMART DYNAMIC FONT SIZING FOR CARDS
   const getDynamicTitleSize = (text: string) => {
     const len = text.length;
     if (len <= 10) return 'text-[24px]';
@@ -39,19 +42,15 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
     return 'text-[18px]';
   };
 
-  const playAudio = (e: React.MouseEvent, text: string) => {
+  const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     triggerHaptic(settings.hapticsEnabled);
-    const utterance = new SpeechSynthesisUtterance(text);
-    
-    const voices = window.speechSynthesis.getVoices();
-    const ukFemale = voices.find(v => v.lang === 'en-GB' && (v.name.toLowerCase().includes('female') || v.name.includes('Google UK English Female'))) 
-      || voices.find(v => v.lang === 'en-GB');
-      
-    if (ukFemale) utterance.voice = ukFemale;
-    else utterance.lang = 'en-GB';
-    
-    window.speechSynthesis.speak(utterance);
+    toggleFavorite(word.id);
+  };
+
+  const playAudio = (e: React.MouseEvent, text: string) => {
+    e.stopPropagation();
+    speak(text);
   };
 
   const handleCardClick = () => {
@@ -70,13 +69,22 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
             <h3 className={`${getDynamicTitleSize(mainWord)} leading-tight font-bold text-on-surface tracking-tight capitalize truncate`}>
               {mainWord}
             </h3>
-            <button
-              onClick={(e) => playAudio(e, mainWord)}
-              className="p-1.5 rounded-full hover:bg-on-surface/10 text-on-surface-variant transition-colors flex-shrink-0"
-              aria-label="Pronounce word"
-            >
-              <Volume2 className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <button
+                onClick={(e) => playAudio(e, mainWord)}
+                className={`p-1.5 rounded-full transition-colors ${isPlaying ? 'bg-primary/20 text-primary scale-110' : 'hover:bg-on-surface/10 text-on-surface-variant'}`}
+                aria-label="Pronounce word"
+              >
+                <Volume2 className={`w-5 h-5 ${isPlaying ? 'animate-pulse' : ''}`} />
+              </button>
+              <button
+                onClick={handleFavoriteClick}
+                className="p-1.5 rounded-full hover:bg-error/10 transition-colors"
+                aria-label="Favorite word"
+              >
+                <Heart className={`w-5 h-5 transition-transform active:scale-75 ${isFavorite ? 'fill-error text-error' : 'text-on-surface-variant'}`} />
+              </button>
+            </div>
           </div>
           <p className="text-[16px] font-medium text-primary mt-1 truncate">{word.meaning_bn}</p>
         </div>
@@ -102,8 +110,6 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
       </p>
 
       <div className="mt-auto pt-2 flex items-center gap-2">
-        
-        {/* BEAUTIFUL SEMI-TRANSPARENT TINTED TAG */}
         <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center w-fit ${
           word.level === 'easy' ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' :
           word.level === 'medium' ? 'bg-orange-500/15 text-orange-800 dark:bg-orange-500/20 dark:text-orange-300' :
@@ -127,7 +133,6 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
           )}
         </span>
         
-        {/* SOLID GREY TAG */}
         <span className="text-[12px] text-on-surface-variant/70 font-medium capitalize">
           • {word.theme}
         </span>

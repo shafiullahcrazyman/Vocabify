@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { WordFamily } from '../types';
-import { X, ChevronLeft, ChevronRight, CheckCircle2, Volume2, Info, Check } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, CheckCircle2, Volume2, Info, Check, Heart } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { triggerHaptic } from '../utils/haptics';
 import { TipsOverlay } from './TipsOverlay';
+import { useTTS } from '../hooks/useTTS';
 
 interface WordOverlayProps {
   word: WordFamily;
@@ -30,8 +31,10 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
   hasNext,
   hasPrev,
 }) => {
-  const { progress, markLearned, settings } = useAppContext();
+  const { progress, markLearned, settings, favorites, toggleFavorite } = useAppContext();
+  const { speak, isPlaying } = useTTS();
   const isLearned = progress.learned.includes(word.id);
+  const isFavorite = favorites.includes(word.id);
   const [isTipsOpen, setIsTipsOpen] = useState(false);
 
   useEffect(() => {
@@ -43,8 +46,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose, onNext, onPrev, hasNext, hasPrev]);
-
-  const isValid = (val?: string) => val && val.toLowerCase() !== 'x' && val.toLowerCase() !== 'none';
 
   useEffect(() => {
     if (settings.autoPronounce) {
@@ -70,9 +71,9 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
     return () => window.speechSynthesis.cancel();
   }, [word, settings.autoPronounce]);
 
+  const isValid = (val?: string) => val && val.toLowerCase() !== 'x' && val.toLowerCase() !== 'none';
   const mainWord = getValidWord(word.noun, word.verb, word.adjective, word.adverb);
 
-  // SMART DYNAMIC FONT SIZING FOR MODAL
   const getOverlayTitleSize = (text: string) => {
     const len = text.length;
     if (len <= 9) return 'text-[40px]';
@@ -80,21 +81,20 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
     return 'text-[26px] sm:text-[36px]';
   };
 
-  const playAudio = (text: string) => {
-    triggerHaptic(settings.hapticsEnabled);
-    const utterance = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices();
-    const ukFemale = voices.find(v => v.lang === 'en-GB' && (v.name.toLowerCase().includes('female') || v.name.includes('Google UK English Female'))) 
-      || voices.find(v => v.lang === 'en-GB');
-    if (ukFemale) utterance.voice = ukFemale;
-    else utterance.lang = 'en-GB';
-    window.speechSynthesis.speak(utterance);
-  };
-
   const handleClose = () => { triggerHaptic(settings.hapticsEnabled); onClose(); };
   const handleMarkLearned = () => { triggerHaptic(settings.hapticsEnabled); markLearned(word.id); };
   const handlePrev = () => { triggerHaptic(settings.hapticsEnabled); onPrev(); };
   const handleNext = () => { triggerHaptic(settings.hapticsEnabled); onNext(); };
+
+  // Swipe logic
+  const handleDragEnd = (event: any, info: any) => {
+    const swipeThreshold = 50;
+    if (info.offset.x < -swipeThreshold && hasNext) {
+      handleNext();
+    } else if (info.offset.x > swipeThreshold && hasPrev) {
+      handlePrev();
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
@@ -111,33 +111,45 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={settings.animationsEnabled ? { type: 'spring', damping: 25, stiffness: 300 } : { duration: 0.15, ease: "easeOut" }}
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.2}
+        onDragEnd={handleDragEnd}
         className="relative bg-surface w-full max-w-2xl max-h-full rounded-[32px] shadow-2xl flex flex-col overflow-hidden"
       >
         <div className="flex items-center justify-between p-4 border-b border-outline/10">
           <button onClick={handleClose} className="p-2 rounded-full hover:bg-surface-variant text-on-surface-variant transition-all duration-200 active:scale-90">
             <X className="w-6 h-6" />
           </button>
-          <button
-            onClick={() => { triggerHaptic(settings.hapticsEnabled); setIsTipsOpen(true); }}
-            className="p-2 rounded-full hover:bg-surface-variant text-primary transition-all duration-200 active:scale-90"
-            aria-label="Grammar Tips"
-          >
-            <Info className="w-6 h-6" />
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => { triggerHaptic(settings.hapticsEnabled); toggleFavorite(word.id); }}
+              className="p-2 rounded-full hover:bg-error/10 transition-colors active:scale-90"
+            >
+              <Heart className={`w-6 h-6 transition-transform ${isFavorite ? 'fill-error text-error' : 'text-on-surface-variant'}`} />
+            </button>
+            <button
+              onClick={() => { triggerHaptic(settings.hapticsEnabled); setIsTipsOpen(true); }}
+              className="p-2 rounded-full hover:bg-surface-variant text-primary transition-all duration-200 active:scale-90"
+              aria-label="Grammar Tips"
+            >
+              <Info className="w-6 h-6" />
+            </button>
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 pointer-events-auto">
           <div className="text-center mb-10 mt-4">
             <div className="flex items-center justify-center gap-3 mb-2 px-2">
               <h2 className={`${getOverlayTitleSize(mainWord)} font-bold tracking-tight text-on-surface leading-none capitalize break-words`}>
                 {mainWord}
               </h2>
               <button
-                onClick={() => playAudio(mainWord)}
-                className="p-3 rounded-full hover:bg-primary/20 text-primary transition-all duration-200 active:scale-90 bg-primary-container/50 flex-shrink-0"
+                onClick={() => speak(mainWord)}
+                className={`p-3 rounded-full transition-all duration-200 active:scale-90 flex-shrink-0 ${isPlaying ? 'bg-primary text-on-primary scale-110 shadow-lg' : 'hover:bg-primary/20 text-primary bg-primary-container/50'}`}
                 aria-label="Pronounce word"
               >
-                <Volume2 className="w-7 h-7" />
+                <Volume2 className={`w-7 h-7 ${isPlaying ? 'animate-pulse' : ''}`} />
               </button>
             </div>
             <p className="m3-headline-small text-primary mt-2">{word.meaning_bn}</p>
@@ -152,7 +164,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                   <div className="flex items-center justify-between">
                     <span className={`text-[20px] font-semibold capitalize ${isValid(word.noun) ? 'text-on-surface' : 'text-on-surface-variant/50'}`}>{isValid(word.noun) ? word.noun : 'None'}</span>
                     {isValid(word.noun) && (
-                      <button onClick={() => playAudio(word.noun!)} className="p-2 rounded-full hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 transition-all duration-200 active:scale-90 flex-shrink-0">
+                      <button onClick={() => speak(word.noun!)} className="p-2 rounded-full hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 transition-all duration-200 active:scale-90 flex-shrink-0">
                         <Volume2 className="w-5 h-5" />
                       </button>
                     )}
@@ -164,7 +176,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                   <div className="flex items-center justify-between">
                     <span className={`text-[20px] font-semibold capitalize ${isValid(word.verb) ? 'text-on-surface' : 'text-on-surface-variant/50'}`}>{isValid(word.verb) ? word.verb : 'None'}</span>
                     {isValid(word.verb) && (
-                      <button onClick={() => playAudio(word.verb!)} className="p-2 rounded-full hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 transition-all duration-200 active:scale-90 flex-shrink-0">
+                      <button onClick={() => speak(word.verb!)} className="p-2 rounded-full hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 transition-all duration-200 active:scale-90 flex-shrink-0">
                         <Volume2 className="w-5 h-5" />
                       </button>
                     )}
@@ -176,7 +188,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                   <div className="flex items-center justify-between">
                     <span className={`text-[20px] font-semibold capitalize ${isValid(word.adjective) ? 'text-on-surface' : 'text-on-surface-variant/50'}`}>{isValid(word.adjective) ? word.adjective : 'None'}</span>
                     {isValid(word.adjective) && (
-                      <button onClick={() => playAudio(word.adjective!)} className="p-2 rounded-full hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 transition-all duration-200 active:scale-90 flex-shrink-0">
+                      <button onClick={() => speak(word.adjective!)} className="p-2 rounded-full hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 transition-all duration-200 active:scale-90 flex-shrink-0">
                         <Volume2 className="w-5 h-5" />
                       </button>
                     )}
@@ -188,7 +200,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                   <div className="flex items-center justify-between">
                     <span className={`text-[20px] font-semibold capitalize ${isValid(word.adverb) ? 'text-on-surface' : 'text-on-surface-variant/50'}`}>{isValid(word.adverb) ? word.adverb : 'None'}</span>
                     {isValid(word.adverb) && (
-                      <button onClick={() => playAudio(word.adverb!)} className="p-2 rounded-full hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 transition-all duration-200 active:scale-90 flex-shrink-0">
+                      <button onClick={() => speak(word.adverb!)} className="p-2 rounded-full hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 transition-all duration-200 active:scale-90 flex-shrink-0">
                         <Volume2 className="w-5 h-5" />
                       </button>
                     )}
@@ -203,8 +215,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             </div>
 
             <div className="flex flex-wrap gap-2">
-              
-              {/* BEAUTIFUL SEMI-TRANSPARENT TINTED TAG */}
               <span className={`px-4 py-1.5 rounded-full m3-label-medium font-bold uppercase tracking-wider flex items-center gap-2 w-fit ${
                 word.level === 'easy' ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' :
                 word.level === 'medium' ? 'bg-orange-500/15 text-orange-800 dark:bg-orange-500/20 dark:text-orange-300' :
@@ -228,7 +238,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                 )}
               </span>
               
-              {/* SOLID GREY TAG */}
               <span className="px-4 py-1.5 bg-surface-variant text-on-surface-variant rounded-full m3-label-medium capitalize">
                 Theme: {word.theme}
               </span>
@@ -236,7 +245,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
           </div>
         </div>
 
-        <div className="p-4 border-t border-outline/10 flex justify-between items-center bg-surface">
+        <div className="p-4 border-t border-outline/10 flex justify-between items-center bg-surface pointer-events-auto">
           <button onClick={handlePrev} disabled={!hasPrev} className="flex items-center px-3 sm:px-4 py-2 rounded-full hover:bg-surface-variant disabled:opacity-50 disabled:cursor-not-allowed text-on-surface transition-all duration-200 active:scale-95">
             <ChevronLeft className="w-5 h-5 mr-1" />
             <span className="m3-label-large">Previous</span>
