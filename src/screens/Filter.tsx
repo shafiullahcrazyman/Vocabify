@@ -19,22 +19,29 @@ export const Filter: React.FC = () => {
 
   const handleClearFilters = () => {
     triggerHaptic(settings.hapticsEnabled);
-    updateFilters({ level: [], pos: [], letter: [], theme: [] });
+    updateFilters({ level: [], cefr: [], pos: [], letter: [], theme: [] }); // <-- Added cefr here
   };
 
   const levels = ['easy', 'medium', 'hard'];
   const pos = ['noun', 'verb', 'adjective', 'adverb'];
   const letters = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
 
-  // Dynamically extract unique themes from the words data
+  // Dynamically extract unique Themes
   const dynamicThemes = useMemo(() => {
     const themesSet = new Set<string>();
     words.forEach(word => {
-      if (word.theme) {
-        themesSet.add(word.theme);
-      }
+      if (word.theme) themesSet.add(word.theme);
     });
     return Array.from(themesSet).sort();
+  }, [words]);
+
+  // Dynamically extract unique CEFR Levels (A1, A2, B1, etc.)
+  const dynamicCEFR = useMemo(() => {
+    const cefrSet = new Set<string>();
+    words.forEach(word => {
+      if (word.cefr) cefrSet.add(word.cefr);
+    });
+    return Array.from(cefrSet).sort(); // Sorts them alphabetically
   }, [words]);
 
   const FilterSection = ({ title, category, options }: { title: string, category: keyof typeof filters, options: string[] }) => (
@@ -53,7 +60,7 @@ export const Filter: React.FC = () => {
                   : 'bg-surface border-outline/30 text-on-surface hover:bg-surface-variant'
               }`}
             >
-              <span className="capitalize">{opt}</span>
+              <span className={category === 'cefr' ? 'uppercase' : 'capitalize'}>{opt}</span>
             </button>
           );
         })}
@@ -78,7 +85,14 @@ export const Filter: React.FC = () => {
             <SlidersHorizontal className="w-6 h-6 mr-3 text-primary" />
             <h2 className="m3-title-large">Categories</h2>
           </div>
-          <FilterSection title="Level" category="level" options={levels} />
+          
+          <FilterSection title="Difficulty" category="level" options={levels} />
+          
+          {/* CEFR Dynamic Filter Section */}
+          {dynamicCEFR.length > 0 && (
+            <FilterSection title="CEFR Level" category="cefr" options={dynamicCEFR} />
+          )}
+
           <FilterSection title="Part of Speech" category="pos" options={pos} />
           
           {/* Dynamic Themes Section */}
