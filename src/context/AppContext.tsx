@@ -31,11 +31,12 @@ const defaultSettings: AppSettings = {
   hapticsEnabled: true,
   animationsEnabled: true,
   autoPronounce: false,
-  hideLearnedWords: false, // <-- Feature: Hide learned words setting
+  hideLearnedWords: false,
 };
 
 const defaultFilters: FilterOptions = {
   level: [],
+  cefr: [], // <--- NEW ADDITION
   pos: [],
   letter: [],
   theme: [],
@@ -50,7 +51,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [userAvatar, setUserAvatar] = useLocalStorage<string | null>('vocab_user_avatar', null);
   const [favorites, setFavorites] = useLocalStorage<string[]>('vocab_favorites', []);
   
-  // FIX: This line guarantees filters are saved to persistent cache memory!
   const [filters, setFilters] = useLocalStorage<FilterOptions>('vocab_filters', defaultFilters);
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -121,7 +121,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         stopTour,
       }}
     >
-      {/* Apply font size class to a wrapper */}
       <div className={`min-h-screen font-size-${settings.fontSize}`}>
         {children}
       </div>
