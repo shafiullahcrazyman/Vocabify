@@ -7,6 +7,7 @@ export interface WordFamily {
   meaning_bn: string;
   example: string;
   level: 'easy' | 'medium' | 'hard';
+  cefr?: string; // <--- NEW: Dynamic CEFR string (A1, A2, B1, etc.)
   theme: string;
   letter: string;
   imageUrl?: string;
@@ -20,11 +21,12 @@ export interface AppSettings {
   hapticsEnabled: boolean;
   animationsEnabled: boolean;
   autoPronounce: boolean;
-  hideLearnedWords: boolean; // <--- NEW ADDITION
+  hideLearnedWords: boolean;
 }
 
 export interface FilterOptions {
   level: string[];
+  cefr: string[]; // <--- NEW: CEFR Filter state
   pos: string[];
   letter: string[];
   theme: string[];
