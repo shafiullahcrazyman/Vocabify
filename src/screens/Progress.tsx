@@ -102,7 +102,7 @@ export const Progress: React.FC = () => {
                 <div className="flex items-center gap-2 mb-1">
                   {/* UPDATED: Increased icon size to w-6 h-6 to match others */}
                   <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
-                  <h3 className="m3-title-medium text-on-surface">Today's Goal</h3>
+                  <h2 className="m3-title-large text-on-surface">Today's Goal</h2>
                 </div>
                 <p className="m3-display-small font-bold text-on-surface tracking-tight mt-1">
                   {wordsLearnedToday} <span className="text-2xl font-normal text-on-surface-variant">/ {dailyGoal}</span>
