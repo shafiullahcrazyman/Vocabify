@@ -98,9 +98,8 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
     }
   };
 
-  // Swipe logic (made smoother and dynamic for touch screens)
   const handleDragEnd = (event: any, info: any) => {
-    const swipeThreshold = 40; // Lowered threshold to make swiping easier
+    const swipeThreshold = 40;
     if (info.offset.x < -swipeThreshold && hasNext) {
       handleNext();
     } else if (info.offset.x > swipeThreshold && hasPrev) {
@@ -126,9 +125,8 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.2}
-        dragDirectionLock={true} // <-- Crucial: Prevents swipe from conflicting with vertical scrolling
+        dragDirectionLock={true}
         onDragEnd={handleDragEnd}
-        // Fixed height constraints so footer is ALWAYS visible at the bottom
         className="relative bg-surface w-full max-w-2xl max-h-[92dvh] sm:max-h-[85vh] rounded-[32px] shadow-2xl flex flex-col overflow-hidden"
       >
         <div className="flex items-center justify-between p-4 border-b border-outline/10 shrink-0">
@@ -152,7 +150,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
           </div>
         </div>
 
-        {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto p-6 pointer-events-auto touch-pan-y">
           <div className="text-center mb-10 mt-4">
             <div className="flex items-center justify-center gap-3 mb-2 px-2">
@@ -161,7 +158,8 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
               </h2>
               <button
                 onClick={() => speak(mainWord)}
-                className={`p-3 rounded-full transition-all duration-200 active:scale-90 flex-shrink-0 ${isPlaying ? 'bg-primary text-on-primary scale-110 shadow-lg' : 'hover:bg-primary/20 text-primary bg-primary-container/50'}`}
+                // Removed shadow from the audio button
+                className={`p-3 rounded-full transition-all duration-200 active:scale-90 flex-shrink-0 ${isPlaying ? 'bg-primary text-on-primary scale-110' : 'hover:bg-primary/20 text-primary bg-primary-container/50'}`}
                 aria-label="Pronounce word"
               >
                 <Volume2 className={`w-7 h-7 ${isPlaying ? 'animate-pulse' : ''}`} />
@@ -230,12 +228,13 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <span className={`px-4 py-1.5 rounded-full m3-label-medium font-bold uppercase tracking-wider flex items-center gap-2 w-fit ${
+              {/* CEFR tag exactly matches the WordCard size and styling now */}
+              <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center w-fit ${
                 word.level === 'easy' ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' :
                 word.level === 'medium' ? 'bg-orange-500/15 text-orange-800 dark:bg-orange-500/20 dark:text-orange-300' :
                 'bg-red-500/15 text-red-700 dark:bg-red-500/20 dark:text-red-300'
               }`}>
-                <span className={`w-2 h-2 rounded-full ${
+                <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
                   word.level === 'easy' ? 'bg-emerald-500' :
                   word.level === 'medium' ? 'bg-orange-500' :
                   'bg-red-500'
@@ -243,7 +242,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                 {word.level}
                 
                 {word.cefr && (
-                  <span className={`ml-1 pl-2 border-l-2 uppercase ${
+                  <span className={`ml-1.5 pl-1.5 border-l uppercase ${
                     word.level === 'easy' ? 'border-emerald-500/30' :
                     word.level === 'medium' ? 'border-orange-500/30' :
                     'border-red-500/30'
@@ -253,17 +252,15 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                 )}
               </span>
               
-              <span className="px-4 py-1.5 bg-surface-variant text-on-surface-variant rounded-full m3-label-medium capitalize">
-                Theme: {word.theme}
+              <span className="text-[12px] text-on-surface-variant/70 font-medium capitalize mt-1">
+                • {word.theme}
               </span>
             </div>
           </div>
         </div>
 
-        {/* REDESIGNED FOOTER */}
         <div className="p-4 border-t border-outline/10 flex justify-between items-center gap-4 bg-surface shrink-0 z-10">
           
-          {/* Previous Button (Circular Icon) */}
           <button 
             onClick={handlePrev} 
             disabled={!hasPrev} 
@@ -273,10 +270,10 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             <ChevronLeft className="w-7 h-7" />
           </button>
           
-          {/* Wide Center Action Button */}
           <button 
             onClick={handleMarkLearned} 
-            className={`flex-1 h-14 flex items-center justify-center rounded-full transition-all duration-300 active:scale-[0.98] shadow-sm font-bold tracking-wide text-[16px] ${
+            // Removed shadow-sm from here
+            className={`flex-1 h-14 flex items-center justify-center rounded-full transition-all duration-300 active:scale-[0.98] font-bold tracking-wide text-[16px] ${
               isLearned 
                 ? 'bg-emerald-500 text-white hover:bg-emerald-600' 
                 : 'bg-surface-variant text-on-surface hover:bg-surface-variant/80 border border-outline/10'
@@ -286,7 +283,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             {isLearned ? 'Learned' : 'Mark Learned'}
           </button>
 
-          {/* Next / Done Button (Circular Icon) */}
           {hasNext ? (
             <button 
               onClick={handleNext} 
