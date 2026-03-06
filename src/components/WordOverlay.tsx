@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, PanInfo } from 'motion/react';
 import { WordFamily } from '../types';
 import { X, ChevronLeft, ChevronRight, CheckCircle2, Volume2, Info, Check, Heart } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
@@ -98,7 +98,8 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
     }
   };
 
-  const handleDragEnd = (event: any, info: any) => {
+  // Fixed proper typing here!
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const swipeThreshold = 40;
     if (info.offset.x < -swipeThreshold && hasNext) {
       handleNext();
