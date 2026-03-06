@@ -160,14 +160,14 @@ export const Progress: React.FC = () => {
           <div className="flex justify-between items-center">
             <div>
               <p className="m3-body-large text-on-surface">Export JSON</p>
-              <p className="m3-body-small text-on-surface-variant">Copy your learned words data</p>
+              <p className="m3-body-small text-on-surface-variant">Copy your learned words</p>
             </div>
             
             <button
               onClick={handleOpenExport}
               className="px-6 py-2.5 bg-primary text-on-primary rounded-full m3-label-large hover:bg-primary/90 transition-all duration-200 active:scale-95 shadow-sm"
             >
-              Open Exporter
+              Open
             </button>
           </div>
         </section>
