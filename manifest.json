@@ -4,7 +4,8 @@
   "start_url": "/Vocabify/",
   "scope": "/Vocabify/",
   "display": "standalone",
-  "background_color": "#674fa3",
+  "background_color": "#141218",
+  "theme_color": "#141218",
   "icons": [
     {
       "src": "/Vocabify/icon.png",
