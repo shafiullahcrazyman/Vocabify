@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
-import { Target, RotateCcw, Trophy, Copy, Check, Download, X, Flame, Sparkles } from 'lucide-react';
+// UPDATED: Added ChevronDown to the imports
+import { Target, RotateCcw, Trophy, Copy, Check, Download, X, Flame, Sparkles, ChevronDown } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import { TopAppBar } from '../components/TopAppBar';
 
@@ -100,7 +101,6 @@ export const Progress: React.FC = () => {
             <div className="flex justify-between items-start mb-5">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  {/* UPDATED: Increased icon size to w-6 h-6 to match others */}
                   <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
                   <h2 className="m3-title-large text-on-surface">Today's Goal</h2>
                 </div>
@@ -121,7 +121,6 @@ export const Progress: React.FC = () => {
             </div>
 
             <div className="w-full bg-surface-variant rounded-full h-4 mb-2 overflow-hidden shadow-inner">
-              {/* UPDATED: Removed the inner white div for a clean, flat look */}
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${dailyPercentage}%` }}
@@ -150,19 +149,23 @@ export const Progress: React.FC = () => {
                     <p className="m3-body-large text-on-surface">Daily Target</p>
                     <p className="m3-body-small text-on-surface-variant">Update your current goal</p>
                   </div>
-                  <select
-                    value={settings.dailyGoal}
-                    onChange={(e) => {
-                      triggerHaptic(settings.hapticsEnabled);
-                      updateSettings({ dailyGoal: Number(e.target.value) });
-                    }}
-                    className="bg-surface-variant text-on-surface rounded-xl px-4 py-2 outline-none border-none m3-body-large cursor-pointer transition-colors hover:bg-surface-variant/80 font-medium"
-                  >
-                    <option value={5}>5 words</option>
-                    <option value={10}>10 words</option>
-                    <option value={20}>20 words</option>
-                    <option value={50}>50 words</option>
-                  </select>
+                  {/* UPDATED: Added a wrapper, appearance-none, and custom ChevronDown icon */}
+                  <div className="relative inline-block">
+                    <select
+                      value={settings.dailyGoal}
+                      onChange={(e) => {
+                        triggerHaptic(settings.hapticsEnabled);
+                        updateSettings({ dailyGoal: Number(e.target.value) });
+                      }}
+                      className="appearance-none bg-surface-variant text-on-surface rounded-xl pl-4 pr-10 py-2 outline-none border-none m3-body-large cursor-pointer transition-colors hover:bg-surface-variant/80 font-medium"
+                    >
+                      <option value={5}>5 words</option>
+                      <option value={10}>10 words</option>
+                      <option value={20}>20 words</option>
+                      <option value={50}>50 words</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface pointer-events-none opacity-70" />
+                  </div>
                 </label>
               </div>
 
@@ -251,17 +254,22 @@ export const Progress: React.FC = () => {
                   <p className="m3-body-large text-on-surface">
                     You have learned <span className="font-bold text-primary">{learnedWordsData.length}</span> words.
                   </p>
-                  <select
-                    value={exportCount}
-                    onChange={(e) => setExportCount(Number(e.target.value))}
-                    className="bg-surface-variant text-on-surface rounded-lg px-3 py-2 outline-none border-none m3-body-large cursor-pointer transition-colors hover:bg-surface-variant/80"
-                  >
-                    <option value={10}>10 words</option>
-                    <option value={20}>20 words</option>
-                    <option value={50}>50 words</option>
-                    <option value={100}>100 words</option>
-                    <option value={-1}>All learned words</option>
-                  </select>
+                  
+                  {/* UPDATED: Added wrapper, appearance-none, and ChevronDown here as well */}
+                  <div className="relative inline-block">
+                    <select
+                      value={exportCount}
+                      onChange={(e) => setExportCount(Number(e.target.value))}
+                      className="appearance-none bg-surface-variant text-on-surface rounded-xl pl-4 pr-10 py-2 outline-none border-none m3-body-large cursor-pointer transition-colors hover:bg-surface-variant/80 font-medium"
+                    >
+                      <option value={10}>10 words</option>
+                      <option value={20}>20 words</option>
+                      <option value={50}>50 words</option>
+                      <option value={100}>100 words</option>
+                      <option value={-1}>All learned words</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface pointer-events-none opacity-70" />
+                  </div>
                 </div>
 
                 <div className="bg-surface-variant/30 rounded-2xl p-4 flex-1 overflow-y-auto border border-outline/10 min-h-[250px] max-h-[400px]">
