@@ -83,11 +83,24 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
 
   const handleClose = () => { triggerHaptic(settings.hapticsEnabled); onClose(); };
   const handleMarkLearned = () => { triggerHaptic(settings.hapticsEnabled); markLearned(word.id); };
-  const handlePrev = () => { triggerHaptic(settings.hapticsEnabled); onPrev(); };
-  const handleNext = () => { triggerHaptic(settings.hapticsEnabled); onNext(); };
+  
+  const handlePrev = () => { 
+    if (hasPrev) {
+      triggerHaptic(settings.hapticsEnabled); 
+      onPrev(); 
+    }
+  };
+  
+  const handleNext = () => { 
+    if (hasNext) {
+      triggerHaptic(settings.hapticsEnabled); 
+      onNext(); 
+    }
+  };
 
+  // Swipe logic (made smoother and dynamic for touch screens)
   const handleDragEnd = (event: any, info: any) => {
-    const swipeThreshold = 50;
+    const swipeThreshold = 40; // Lowered threshold to make swiping easier
     if (info.offset.x < -swipeThreshold && hasNext) {
       handleNext();
     } else if (info.offset.x > swipeThreshold && hasPrev) {
@@ -113,10 +126,12 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.2}
+        dragDirectionLock={true} // <-- Crucial: Prevents swipe from conflicting with vertical scrolling
         onDragEnd={handleDragEnd}
-        className="relative bg-surface w-full max-w-2xl max-h-full rounded-[32px] shadow-2xl flex flex-col overflow-hidden"
+        // Fixed height constraints so footer is ALWAYS visible at the bottom
+        className="relative bg-surface w-full max-w-2xl max-h-[92dvh] sm:max-h-[85vh] rounded-[32px] shadow-2xl flex flex-col overflow-hidden"
       >
-        <div className="flex items-center justify-between p-4 border-b border-outline/10">
+        <div className="flex items-center justify-between p-4 border-b border-outline/10 shrink-0">
           <button onClick={handleClose} className="p-2 rounded-full hover:bg-surface-variant text-on-surface-variant transition-all duration-200 active:scale-90">
             <X className="w-6 h-6" />
           </button>
@@ -125,7 +140,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
               onClick={() => { triggerHaptic(settings.hapticsEnabled); toggleFavorite(word.id); }}
               className="p-2 rounded-full hover:bg-rose-50/50 transition-colors active:scale-90"
             >
-              {/* VIBE: Solid Rose-500 heart in the Overlay too */}
               <Heart className={`w-6 h-6 transition-transform ${isFavorite ? 'fill-rose-500 text-rose-500' : 'text-on-surface-variant'}`} />
             </button>
             <button
@@ -138,7 +152,8 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 pointer-events-auto">
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto p-6 pointer-events-auto touch-pan-y">
           <div className="text-center mb-10 mt-4">
             <div className="flex items-center justify-center gap-3 mb-2 px-2">
               <h2 className={`${getOverlayTitleSize(mainWord)} font-bold tracking-tight text-on-surface leading-none capitalize break-words`}>
@@ -155,7 +170,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             <p className="m3-headline-small text-primary mt-2">{word.meaning_bn}</p>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-6 pb-4">
             <div className="bg-surface-variant/30 rounded-3xl p-5">
               <h4 className="m3-title-medium text-on-surface mb-4">Word Forms</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -245,26 +260,48 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
           </div>
         </div>
 
-        <div className="p-4 border-t border-outline/10 flex justify-between items-center bg-surface pointer-events-auto">
-          <button onClick={handlePrev} disabled={!hasPrev} className="flex items-center px-3 sm:px-4 py-2 rounded-full hover:bg-surface-variant disabled:opacity-50 disabled:cursor-not-allowed text-on-surface transition-all duration-200 active:scale-95">
-            <ChevronLeft className="w-5 h-5 mr-1" />
-            <span className="m3-label-large">Previous</span>
+        {/* REDESIGNED FOOTER */}
+        <div className="p-4 border-t border-outline/10 flex justify-between items-center gap-4 bg-surface shrink-0 z-10">
+          
+          {/* Previous Button (Circular Icon) */}
+          <button 
+            onClick={handlePrev} 
+            disabled={!hasPrev} 
+            className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-variant/50 hover:bg-surface-variant disabled:opacity-30 disabled:cursor-not-allowed text-on-surface transition-all duration-200 active:scale-90 shrink-0"
+            aria-label="Previous Word"
+          >
+            <ChevronLeft className="w-7 h-7" />
           </button>
           
-          <button onClick={handleMarkLearned} className={`flex items-center justify-center p-3 sm:px-6 sm:py-2.5 rounded-full transition-all duration-200 active:scale-95 ${isLearned ? 'text-primary bg-primary-container' : 'text-on-surface-variant hover:bg-surface-variant'}`}>
-            <CheckCircle2 className="w-6 h-6 sm:w-5 sm:h-5 sm:mr-2" />
-            <span className="m3-label-large font-bold hidden sm:inline">{isLearned ? 'Learned' : 'Mark Learned'}</span>
+          {/* Wide Center Action Button */}
+          <button 
+            onClick={handleMarkLearned} 
+            className={`flex-1 h-14 flex items-center justify-center rounded-full transition-all duration-300 active:scale-[0.98] shadow-sm font-bold tracking-wide text-[16px] ${
+              isLearned 
+                ? 'bg-emerald-500 text-white hover:bg-emerald-600' 
+                : 'bg-surface-variant text-on-surface hover:bg-surface-variant/80 border border-outline/10'
+            }`}
+          >
+            <CheckCircle2 className={`w-5 h-5 mr-2 ${isLearned ? 'text-white' : 'text-on-surface-variant'}`} />
+            {isLearned ? 'Learned' : 'Mark Learned'}
           </button>
 
+          {/* Next / Done Button (Circular Icon) */}
           {hasNext ? (
-            <button onClick={handleNext} className="flex items-center px-3 sm:px-4 py-2 rounded-full hover:bg-surface-variant text-on-surface transition-all duration-200 active:scale-95">
-              <span className="m3-label-large">Next</span>
-              <ChevronRight className="w-5 h-5 ml-1" />
+            <button 
+              onClick={handleNext} 
+              className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-variant/50 hover:bg-surface-variant text-on-surface transition-all duration-200 active:scale-90 shrink-0"
+              aria-label="Next Word"
+            >
+              <ChevronRight className="w-7 h-7" />
             </button>
           ) : (
-            <button onClick={handleClose} className="flex items-center px-3 sm:px-4 py-2 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-200 active:scale-95">
-              <span className="m3-label-large font-bold">Done</span>
-              <Check className="w-5 h-5 ml-1" />
+            <button 
+              onClick={handleClose} 
+              className="w-14 h-14 flex items-center justify-center rounded-full bg-primary/15 hover:bg-primary/25 text-primary transition-all duration-200 active:scale-90 shrink-0"
+              aria-label="Done"
+            >
+              <Check className="w-7 h-7" />
             </button>
           )}
         </div>
