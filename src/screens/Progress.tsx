@@ -73,12 +73,35 @@ export const Progress: React.FC = () => {
       >
         <div className="px-4 space-y-6">
           
-          {/* NEW: Today's Goal Card */}
+          {/* Overview Card (Total Mastery) - MOVED TO TOP */}
+          <section className="bg-primary text-on-primary rounded-3xl p-6 shadow-md relative overflow-hidden">
+            <div className="relative z-10">
+              <div className="flex items-center mb-2">
+                <Trophy className="w-8 h-8 mr-3" />
+                <h2 className="m3-display-small">{learnedWords}</h2>
+              </div>
+              <p className="m3-title-medium opacity-90 mb-6">Total Lifetime Mastery</p>
+              
+              <div className="w-full bg-on-primary/20 rounded-full h-3 mb-2 overflow-hidden shadow-inner">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${percentage}%` }}
+                  transition={settings.animationsEnabled ? { duration: 1, ease: [0.2, 0, 0, 1], delay: 0.2 } : { duration: 0.2, ease: "easeOut" }}
+                  className="bg-on-primary h-3 rounded-full" 
+                />
+              </div>
+              <p className="m3-label-medium opacity-80 text-right">{percentage}% of entire dictionary</p>
+            </div>
+            <Trophy className="absolute -right-4 -bottom-4 w-40 h-40 opacity-10" />
+          </section>
+
+          {/* Today's Goal Card - MOVED TO SECOND */}
           <section className="bg-surface rounded-3xl p-6 shadow-sm border border-outline/10 relative overflow-hidden">
             <div className="flex justify-between items-start mb-5">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <Flame className={`w-5 h-5 ${isGoalReached ? 'text-orange-500 fill-orange-500/20' : 'text-on-surface-variant'}`} />
+                  {/* UPDATED: Flame is now always vibrant orange and filled */}
+                  <Flame className="w-5 h-5 text-orange-500 fill-orange-500" />
                   <h3 className="m3-title-medium text-on-surface">Today's Goal</h3>
                 </div>
                 <p className="m3-display-small font-bold text-on-surface tracking-tight">
@@ -113,28 +136,6 @@ export const Progress: React.FC = () => {
                 ? "Amazing job! You crushed your daily target."
                 : `${dailyGoal - wordsLearnedToday} more words to hit your streak.`}
             </p>
-          </section>
-
-          {/* Overview Card (Total Mastery) */}
-          <section className="bg-primary text-on-primary rounded-3xl p-6 shadow-md relative overflow-hidden">
-            <div className="relative z-10">
-              <div className="flex items-center mb-2">
-                <Trophy className="w-8 h-8 mr-3" />
-                <h2 className="m3-display-small">{learnedWords}</h2>
-              </div>
-              <p className="m3-title-medium opacity-90 mb-6">Total Lifetime Mastery</p>
-              
-              <div className="w-full bg-on-primary/20 rounded-full h-3 mb-2 overflow-hidden shadow-inner">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${percentage}%` }}
-                  transition={settings.animationsEnabled ? { duration: 1, ease: [0.2, 0, 0, 1], delay: 0.2 } : { duration: 0.2, ease: "easeOut" }}
-                  className="bg-on-primary h-3 rounded-full" 
-                />
-              </div>
-              <p className="m3-label-medium opacity-80 text-right">{percentage}% of entire dictionary</p>
-            </div>
-            <Trophy className="absolute -right-4 -bottom-4 w-40 h-40 opacity-10" />
           </section>
 
           {/* Learning Goals Settings */}
