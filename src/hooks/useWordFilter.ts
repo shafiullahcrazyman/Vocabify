@@ -26,8 +26,10 @@ export const useWordFilter = (
     if (!hasActiveFilters) return [];
 
     let result = words.filter((word) => {
-      // 1. Favorites Filter
-      if (filters.favoritesOnly && !favorites.includes(word.id)) return false;
+      // 1. Favorites Filter (DYNAMIC FIX: Don't hide if it's currently open!)
+      if (filters.favoritesOnly && !favorites.includes(word.id)) {
+        if (word.id !== activeWordId) return false;
+      }
 
       // 2. Search
       if (searchQuery.trim() !== '') {
