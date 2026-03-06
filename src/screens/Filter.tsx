@@ -87,7 +87,7 @@ export const Filter: React.FC = () => {
                     <Heart className="w-5 h-5 fill-rose-500 text-rose-500" /> 
                     Favorites Only
                   </p>
-                  <p className="m3-body-small text-on-surface-variant">Show only words I've saved</p>
+                  
                 </div>
                 <div className="relative inline-block w-12 mr-2 align-middle select-none">
                   <input
