@@ -129,20 +129,21 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
         onDragEnd={handleDragEnd}
         className="relative bg-surface w-full max-w-2xl max-h-[92dvh] sm:max-h-[85vh] rounded-[32px] shadow-2xl flex flex-col overflow-hidden"
       >
-        <div className="flex items-center justify-between p-4 border-b border-outline/10 shrink-0">
-          <button onClick={handleClose} className="p-2 rounded-full hover:bg-surface-variant text-on-surface-variant transition-all duration-200 active:scale-90">
+        {/* FIXED TOP HEADER: 88px height perfectly matches bottom */}
+        <div className="flex items-center justify-between px-4 h-[88px] border-b border-outline/10 shrink-0">
+          <button onClick={handleClose} className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-variant text-on-surface-variant transition-all duration-200 active:scale-90">
             <X className="w-6 h-6" />
           </button>
-          <div className="flex gap-2">
+          <div className="flex gap-1 sm:gap-2">
             <button
               onClick={() => { triggerHaptic(settings.hapticsEnabled); toggleFavorite(word.id); }}
-              className="p-2 rounded-full hover:bg-rose-50/50 transition-colors active:scale-90"
+              className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-rose-50/50 transition-colors active:scale-90"
             >
               <Heart className={`w-6 h-6 transition-transform ${isFavorite ? 'fill-rose-500 text-rose-500' : 'text-on-surface-variant'}`} />
             </button>
             <button
               onClick={() => { triggerHaptic(settings.hapticsEnabled); setIsTipsOpen(true); }}
-              className="p-2 rounded-full hover:bg-surface-variant text-primary transition-all duration-200 active:scale-90"
+              className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-variant text-primary transition-all duration-200 active:scale-90"
               aria-label="Grammar Tips"
             >
               <Info className="w-6 h-6" />
@@ -151,14 +152,13 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 pointer-events-auto touch-pan-y">
-          <div className="text-center mb-10 mt-4">
+          <div className="text-center mb-10 mt-2">
             <div className="flex items-center justify-center gap-3 mb-2 px-2">
               <h2 className={`${getOverlayTitleSize(mainWord)} font-bold tracking-tight text-on-surface leading-none capitalize break-words`}>
                 {mainWord}
               </h2>
               <button
                 onClick={() => speak(mainWord)}
-                // Removed shadow from the audio button
                 className={`p-3 rounded-full transition-all duration-200 active:scale-90 flex-shrink-0 ${isPlaying ? 'bg-primary text-on-primary scale-110' : 'hover:bg-primary/20 text-primary bg-primary-container/50'}`}
                 aria-label="Pronounce word"
               >
@@ -228,7 +228,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {/* CEFR tag exactly matches the WordCard size and styling now */}
               <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center w-fit ${
                 word.level === 'easy' ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' :
                 word.level === 'medium' ? 'bg-orange-500/15 text-orange-800 dark:bg-orange-500/20 dark:text-orange-300' :
@@ -259,8 +258,8 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
           </div>
         </div>
 
-        <div className="p-4 border-t border-outline/10 flex justify-between items-center gap-4 bg-surface shrink-0 z-10">
-          
+        {/* FIXED BOTTOM FOOTER: 88px height perfectly matches top */}
+        <div className="px-4 h-[88px] border-t border-outline/10 flex justify-between items-center gap-3 sm:gap-4 bg-surface shrink-0 z-10">
           <button 
             onClick={handlePrev} 
             disabled={!hasPrev} 
@@ -272,14 +271,13 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
           
           <button 
             onClick={handleMarkLearned} 
-            // Removed shadow-sm from here
             className={`flex-1 h-14 flex items-center justify-center rounded-full transition-all duration-300 active:scale-[0.98] font-bold tracking-wide text-[16px] ${
               isLearned 
-                ? 'bg-emerald-500 text-white hover:bg-emerald-600' 
-                : 'bg-surface-variant text-on-surface hover:bg-surface-variant/80 border border-outline/10'
+                ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' 
+                : 'bg-surface-variant/50 text-on-surface hover:bg-surface-variant'
             }`}
           >
-            <CheckCircle2 className={`w-5 h-5 mr-2 ${isLearned ? 'text-white' : 'text-on-surface-variant'}`} />
+            <CheckCircle2 className={`w-6 h-6 mr-2 ${isLearned ? 'text-emerald-600 dark:text-emerald-400' : 'text-on-surface-variant'}`} />
             {isLearned ? 'Learned' : 'Mark Learned'}
           </button>
 
