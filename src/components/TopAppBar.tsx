@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { User, Info, PlayCircle, X } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { SettingsDrawer } from './SettingsDrawer';
@@ -12,10 +12,26 @@ interface TopAppBarProps {
 
 export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
   const { searchQuery, setSearchQuery, userAvatar, setUserAvatar, settings } = useAppContext();
+  
+  // Local state for immediate typing feedback without lag
+  const [localSearch, setLocalSearch] = useState(searchQuery);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isTipsOpen, setIsTipsOpen] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Debounce effect: Wait 300ms after the user stops typing to update the global app state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(localSearch);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [localSearch, setSearchQuery]);
+
+  // Sync external clear events back to local state
+  useEffect(() => {
+    if (searchQuery === '') setLocalSearch('');
+  }, [searchQuery]);
 
   const handleAvatarClick = () => {
     triggerHaptic(settings.hapticsEnabled);
@@ -62,15 +78,16 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
             <input
               type="text"
               placeholder="Search words..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
               className="bg-transparent border-none outline-none flex-1 w-full text-on-surface placeholder:text-on-surface-variant m3-body-large truncate pr-28"
             />
             
-            {searchQuery.length > 0 && (
+            {localSearch.length > 0 && (
               <button
                 onClick={() => {
                   triggerHaptic(settings.hapticsEnabled);
+                  setLocalSearch('');
                   setSearchQuery('');
                 }}
                 className="absolute right-[88px] p-1.5 rounded-full hover:bg-on-surface/10 text-on-surface-variant transition-colors"
