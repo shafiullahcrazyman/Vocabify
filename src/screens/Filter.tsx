@@ -83,7 +83,7 @@ export const Filter: React.FC = () => {
               <label className="flex justify-between items-center cursor-pointer">
                 <div>
                   <p className="m3-body-large text-on-surface font-medium flex items-center gap-2">
-                    <Heart className="w-5 h-5 fill-rose-500 text-rose-500" /> 
+                    <Heart className="w-8 h-8 fill-rose-500 text-rose-500" /> 
                     Favorites Only
                   </p>
                 </div>
