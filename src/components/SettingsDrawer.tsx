@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Sun, Moon, Monitor, RotateCcw } from 'lucide-react';
+import { X, Sun, Moon, Monitor, Check } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { AppSettings } from '../types';
 import { triggerHaptic } from '../utils/haptics';
@@ -11,9 +11,8 @@ interface SettingsDrawerProps {
 }
 
 export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose }) => {
-  const { settings, updateSettings, startTour } = useAppContext();
+  const { settings, updateSettings } = useAppContext();
 
-  // Prevent Tour from starting if this modal is open
   useEffect(() => {
     if (isOpen) document.body.classList.add('modal-open');
     else document.body.classList.remove('modal-open');
@@ -35,15 +34,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
     updateSettings({ [key]: value });
   };
 
-  const handleRestartTour = () => {
-    triggerHaptic(settings.hapticsEnabled);
-    onClose();
-    setTimeout(() => {
-      startTour();
-    }, 300);
-  };
-
-  // Helper function to dynamically generate M3 rounded corners based on item position
   const getGroupItemClass = (index: number, total: number) => {
     if (total === 1) return 'rounded-[28px]';
     if (index === 0) return 'rounded-t-[28px] border-b border-outline/10';
@@ -51,7 +41,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
     return 'border-b border-outline/10 rounded-none';
   };
 
-  // Data mapping for super clean code
   const themeOptions = [
     { id: 'light', label: 'Light', icon: Sun },
     { id: 'dark', label: 'Dark', icon: Moon },
@@ -197,23 +186,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                       </label>
                     );
                   })}
-                </div>
-              </div>
-
-              {/* Support / Other Group */}
-              <div>
-                <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Help</h3>
-                <div className="flex flex-col">
-                  <button
-                    onClick={handleRestartTour}
-                    className={`flex items-center p-4 bg-surface-variant/40 hover:bg-surface-variant/60 active:bg-surface-variant/80 transition-colors duration-200 ${getGroupItemClass(0, 1)}`}
-                  >
-                    <RotateCcw className="w-6 h-6 text-on-surface-variant mr-4" />
-                    <div className="text-left">
-                      <p className="m3-body-large text-on-surface font-medium">Restart App Tour</p>
-                      <p className="m3-body-small text-on-surface-variant">View the introduction guide again</p>
-                    </div>
-                  </button>
                 </div>
               </div>
 
