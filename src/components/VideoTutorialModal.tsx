@@ -1,4 +1,3 @@
---- START OF FILE Vocabify-main/src/components/VideoTutorialModal.tsx ---
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
