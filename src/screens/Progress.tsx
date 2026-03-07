@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
-import { Target, RotateCcw, Trophy, Copy, Check, Download, X, Flame, Sparkles, ChevronDown } from 'lucide-react';
+import { Target, RotateCcw, Award, Copy, Check, Download, X, Flame, Sparkles, ChevronDown } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import { TopAppBar } from '../components/TopAppBar';
 
@@ -57,44 +57,41 @@ export const Progress: React.FC = () => {
       >
         <div className="px-4 space-y-6">
           
-          {/* Overview Card (Unified Layout) */}
-          <section className="bg-primary text-on-primary rounded-3xl p-6 shadow-md relative overflow-hidden">
-            <div className="relative z-10">
-              <div className="flex justify-between items-start mb-5">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <Trophy className="w-6 h-6 fill-current text-on-primary" />
-                    <h2 className="m3-title-large text-on-primary">Total Mastery</h2>
-                  </div>
-                  <p className="m3-display-small font-bold tracking-tight mt-1">
-                    {learnedWords} <span className="text-2xl font-normal opacity-80">/ {totalWords}</span>
-                  </p>
+          {/* Overview Card (Unified Layout & Flat 2D Bar) */}
+          <section className="bg-primary text-on-primary rounded-3xl p-6 shadow-md">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <div className="flex items-center gap-2.5 mb-1">
+                  <Award className="w-8 h-8" />
+                  <h2 className="m3-title-large text-on-primary">Total Mastery</h2>
                 </div>
+                <p className="text-3xl font-bold tracking-tight mt-2">
+                  {learnedWords} <span className="text-xl font-medium opacity-80">/ {totalWords}</span>
+                </p>
               </div>
-              
-              <div className="w-full bg-on-primary/20 rounded-full h-4 mb-2 overflow-hidden shadow-inner">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${percentage}%` }}
-                  transition={settings.animationsEnabled ? { duration: 1, ease: [0.2, 0, 0, 1], delay: 0.2 } : { duration: 0.2, ease: "easeOut" }}
-                  className="bg-on-primary h-full rounded-full" 
-                />
-              </div>
-              <p className="m3-body-small opacity-80 text-right">{percentage}% of entire dictionary</p>
             </div>
-            <Trophy className="absolute -right-4 -bottom-4 w-40 h-40 opacity-10" />
+            
+            <div className="w-full bg-on-primary/20 rounded-full h-4 mb-2 overflow-hidden">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: `${percentage}%` }}
+                transition={settings.animationsEnabled ? { duration: 1, ease: [0.2, 0, 0, 1], delay: 0.2 } : { duration: 0.2, ease: "easeOut" }}
+                className="bg-on-primary h-full rounded-full" 
+              />
+            </div>
+            <p className="m3-body-small opacity-80 text-right">{percentage}% of entire dictionary</p>
           </section>
 
-          {/* Today's Goal Card (Unified Layout) */}
-          <section className="bg-surface rounded-3xl p-6 shadow-sm border border-outline/10 relative overflow-hidden">
-            <div className="flex justify-between items-start mb-5">
+          {/* Today's Goal Card (Unified Layout & Flat 2D Bar) */}
+          <section className="bg-surface rounded-3xl p-6 shadow-sm border border-outline/10">
+            <div className="flex justify-between items-start mb-4">
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
+                <div className="flex items-center gap-2.5 mb-1">
+                  <Flame className="w-8 h-8 text-orange-500 fill-orange-500" />
                   <h2 className="m3-title-large text-on-surface">Today's Goal</h2>
                 </div>
-                <p className="m3-display-small font-bold text-on-surface tracking-tight mt-1">
-                  {wordsLearnedToday} <span className="text-2xl font-normal text-on-surface-variant">/ {settings.dailyGoal}</span>
+                <p className="text-3xl font-bold text-on-surface tracking-tight mt-2">
+                  {wordsLearnedToday} <span className="text-xl font-medium text-on-surface-variant">/ {settings.dailyGoal}</span>
                 </p>
               </div>
               {isGoalReached && (
@@ -109,7 +106,7 @@ export const Progress: React.FC = () => {
               )}
             </div>
 
-            <div className="w-full bg-surface-variant rounded-full h-4 mb-2 overflow-hidden shadow-inner">
+            <div className="w-full bg-surface-variant rounded-full h-4 mb-2 overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${dailyPercentage}%` }}
