@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Sun, Moon, Monitor } from 'lucide-react';
+import { X, Sun, Moon, Monitor, CloudOff, Smartphone, Sparkles, Volume2, EyeOff, RotateCcw } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { triggerHaptic } from '../utils/haptics';
 
@@ -9,10 +9,26 @@ interface SettingsDrawerProps {
   onClose: () => void;
 }
 
+// Custom Material 3 Switch Component
+const M3Switch = ({ checked }: { checked: boolean }) => (
+  <div 
+    className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors duration-200 ease-in-out ${
+      checked ? 'bg-primary border-2 border-primary' : 'bg-surface-variant border-2 border-outline'
+    }`}
+  >
+    <span 
+      className={`inline-block transform rounded-full transition-all duration-200 ease-in-out shadow-sm ${
+        checked 
+          ? 'translate-x-[20px] w-6 h-6 bg-on-primary' 
+          : 'translate-x-[4px] w-4 h-4 bg-outline'
+      }`} 
+    />
+  </div>
+);
+
 export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose }) => {
   const { settings, updateSettings, startTour } = useAppContext();
 
-  // Prevent Tour from starting if this modal is open
   useEffect(() => {
     if (isOpen) document.body.classList.add('modal-open');
     else document.body.classList.remove('modal-open');
@@ -42,10 +58,27 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
     }, 300);
   };
 
+  // Helper for M3 List Items
+  const SettingsItem = ({ icon: Icon, title, subtitle, stateKey }: { icon: any, title: string, subtitle: string, stateKey: keyof typeof settings }) => (
+    <div 
+      className="flex items-center justify-between py-4 px-2 cursor-pointer hover:bg-on-surface/5 active:bg-on-surface/10 rounded-xl transition-colors select-none"
+      onClick={() => handleToggle(stateKey, !(settings[stateKey] as boolean))}
+    >
+      <div className="flex items-center gap-4 pr-4">
+        <Icon className="w-6 h-6 text-on-surface-variant shrink-0" />
+        <div className="flex flex-col">
+          <span className="m3-body-large text-on-surface">{title}</span>
+          <span className="m3-body-medium text-on-surface-variant mt-0.5 leading-snug">{subtitle}</span>
+        </div>
+      </div>
+      <M3Switch checked={settings[stateKey] as boolean} />
+    </div>
+  );
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex">
+        <div className="fixed inset-0 z-50 flex justify-end">
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -55,172 +88,113 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
             onClick={handleClose}
           />
           <motion.div 
-            initial={{ x: '-100%' }}
+            initial={{ x: '100%' }}
             animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            transition={settings.animationsEnabled ? { type: 'spring', damping: 25, stiffness: 200 } : { duration: 0.15, ease: "easeOut" }}
-            className="relative bg-surface w-[calc(100%-56px)] max-w-[360px] h-full shadow-2xl flex flex-col"
+            exit={{ x: '100%' }}
+            transition={settings.animationsEnabled ? { type: 'spring', damping: 28, stiffness: 250 } : { duration: 0.15, ease: "easeOut" }}
+            className="relative bg-surface w-full max-w-[400px] h-full shadow-2xl flex flex-col"
           >
-            <div className="flex items-center justify-between p-4 border-b border-outline/10">
-              <h2 className="text-[22px] font-medium text-on-surface tracking-tight">Settings</h2>
-              <button onClick={handleClose} className="p-2 rounded-full hover:bg-surface-variant text-on-surface-variant transition-all duration-200 active:scale-90">
+            {/* Header */}
+            <div className="flex items-center px-4 h-16 border-b border-outline/10 shrink-0">
+              <button 
+                onClick={handleClose} 
+                className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-variant text-on-surface-variant transition-colors active:scale-95 -ml-2 mr-2"
+                aria-label="Close settings"
+              >
                 <X className="w-6 h-6" />
               </button>
+              <h2 className="text-[22px] font-medium text-on-surface tracking-tight">Settings</h2>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-6 space-y-8">
-              {/* Theme */}
-              <div>
-                <p className="m3-label-large text-on-surface-variant mb-3">Theme</p>
-                <div className="flex flex-col gap-2">
-                  {(['light', 'dark', 'system'] as const).map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => handleThemeChange(t)}
-                      className={`px-4 py-3 rounded-xl m3-label-large capitalize flex items-center transition-all duration-200 active:scale-[0.98] ${
-                        settings.theme === t
-                          ? 'bg-primary-container text-on-primary-container'
-                          : 'bg-surface-variant/50 text-on-surface hover:bg-surface-variant'
-                      }`}
-                    >
-                      {t === 'light' && <Sun className="w-5 h-5 mr-3" />}
-                      {t === 'dark' && <Moon className="w-5 h-5 mr-3" />}
-                      {t === 'system' && <Monitor className="w-5 h-5 mr-3" />}
-                      {t}
-                    </button>
-                  ))}
+            <div className="flex-1 overflow-y-auto px-4 py-2">
+              
+              {/* APPEARANCE SECTION */}
+              <div className="py-4">
+                <h3 className="m3-title-small text-primary px-2 mb-3 tracking-wide">Appearance</h3>
+                <div className="px-2">
+                  <div className="flex items-center gap-4 mb-3">
+                    <Sun className="w-6 h-6 text-on-surface-variant shrink-0" />
+                    <span className="m3-body-large text-on-surface">App Theme</span>
+                  </div>
+                  {/* M3 Segmented Button */}
+                  <div className="flex w-full border border-outline/40 rounded-full overflow-hidden mt-2 h-10">
+                    {(['light', 'dark', 'system'] as const).map((t, idx) => (
+                      <button
+                        key={t}
+                        onClick={() => handleThemeChange(t)}
+                        className={`flex-1 flex items-center justify-center gap-2 m3-label-large capitalize transition-colors ${
+                          settings.theme === t
+                            ? 'bg-primary-container text-on-primary-container font-bold'
+                            : 'bg-surface text-on-surface hover:bg-on-surface/5'
+                        } ${idx !== 2 ? 'border-r border-outline/40' : ''}`}
+                      >
+                        {t === 'light' && <Sun className="w-[18px] h-[18px]" />}
+                        {t === 'dark' && <Moon className="w-[18px] h-[18px]" />}
+                        {t === 'system' && <Monitor className="w-[18px] h-[18px]" />}
+                        {t}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Offline Mode */}
-              <div className="pt-4 border-t border-outline/10">
-                <label className="flex justify-between items-center cursor-pointer">
-                  <div>
-                    <p className="m3-body-large text-on-surface">Offline Mode</p>
-                    <p className="m3-body-small text-on-surface-variant">Keep data local</p>
-                  </div>
-                  <div className="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                    <input
-                      type="checkbox"
-                      checked={settings.offlineMode ?? false}
-                      onChange={(e) => handleToggle('offlineMode', e.target.checked)}
-                      className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
-                      style={{
-                        right: settings.offlineMode ? '0' : '1.5rem',
-                        borderColor: settings.offlineMode ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline)',
-                        background: settings.offlineMode ? 'var(--md-sys-color-primary)' : 'white'
-                      }}
-                    />
-                    <label className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors duration-300 ${settings.offlineMode ? 'bg-primary-container' : 'bg-surface-variant'}`}></label>
-                  </div>
-                </label>
+              <div className="border-t border-outline/10 my-2" />
+
+              {/* LEARNING SECTION */}
+              <div className="py-2">
+                <h3 className="m3-title-small text-primary px-2 mb-1 tracking-wide">Learning</h3>
+                <SettingsItem 
+                  icon={Volume2} 
+                  title="Auto Pronounce" 
+                  subtitle="Play audio automatically when viewing a word" 
+                  stateKey="autoPronounce" 
+                />
+                <SettingsItem 
+                  icon={EyeOff} 
+                  title="Hide Learned Words" 
+                  subtitle="Remove mastered words from standard lists" 
+                  stateKey="hideLearnedWords" 
+                />
               </div>
 
-              {/* Haptics */}
-              <div className="pt-4 border-t border-outline/10">
-                <label className="flex justify-between items-center cursor-pointer">
-                  <div>
-                    <p className="m3-body-large text-on-surface">Haptic Feedback</p>
-                    <p className="m3-body-small text-on-surface-variant">Vibrate on tap</p>
-                  </div>
-                  <div className="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                    <input
-                      type="checkbox"
-                      checked={settings.hapticsEnabled ?? false}
-                      onChange={(e) => handleToggle('hapticsEnabled', e.target.checked)}
-                      className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
-                      style={{
-                        right: settings.hapticsEnabled ? '0' : '1.5rem',
-                        borderColor: settings.hapticsEnabled ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline)',
-                        background: settings.hapticsEnabled ? 'var(--md-sys-color-primary)' : 'white'
-                      }}
-                    />
-                    <label className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors duration-300 ${settings.hapticsEnabled ? 'bg-primary-container' : 'bg-surface-variant'}`}></label>
-                  </div>
-                </label>
+              <div className="border-t border-outline/10 my-2" />
+
+              {/* SYSTEM SECTION */}
+              <div className="py-2">
+                <h3 className="m3-title-small text-primary px-2 mb-1 tracking-wide">System & Device</h3>
+                <SettingsItem 
+                  icon={CloudOff} 
+                  title="Offline Mode" 
+                  subtitle="Keep all vocabulary data stored locally" 
+                  stateKey="offlineMode" 
+                />
+                <SettingsItem 
+                  icon={Smartphone} 
+                  title="Haptic Feedback" 
+                  subtitle="Vibrate slightly on taps and actions" 
+                  stateKey="hapticsEnabled" 
+                />
+                <SettingsItem 
+                  icon={Sparkles} 
+                  title="Animations" 
+                  subtitle="Smooth UI transitions and physics" 
+                  stateKey="animationsEnabled" 
+                />
               </div>
 
-              {/* Animations */}
-              <div className="pt-4 border-t border-outline/10">
-                <label className="flex justify-between items-center cursor-pointer">
-                  <div>
-                    <p className="m3-body-large text-on-surface">Animations</p>
-                    <p className="m3-body-small text-on-surface-variant">Smooth UI transitions</p>
-                  </div>
-                  <div className="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                    <input
-                      type="checkbox"
-                      checked={settings.animationsEnabled ?? false}
-                      onChange={(e) => handleToggle('animationsEnabled', e.target.checked)}
-                      className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
-                      style={{
-                        right: settings.animationsEnabled ? '0' : '1.5rem',
-                        borderColor: settings.animationsEnabled ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline)',
-                        background: settings.animationsEnabled ? 'var(--md-sys-color-primary)' : 'white'
-                      }}
-                    />
-                    <label className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors duration-300 ${settings.animationsEnabled ? 'bg-primary-container' : 'bg-surface-variant'}`}></label>
-                  </div>
-                </label>
-              </div>
+              <div className="border-t border-outline/10 my-2" />
 
-              {/* Auto Pronounce */}
-              <div className="pt-4 border-t border-outline/10">
-                <label className="flex justify-between items-center cursor-pointer">
-                  <div>
-                    <p className="m3-body-large text-on-surface">Auto Pronounce</p>
-                    <p className="m3-body-small text-on-surface-variant">Play audio automatically</p>
-                  </div>
-                  <div className="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                    <input
-                      type="checkbox"
-                      checked={settings.autoPronounce ?? false}
-                      onChange={(e) => handleToggle('autoPronounce', e.target.checked)}
-                      className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
-                      style={{
-                        right: settings.autoPronounce ? '0' : '1.5rem',
-                        borderColor: settings.autoPronounce ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline)',
-                        background: settings.autoPronounce ? 'var(--md-sys-color-primary)' : 'white'
-                      }}
-                    />
-                    <label className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors duration-300 ${settings.autoPronounce ? 'bg-primary-container' : 'bg-surface-variant'}`}></label>
-                  </div>
-                </label>
-              </div>
-              
-              {/* Hide Learned Words */}
-              <div className="pt-4 border-t border-outline/10">
-                <label className="flex justify-between items-center cursor-pointer">
-                  <div>
-                    <p className="m3-body-large text-on-surface">Hide Learned Words</p>
-                    <p className="m3-body-small text-on-surface-variant">Don't show words I already know</p>
-                  </div>
-                  <div className="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                    <input
-                      type="checkbox"
-                      checked={settings.hideLearnedWords ?? false}
-                      onChange={(e) => handleToggle('hideLearnedWords', e.target.checked)}
-                      className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
-                      style={{
-                        right: settings.hideLearnedWords ? '0' : '1.5rem',
-                        borderColor: settings.hideLearnedWords ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline)',
-                        background: settings.hideLearnedWords ? 'var(--md-sys-color-primary)' : 'white'
-                      }}
-                    />
-                    <label className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors duration-300 ${settings.hideLearnedWords ? 'bg-primary-container' : 'bg-surface-variant'}`}></label>
-                  </div>
-                </label>
-              </div>
-
-              {/* Restart Tour */}
-              <div className="pt-4 border-t border-outline/10 pb-8">
+              {/* HELP SECTION */}
+              <div className="py-4 px-2 pb-10">
                 <button
                   onClick={handleRestartTour}
-                  className="w-full py-3 px-4 rounded-xl bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-colors active:scale-[0.98]"
+                  className="flex items-center justify-center w-full gap-2 py-3.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 active:bg-primary/30 transition-colors active:scale-[0.98] m3-label-large font-bold"
                 >
+                  <RotateCcw className="w-5 h-5" />
                   Restart App Tour
                 </button>
               </div>
+
             </div>
           </motion.div>
         </div>
