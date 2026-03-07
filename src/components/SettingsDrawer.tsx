@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Sun, Moon, Monitor, Check } from 'lucide-react';
+import { X, Sun, Moon, Monitor } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { AppSettings } from '../types';
 import { triggerHaptic } from '../utils/haptics';
@@ -25,8 +25,10 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
   };
 
   const handleThemeChange = (theme: 'light' | 'dark' | 'system') => {
-    triggerHaptic(settings.hapticsEnabled);
-    updateSettings({ theme });
+    if (settings.theme !== theme) {
+      triggerHaptic(settings.hapticsEnabled);
+      updateSettings({ theme });
+    }
   };
 
   const handleToggle = (key: keyof AppSettings, value: boolean) => {
@@ -34,6 +36,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
     updateSettings({ [key]: value });
   };
 
+  // Helper function for dynamic M3 rounded corners
   const getGroupItemClass = (index: number, total: number) => {
     if (total === 1) return 'rounded-[28px]';
     if (index === 0) return 'rounded-t-[28px] border-b border-outline/10';
@@ -88,35 +91,49 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
             {/* Content Body */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-12 space-y-8">
               
-              {/* Theme Group */}
+              {/* Theme Group (M3 Radio Buttons) */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Appearance</h3>
                 <div className="flex flex-col">
                   {themeOptions.map((item, index) => {
                     const isSelected = settings.theme === item.id;
                     return (
-                      <button
+                      <label
                         key={item.id}
-                        onClick={() => handleThemeChange(item.id)}
-                        className={`flex items-center p-4 transition-colors duration-200 ${getGroupItemClass(index, themeOptions.length)} ${
-                          isSelected 
-                            ? 'bg-primary-container text-on-primary-container' 
-                            : 'bg-surface-variant/40 hover:bg-surface-variant/60 active:bg-surface-variant/80 text-on-surface'
-                        }`}
+                        className={`flex items-center justify-between p-4 bg-surface-variant/40 hover:bg-surface-variant/60 cursor-pointer active:bg-surface-variant/80 transition-colors duration-200 ${getGroupItemClass(index, themeOptions.length)}`}
                       >
-                        <div className="flex items-center gap-4">
-                          <item.icon className={`w-6 h-6 ${isSelected ? 'text-on-primary-container' : 'text-on-surface-variant'}`} />
-                          <span className={`m3-body-large ${isSelected ? 'font-semibold' : ''}`}>
+                        <div className="flex items-center gap-4 pr-4">
+                          <item.icon className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-on-surface-variant'}`} />
+                          <p className={`m3-body-large ${isSelected ? 'text-on-surface font-semibold' : 'text-on-surface'}`}>
                             {item.label}
-                          </span>
+                          </p>
                         </div>
-                      </button>
+                        
+                        {/* M3 Radio Button */}
+                        <div className="shrink-0 relative flex items-center justify-center">
+                          <input
+                            type="radio"
+                            name="theme"
+                            value={item.id}
+                            checked={isSelected}
+                            onChange={() => handleThemeChange(item.id)}
+                            className="sr-only"
+                          />
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors duration-200 ${
+                            isSelected ? 'border-primary' : 'border-outline/50'
+                          }`}>
+                            <div className={`w-2.5 h-2.5 rounded-full bg-primary transition-transform duration-200 ${
+                              isSelected ? 'scale-100' : 'scale-0'
+                            }`} />
+                          </div>
+                        </div>
+                      </label>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Preferences Group */}
+              {/* Preferences Group (M3 Switches) */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Preferences</h3>
                 <div className="flex flex-col">
@@ -131,7 +148,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                           <p className="m3-body-large text-on-surface font-medium mb-0.5">{item.label}</p>
                           <p className="m3-body-small text-on-surface-variant leading-tight">{item.desc}</p>
                         </div>
-                        {/* Modern M3 Switch using pure Tailwind */}
+                        {/* M3 Toggle Switch */}
                         <div className="shrink-0 relative">
                           <input
                             type="checkbox"
@@ -153,7 +170,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                 </div>
               </div>
 
-              {/* Learning Options Group */}
+              {/* Learning Options Group (M3 Switches) */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Learning</h3>
                 <div className="flex flex-col">
@@ -168,6 +185,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                           <p className="m3-body-large text-on-surface font-medium mb-0.5">{item.label}</p>
                           <p className="m3-body-small text-on-surface-variant leading-tight">{item.desc}</p>
                         </div>
+                        {/* M3 Toggle Switch */}
                         <div className="shrink-0 relative">
                           <input
                             type="checkbox"
