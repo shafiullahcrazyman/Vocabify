@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Sun, Moon, Monitor, Check, RotateCcw } from 'lucide-react';
+import { X, Sun, Moon, Monitor, RotateCcw } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { AppSettings } from '../types';
 import { triggerHaptic } from '../utils/haptics';
@@ -109,15 +109,18 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                       <button
                         key={item.id}
                         onClick={() => handleThemeChange(item.id)}
-                        className={`flex items-center justify-between p-4 bg-surface-variant/40 hover:bg-surface-variant/60 active:bg-surface-variant/80 transition-colors duration-200 ${getGroupItemClass(index, themeOptions.length)}`}
+                        className={`flex items-center p-4 transition-colors duration-200 ${getGroupItemClass(index, themeOptions.length)} ${
+                          isSelected 
+                            ? 'bg-primary-container text-on-primary-container' 
+                            : 'bg-surface-variant/40 hover:bg-surface-variant/60 active:bg-surface-variant/80 text-on-surface'
+                        }`}
                       >
                         <div className="flex items-center gap-4">
-                          <item.icon className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-on-surface-variant'}`} />
-                          <span className={`m3-body-large ${isSelected ? 'text-on-surface font-semibold' : 'text-on-surface'}`}>
+                          <item.icon className={`w-6 h-6 ${isSelected ? 'text-on-primary-container' : 'text-on-surface-variant'}`} />
+                          <span className={`m3-body-large ${isSelected ? 'font-semibold' : ''}`}>
                             {item.label}
                           </span>
                         </div>
-                        {isSelected && <Check className="w-5 h-5 text-primary" strokeWidth={3} />}
                       </button>
                     );
                   })}
