@@ -6,7 +6,6 @@ export const TooltipGuide: React.FC = () => {
   const { settings, runTour, startTour, stopTour } = useAppContext();
   const [isDark, setIsDark] = useState(false);
 
-  // Safely detect if the app is currently in Dark Mode or Light Mode
   useEffect(() => {
     const checkTheme = () => {
       if (settings.theme === 'system') {
@@ -17,7 +16,6 @@ export const TooltipGuide: React.FC = () => {
     
     setIsDark(checkTheme());
 
-    // Listen for system theme changes in real-time
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handler = () => setIsDark(checkTheme());
     mediaQuery.addEventListener('change', handler);
@@ -25,13 +23,16 @@ export const TooltipGuide: React.FC = () => {
     return () => mediaQuery.removeEventListener('change', handler);
   }, [settings.theme]);
 
-  // Run the tour only once when the app loads
+  // Run the tour only once when the app loads, BUT wait to see if they opened a modal
   useEffect(() => {
     const hasSeenTour = localStorage.getItem('vocabify_has_seen_tour');
     if (!hasSeenTour) {
       const timer = setTimeout(() => {
-        startTour();
-      }, 1000);
+        // Fix: Don't auto-start the tour if a modal is currently open
+        if (!document.body.classList.contains('modal-open')) {
+          startTour();
+        }
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, [startTour]);
@@ -120,22 +121,9 @@ export const TooltipGuide: React.FC = () => {
     },
   ];
 
-  // Hardcoded Hex Colors so react-joyride understands them perfectly in both modes
   const m3Colors = isDark 
-    ? { // Dark Mode Colors
-        primary: '#D0BCFF',
-        onPrimary: '#381E72',
-        surface: '#141218',
-        onSurface: '#E6E0E9',
-        onSurfaceVariant: '#CAC4D0',
-      }
-    : { // Light Mode Colors
-        primary: '#6750A4',
-        onPrimary: '#FFFFFF',
-        surface: '#FEF7FF',
-        onSurface: '#1D1B20',
-        onSurfaceVariant: '#49454F',
-      };
+    ? { primary: '#D0BCFF', onPrimary: '#381E72', surface: '#141218', onSurface: '#E6E0E9', onSurfaceVariant: '#CAC4D0' }
+    : { primary: '#6750A4', onPrimary: '#FFFFFF', surface: '#FEF7FF', onSurface: '#1D1B20', onSurfaceVariant: '#49454F' };
 
   return (
     <Joyride
@@ -156,43 +144,13 @@ export const TooltipGuide: React.FC = () => {
           textColor: m3Colors.onSurface,
           zIndex: 1000,
         },
-        tooltip: {
-          borderRadius: '16px',
-          padding: '20px',
-          boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.5)' : '0 4px 20px rgba(0,0,0,0.15)',
-        },
-        tooltipContainer: {
-          textAlign: 'left',
-        },
-        buttonNext: {
-          backgroundColor: m3Colors.primary,
-          color: m3Colors.onPrimary,
-          borderRadius: '100px',
-          padding: '10px 24px',
-          fontWeight: 500,
-          fontSize: '14px',
-          outline: 'none',
-        },
-        buttonBack: {
-          color: m3Colors.primary,
-          marginRight: '8px',
-          fontWeight: 500,
-          fontSize: '14px',
-          outline: 'none',
-        },
-        buttonSkip: {
-          color: m3Colors.onSurfaceVariant,
-          fontWeight: 500,
-          fontSize: '14px',
-          outline: 'none',
-        },
+        tooltip: { borderRadius: '16px', padding: '20px', boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.5)' : '0 4px 20px rgba(0,0,0,0.15)' },
+        tooltipContainer: { textAlign: 'left' },
+        buttonNext: { backgroundColor: m3Colors.primary, color: m3Colors.onPrimary, borderRadius: '100px', padding: '10px 24px', fontWeight: 500, fontSize: '14px', outline: 'none' },
+        buttonBack: { color: m3Colors.primary, marginRight: '8px', fontWeight: 500, fontSize: '14px', outline: 'none' },
+        buttonSkip: { color: m3Colors.onSurfaceVariant, fontWeight: 500, fontSize: '14px', outline: 'none' },
       }}
-      locale={{
-        last: 'Finish Tour',
-        skip: 'Skip',
-        next: 'Next',
-        back: 'Back',
-      }}
+      locale={{ last: 'Finish Tour', skip: 'Skip', next: 'Next', back: 'Back' }}
     />
   );
 };
