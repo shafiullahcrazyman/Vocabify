@@ -1,3 +1,4 @@
+--- START OF FILE Vocabify-main/src/components/WordOverlay.tsx ---
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'motion/react';
 import { WordFamily } from '../types';
@@ -36,6 +37,12 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
   const isLearned = progress.learned.includes(word.id);
   const isFavorite = favorites.includes(word.id);
   const [isTipsOpen, setIsTipsOpen] = useState(false);
+
+  // Prevent Tour from starting because a word is actively selected
+  useEffect(() => {
+    document.body.classList.add('modal-open');
+    return () => document.body.classList.remove('modal-open');
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -98,7 +105,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
     }
   };
 
-  // Fixed proper typing here!
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const swipeThreshold = 40;
     if (info.offset.x < -swipeThreshold && hasNext) {
@@ -130,7 +136,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
         onDragEnd={handleDragEnd}
         className="relative bg-surface w-full max-w-2xl max-h-[92dvh] sm:max-h-[85vh] rounded-[32px] shadow-2xl flex flex-col overflow-hidden"
       >
-        {/* FIXED TOP HEADER: 88px height perfectly matches bottom */}
         <div className="flex items-center justify-between px-4 h-[88px] border-b border-outline/10 shrink-0">
           <button onClick={handleClose} className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-variant text-on-surface-variant transition-all duration-200 active:scale-90">
             <X className="w-6 h-6" />
@@ -259,7 +264,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
           </div>
         </div>
 
-        {/* FIXED BOTTOM FOOTER: 88px height perfectly matches top */}
         <div className="px-4 h-[88px] border-t border-outline/10 flex justify-between items-center gap-3 sm:gap-4 bg-surface shrink-0 z-10">
           <button 
             onClick={handlePrev} 
