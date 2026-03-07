@@ -1,10 +1,8 @@
 import React, { useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-// ADDED: MotionGlobalConfig to act as the Master Switch for animations
 import { AnimatePresence, MotionConfig, MotionGlobalConfig } from 'motion/react';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { BottomNav } from './components/BottomNav';
-import { TooltipGuide } from './components/TooltipGuide';
 import { Home } from './screens/Home';
 import { Filter } from './screens/Filter';
 import { Progress } from './screens/Progress';
@@ -27,8 +25,6 @@ function AnimatedRoutes() {
 function AppContent() {
   const { settings } = useAppContext();
   
-  // NEW: This listens to your settings. If animations are disabled, 
-  // it forces the animation engine to instantly skip to the end (0 seconds).
   useEffect(() => {
     MotionGlobalConfig.skipAnimations = !settings.animationsEnabled;
   }, [settings.animationsEnabled]);
@@ -41,7 +37,6 @@ function AppContent() {
             <AnimatedRoutes />
           </div>
           <BottomNav />
-          <TooltipGuide />
         </div>
       </HashRouter>
     </MotionConfig>
