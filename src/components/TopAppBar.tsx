@@ -16,7 +16,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
   
   // Local state for immediate typing feedback without lag
   const [localSearch, setLocalSearch] = useState(searchQuery);
-  const debouncedSearch = useDebounce(localSearch, 300); // 300ms delay safely managed
+  const debouncedSearch = useDebounce(localSearch, 300);
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isTipsOpen, setIsTipsOpen] = useState(false);
@@ -74,29 +74,32 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
             <h1 className="text-[22px] font-medium text-on-surface truncate">{title}</h1>
           </div>
         ) : (
-          <div className="tour-search-bar flex-1 min-w-0 flex items-center bg-surface-variant rounded-full px-4 h-14 shadow-sm transition-all duration-300 focus-within:shadow-md relative">
+          <div className="tour-search-bar flex-1 min-w-0 flex items-center bg-surface-variant rounded-full pl-4 pr-2 h-14 shadow-sm transition-all duration-300 focus-within:shadow-md">
+            
+            {/* Search Input - dynamically takes available space */}
             <input
               type="text"
               placeholder="Search words..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
-              className="bg-transparent border-none outline-none flex-1 w-full text-on-surface placeholder:text-on-surface-variant m3-body-large truncate pr-28"
+              className="bg-transparent border-none outline-none flex-1 min-w-0 w-full text-on-surface placeholder:text-on-surface-variant m3-body-large truncate mr-2"
             />
             
-            {localSearch.length > 0 && (
-              <button
-                onClick={() => {
-                  triggerHaptic(settings.hapticsEnabled);
-                  setLocalSearch('');
-                  setSearchQuery('');
-                }}
-                className="absolute right-[88px] p-1.5 rounded-full hover:bg-on-surface/10 text-on-surface-variant transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
+            {/* Action Buttons - grouped safely to the right */}
+            <div className="flex items-center shrink-0 gap-0.5">
+              {localSearch.length > 0 && (
+                <button
+                  onClick={() => {
+                    triggerHaptic(settings.hapticsEnabled);
+                    setLocalSearch('');
+                    setSearchQuery('');
+                  }}
+                  className="p-1.5 rounded-full hover:bg-on-surface/10 text-on-surface-variant transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
 
-            <div className="absolute right-2 flex items-center gap-1">
               <button
                 onClick={() => {
                   triggerHaptic(settings.hapticsEnabled);
@@ -107,6 +110,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
               >
                 <PlayCircle className="w-6 h-6 text-primary" strokeWidth={2.5} />
               </button>
+              
               <button
                 onClick={() => {
                   triggerHaptic(settings.hapticsEnabled);
@@ -118,6 +122,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
                 <Info className="w-6 h-6 text-primary" strokeWidth={2.5} />
               </button>
             </div>
+
           </div>
         )}
         
