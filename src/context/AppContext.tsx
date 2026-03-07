@@ -18,9 +18,6 @@ interface AppContextType {
   setUserAvatar: (avatar: string | null) => void;
   favorites: string[];
   toggleFavorite: (id: string) => void;
-  runTour: boolean;
-  startTour: () => void;
-  stopTour: () => void;
 }
 
 const defaultSettings: AppSettings = {
@@ -49,17 +46,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [storedSettings, setSettings] = useLocalStorage<AppSettings>('vocab_settings', defaultSettings);
   const settings = { ...defaultSettings, ...storedSettings };
   
-  // UPDATED: Added learnedDates to track WHEN a word was learned
   const [progress, setProgress] = useLocalStorage<{ learned: string[], learnedDates?: Record<string, string> }>('vocab_progress', { learned: [], learnedDates: {} });
-  
   const [userAvatar, setUserAvatar] = useLocalStorage<string | null>('vocab_user_avatar', null);
   const [favorites, setFavorites] = useLocalStorage<string[]>('vocab_favorites', []);
   const [filters, setFilters] = useLocalStorage<FilterOptions>('vocab_filters', defaultFilters);
   const [searchQuery, setSearchQuery] = useState('');
-  const [runTour, setRunTour] = useState(false);
-
-  const startTour = () => setRunTour(true);
-  const stopTour = () => setRunTour(false);
 
   const words = wordsData as WordFamily[];
 
@@ -83,16 +74,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setFilters({ ...filters, ...newFilters });
   };
 
-  // UPDATED: Logic to handle storing the date
   const markLearned = (id: string) => {
-    const today = new Date().toISOString().split('T')[0]; // Gets date as YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0];
 
     setProgress((prev) => {
       const prevLearned = prev.learned || [];
       const prevDates = prev.learnedDates || {};
 
       if (prevLearned.includes(id)) {
-        // If un-marking, remove the ID and the date
         const newDates = { ...prevDates };
         delete newDates[id];
         
@@ -101,7 +90,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           learnedDates: newDates,
         };
       } else {
-        // If marking as learned, save ID and today's date
         return {
           learned: [...prevLearned, id],
           learnedDates: { ...prevDates, [id]: today },
@@ -137,9 +125,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setUserAvatar,
         favorites,
         toggleFavorite,
-        runTour,
-        startTour,
-        stopTour,
       }}
     >
       <div className={`min-h-screen font-size-${settings.fontSize}`}>
