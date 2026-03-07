@@ -53,7 +53,10 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose, onNext, onPrev, hasNext, hasPrev]);
 
+  // THE FIX: Added a 400ms delay to auto-pronounce
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+
     if (settings.autoPronounce) {
       const wordsToPronounce: string[] = [];
       if (isValid(word.noun)) wordsToPronounce.push(word.noun!);
@@ -62,19 +65,28 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
       if (isValid(word.adverb)) wordsToPronounce.push(word.adverb!);
 
       if (wordsToPronounce.length > 0) {
-        window.speechSynthesis.cancel();
-        wordsToPronounce.forEach((text) => {
-          const utterance = new SpeechSynthesisUtterance(text);
-          const voices = window.speechSynthesis.getVoices();
-          const ukFemale = voices.find(v => v.lang === 'en-GB' && (v.name.toLowerCase().includes('female') || v.name.includes('Google UK English Female'))) 
-            || voices.find(v => v.lang === 'en-GB');
-          if (ukFemale) utterance.voice = ukFemale;
-          else utterance.lang = 'en-GB';
-          window.speechSynthesis.speak(utterance);
-        });
+        // Wait 400ms for modal to open and browser audio to unlock
+        timer = setTimeout(() => {
+          window.speechSynthesis.cancel();
+          wordsToPronounce.forEach((text) => {
+            const utterance = new SpeechSynthesisUtterance(text);
+            const voices = window.speechSynthesis.getVoices();
+            const ukFemale = voices.find(v => v.lang === 'en-GB' && (v.name.toLowerCase().includes('female') || v.name.includes('Google UK English Female'))) 
+              || voices.find(v => v.lang === 'en-GB');
+            
+            if (ukFemale) utterance.voice = ukFemale;
+            else utterance.lang = 'en-GB';
+            
+            window.speechSynthesis.speak(utterance);
+          });
+        }, 400);
       }
     }
-    return () => window.speechSynthesis.cancel();
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      window.speechSynthesis.cancel();
+    };
   }, [word, settings.autoPronounce]);
 
   const isValid = (val?: string) => val && val.toLowerCase() !== 'x' && val.toLowerCase() !== 'none';
