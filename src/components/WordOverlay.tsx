@@ -1,4 +1,3 @@
---- START OF FILE Vocabify-main/src/components/WordOverlay.tsx ---
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'motion/react';
 import { WordFamily } from '../types';
