@@ -1,4 +1,3 @@
---- START OF FILE Vocabify-main/src/components/SettingsDrawer.tsx ---
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Sun, Moon, Monitor } from 'lucide-react';
