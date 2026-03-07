@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
-// UPDATED: Added ChevronDown to the imports
 import { Target, RotateCcw, Trophy, Copy, Check, Download, X, Flame, Sparkles, ChevronDown } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import { TopAppBar } from '../components/TopAppBar';
@@ -13,19 +12,23 @@ export const Progress: React.FC = () => {
   const [exportCount, setExportCount] = useState<number>(-1);
   const [copied, setCopied] = useState(false);
 
-  // --- PROGRESS CALCULATIONS ---
-  const totalWords = words.length;
-  const learnedWordsData = words.filter(w => progress.learned.includes(w.id));
-  const learnedWords = learnedWordsData.length;
-  const percentage = totalWords > 0 ? Math.round((learnedWords / totalWords) * 100) : 0;
+  // --- OPTIMIZED PROGRESS CALCULATIONS ---
+  const { learnedWordsData, learnedWords, percentage } = useMemo(() => {
+    const total = words.length;
+    const learnedData = words.filter(w => progress.learned.includes(w.id));
+    const count = learnedData.length;
+    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+    return { learnedWordsData: learnedData, learnedWords: count, percentage: pct };
+  }, [words, progress.learned]);
 
-  // --- DAILY GOAL CALCULATIONS ---
-  const today = new Date().toISOString().split('T')[0];
-  const learnedDates = progress.learnedDates || {};
-  const wordsLearnedToday = Object.values(learnedDates).filter(date => date === today).length;
-  const dailyGoal = settings.dailyGoal;
-  const dailyPercentage = Math.min(Math.round((wordsLearnedToday / dailyGoal) * 100), 100);
-  const isGoalReached = wordsLearnedToday >= dailyGoal;
+  const { wordsLearnedToday, dailyPercentage, isGoalReached } = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const learnedDates = progress.learnedDates || {};
+    const count = Object.values(learnedDates).filter(date => date === today).length;
+    const goal = settings.dailyGoal;
+    const pct = Math.min(Math.round((count / goal) * 100), 100);
+    return { wordsLearnedToday: count, dailyPercentage: pct, isGoalReached: count >= goal };
+  }, [progress.learnedDates, settings.dailyGoal]);
 
   const handleCopyJSON = () => {
     triggerHaptic(settings.hapticsEnabled);
@@ -36,31 +39,11 @@ export const Progress: React.FC = () => {
     });
   };
 
-  const handleResetClick = () => {
-    triggerHaptic(settings.hapticsEnabled);
-    setShowConfirm(true);
-  };
-
-  const handleCancelReset = () => {
-    triggerHaptic(settings.hapticsEnabled);
-    setShowConfirm(false);
-  };
-
-  const handleConfirmReset = () => {
-    triggerHaptic(settings.hapticsEnabled);
-    resetProgress();
-    setShowConfirm(false);
-  };
-
-  const handleOpenExport = () => {
-    triggerHaptic(settings.hapticsEnabled);
-    setShowExportModal(true);
-  };
-
-  const handleCloseExport = () => {
-    triggerHaptic(settings.hapticsEnabled);
-    setShowExportModal(false);
-  };
+  const handleResetClick = () => { triggerHaptic(settings.hapticsEnabled); setShowConfirm(true); };
+  const handleCancelReset = () => { triggerHaptic(settings.hapticsEnabled); setShowConfirm(false); };
+  const handleConfirmReset = () => { triggerHaptic(settings.hapticsEnabled); resetProgress(); setShowConfirm(false); };
+  const handleOpenExport = () => { triggerHaptic(settings.hapticsEnabled); setShowExportModal(true); };
+  const handleCloseExport = () => { triggerHaptic(settings.hapticsEnabled); setShowExportModal(false); };
 
   return (
     <>
@@ -74,7 +57,7 @@ export const Progress: React.FC = () => {
       >
         <div className="px-4 space-y-6">
           
-          {/* Overview Card (Total Mastery) */}
+          {/* Overview Card */}
           <section className="bg-primary text-on-primary rounded-3xl p-6 shadow-md relative overflow-hidden">
             <div className="relative z-10">
               <div className="flex items-center mb-2">
@@ -105,7 +88,7 @@ export const Progress: React.FC = () => {
                   <h2 className="m3-title-large text-on-surface">Today's Goal</h2>
                 </div>
                 <p className="m3-display-small font-bold text-on-surface tracking-tight mt-1">
-                  {wordsLearnedToday} <span className="text-2xl font-normal text-on-surface-variant">/ {dailyGoal}</span>
+                  {wordsLearnedToday} <span className="text-2xl font-normal text-on-surface-variant">/ {settings.dailyGoal}</span>
                 </p>
               </div>
               {isGoalReached && (
@@ -131,7 +114,7 @@ export const Progress: React.FC = () => {
             <p className="m3-body-small text-on-surface-variant mt-2">
               {isGoalReached
                 ? "Amazing job! You crushed your daily target."
-                : `${dailyGoal - wordsLearnedToday} more words to hit your streak.`}
+                : `${settings.dailyGoal - wordsLearnedToday} more words to hit your streak.`}
             </p>
           </section>
 
@@ -149,7 +132,6 @@ export const Progress: React.FC = () => {
                     <p className="m3-body-large text-on-surface">Daily Target</p>
                     <p className="m3-body-small text-on-surface-variant">Update your current goal</p>
                   </div>
-                  {/* UPDATED: Added a wrapper, appearance-none, and custom ChevronDown icon */}
                   <div className="relative inline-block">
                     <select
                       value={settings.dailyGoal}
@@ -255,7 +237,6 @@ export const Progress: React.FC = () => {
                     You have learned <span className="font-bold text-primary">{learnedWordsData.length}</span> words.
                   </p>
                   
-                  {/* UPDATED: Added wrapper, appearance-none, and ChevronDown here as well */}
                   <div className="relative inline-block">
                     <select
                       value={exportCount}
