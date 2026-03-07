@@ -13,12 +13,12 @@ export const Progress: React.FC = () => {
   const [copied, setCopied] = useState(false);
 
   // --- OPTIMIZED PROGRESS CALCULATIONS ---
-  const { learnedWordsData, learnedWords, percentage } = useMemo(() => {
+  const { learnedWordsData, learnedWords, percentage, totalWords } = useMemo(() => {
     const total = words.length;
     const learnedData = words.filter(w => progress.learned.includes(w.id));
     const count = learnedData.length;
     const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-    return { learnedWordsData: learnedData, learnedWords: count, percentage: pct };
+    return { learnedWordsData: learnedData, learnedWords: count, percentage: pct, totalWords: total };
   }, [words, progress.learned]);
 
   const { wordsLearnedToday, dailyPercentage, isGoalReached } = useMemo(() => {
@@ -57,29 +57,35 @@ export const Progress: React.FC = () => {
       >
         <div className="px-4 space-y-6">
           
-          {/* Overview Card */}
+          {/* Overview Card (Unified Layout) */}
           <section className="bg-primary text-on-primary rounded-3xl p-6 shadow-md relative overflow-hidden">
             <div className="relative z-10">
-              <div className="flex items-center mb-2">
-                <Trophy className="w-8 h-8 mr-3" />
-                <h2 className="m3-display-small">{learnedWords}</h2>
+              <div className="flex justify-between items-start mb-5">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Trophy className="w-6 h-6 fill-current text-on-primary" />
+                    <h2 className="m3-title-large text-on-primary">Total Mastery</h2>
+                  </div>
+                  <p className="m3-display-small font-bold tracking-tight mt-1">
+                    {learnedWords} <span className="text-2xl font-normal opacity-80">/ {totalWords}</span>
+                  </p>
+                </div>
               </div>
-              <p className="m3-title-medium opacity-90 mb-6">Total Lifetime Mastery</p>
               
-              <div className="w-full bg-on-primary/20 rounded-full h-3 mb-2 overflow-hidden shadow-inner">
+              <div className="w-full bg-on-primary/20 rounded-full h-4 mb-2 overflow-hidden shadow-inner">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${percentage}%` }}
                   transition={settings.animationsEnabled ? { duration: 1, ease: [0.2, 0, 0, 1], delay: 0.2 } : { duration: 0.2, ease: "easeOut" }}
-                  className="bg-on-primary h-3 rounded-full" 
+                  className="bg-on-primary h-full rounded-full" 
                 />
               </div>
-              <p className="m3-label-medium opacity-80 text-right">{percentage}% of entire dictionary</p>
+              <p className="m3-body-small opacity-80 text-right">{percentage}% of entire dictionary</p>
             </div>
             <Trophy className="absolute -right-4 -bottom-4 w-40 h-40 opacity-10" />
           </section>
 
-          {/* Today's Goal Card */}
+          {/* Today's Goal Card (Unified Layout) */}
           <section className="bg-surface rounded-3xl p-6 shadow-sm border border-outline/10 relative overflow-hidden">
             <div className="flex justify-between items-start mb-5">
               <div>
@@ -95,10 +101,10 @@ export const Progress: React.FC = () => {
                 <motion.div 
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  className="bg-orange-500/15 border border-orange-500/30 text-orange-600 dark:text-orange-400 px-3 py-1.5 rounded-xl text-sm font-bold flex items-center gap-1 shadow-sm"
+                  className="bg-orange-500/15 border border-orange-500/30 text-orange-600 dark:text-orange-400 px-3 py-1.5 rounded-xl text-sm font-bold flex items-center gap-1 shadow-sm mt-1"
                 >
                   <Sparkles size={16} />
-                  Goal Reached!
+                  Reached!
                 </motion.div>
               )}
             </div>
@@ -111,10 +117,10 @@ export const Progress: React.FC = () => {
                 className={`h-full rounded-full ${isGoalReached ? 'bg-orange-500' : 'bg-primary'}`}
               />
             </div>
-            <p className="m3-body-small text-on-surface-variant mt-2">
+            <p className="m3-body-small text-on-surface-variant text-right">
               {isGoalReached
-                ? "Amazing job! You crushed your daily target."
-                : `${settings.dailyGoal - wordsLearnedToday} more words to hit your streak.`}
+                ? "Streak maintained!"
+                : `${settings.dailyGoal - wordsLearnedToday} more to go`}
             </p>
           </section>
 
