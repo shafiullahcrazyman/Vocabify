@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Sun, Moon, Monitor, CloudOff, Smartphone, Sparkles, Volume2, EyeOff, RotateCcw } from 'lucide-react';
+import { X, Sun, Moon, Monitor, Check, RotateCcw } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
+import { AppSettings } from '../types';
 import { triggerHaptic } from '../utils/haptics';
 
 interface SettingsDrawerProps {
@@ -9,26 +10,10 @@ interface SettingsDrawerProps {
   onClose: () => void;
 }
 
-// Custom Material 3 Switch Component
-const M3Switch = ({ checked }: { checked: boolean }) => (
-  <div 
-    className={`relative inline-flex h-8 w-[52px] shrink-0 items-center rounded-full transition-colors duration-200 ease-in-out ${
-      checked ? 'bg-primary border-2 border-primary' : 'bg-surface-variant border-2 border-outline'
-    }`}
-  >
-    <span 
-      className={`inline-block transform rounded-full transition-all duration-200 ease-in-out shadow-sm ${
-        checked 
-          ? 'translate-x-[20px] w-6 h-6 bg-on-primary' 
-          : 'translate-x-[4px] w-4 h-4 bg-outline'
-      }`} 
-    />
-  </div>
-);
-
 export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose }) => {
   const { settings, updateSettings, startTour } = useAppContext();
 
+  // Prevent Tour from starting if this modal is open
   useEffect(() => {
     if (isOpen) document.body.classList.add('modal-open');
     else document.body.classList.remove('modal-open');
@@ -45,7 +30,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
     updateSettings({ theme });
   };
 
-  const handleToggle = (key: keyof typeof settings, value: boolean) => {
+  const handleToggle = (key: keyof AppSettings, value: boolean) => {
     triggerHaptic(settings.hapticsEnabled);
     updateSettings({ [key]: value });
   };
@@ -58,27 +43,36 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
     }, 300);
   };
 
-  // Helper for M3 List Items
-  const SettingsItem = ({ icon: Icon, title, subtitle, stateKey }: { icon: any, title: string, subtitle: string, stateKey: keyof typeof settings }) => (
-    <div 
-      className="flex items-center justify-between py-4 px-2 cursor-pointer hover:bg-on-surface/5 active:bg-on-surface/10 rounded-xl transition-colors select-none"
-      onClick={() => handleToggle(stateKey, !(settings[stateKey] as boolean))}
-    >
-      <div className="flex items-center gap-4 pr-4">
-        <Icon className="w-6 h-6 text-on-surface-variant shrink-0" />
-        <div className="flex flex-col">
-          <span className="m3-body-large text-on-surface">{title}</span>
-          <span className="m3-body-medium text-on-surface-variant mt-0.5 leading-snug">{subtitle}</span>
-        </div>
-      </div>
-      <M3Switch checked={settings[stateKey] as boolean} />
-    </div>
-  );
+  // Helper function to dynamically generate M3 rounded corners based on item position
+  const getGroupItemClass = (index: number, total: number) => {
+    if (total === 1) return 'rounded-[28px]';
+    if (index === 0) return 'rounded-t-[28px] border-b border-outline/10';
+    if (index === total - 1) return 'rounded-b-[28px]';
+    return 'border-b border-outline/10 rounded-none';
+  };
+
+  // Data mapping for super clean code
+  const themeOptions = [
+    { id: 'light', label: 'Light', icon: Sun },
+    { id: 'dark', label: 'Dark', icon: Moon },
+    { id: 'system', label: 'System', icon: Monitor },
+  ] as const;
+
+  const prefOptions = [
+    { id: 'offlineMode', label: 'Offline Mode', desc: 'Keep data local' },
+    { id: 'hapticsEnabled', label: 'Haptic Feedback', desc: 'Vibrate on tap' },
+    { id: 'animationsEnabled', label: 'Animations', desc: 'Smooth UI transitions' },
+  ] as const;
+
+  const learningOptions = [
+    { id: 'autoPronounce', label: 'Auto Pronounce', desc: 'Play audio automatically' },
+    { id: 'hideLearnedWords', label: 'Hide Learned Words', desc: "Don't show words I already know" },
+  ] as const;
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end">
+        <div className="fixed inset-0 z-50 flex">
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -88,111 +82,136 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
             onClick={handleClose}
           />
           <motion.div 
-            initial={{ x: '100%' }}
+            initial={{ x: '-100%' }}
             animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={settings.animationsEnabled ? { type: 'spring', damping: 28, stiffness: 250 } : { duration: 0.15, ease: "easeOut" }}
-            className="relative bg-surface w-full max-w-[400px] h-full shadow-2xl flex flex-col"
+            exit={{ x: '-100%' }}
+            transition={settings.animationsEnabled ? { type: 'spring', damping: 25, stiffness: 200 } : { duration: 0.15, ease: "easeOut" }}
+            className="relative bg-surface w-[calc(100%-56px)] max-w-[380px] h-full shadow-2xl flex flex-col"
           >
             {/* Header */}
-            <div className="flex items-center px-4 h-16 border-b border-outline/10 shrink-0">
-              <button 
-                onClick={handleClose} 
-                className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-variant text-on-surface-variant transition-colors active:scale-95 -ml-2 mr-2"
-                aria-label="Close settings"
-              >
+            <div className="flex items-center justify-between p-4 px-6 border-b border-outline/10 shrink-0">
+              <h2 className="text-[22px] font-bold text-on-surface tracking-tight">Settings</h2>
+              <button onClick={handleClose} className="p-2 -mr-2 rounded-full hover:bg-surface-variant text-on-surface-variant transition-all duration-200 active:scale-90">
                 <X className="w-6 h-6" />
               </button>
-              <h2 className="text-[22px] font-medium text-on-surface tracking-tight">Settings</h2>
             </div>
             
-            <div className="flex-1 overflow-y-auto px-4 py-2">
+            {/* Content Body */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-12 space-y-8">
               
-              {/* APPEARANCE SECTION */}
-              <div className="py-4">
-                <h3 className="m3-title-small text-primary px-2 mb-3 tracking-wide">Appearance</h3>
-                <div className="px-2">
-                  <div className="flex items-center gap-4 mb-3">
-                    <Sun className="w-6 h-6 text-on-surface-variant shrink-0" />
-                    <span className="m3-body-large text-on-surface">App Theme</span>
-                  </div>
-                  {/* M3 Segmented Button */}
-                  <div className="flex w-full border border-outline/40 rounded-full overflow-hidden mt-2 h-10">
-                    {(['light', 'dark', 'system'] as const).map((t, idx) => (
+              {/* Theme Group */}
+              <div>
+                <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Appearance</h3>
+                <div className="flex flex-col">
+                  {themeOptions.map((item, index) => {
+                    const isSelected = settings.theme === item.id;
+                    return (
                       <button
-                        key={t}
-                        onClick={() => handleThemeChange(t)}
-                        className={`flex-1 flex items-center justify-center gap-2 m3-label-large capitalize transition-colors ${
-                          settings.theme === t
-                            ? 'bg-primary-container text-on-primary-container font-bold'
-                            : 'bg-surface text-on-surface hover:bg-on-surface/5'
-                        } ${idx !== 2 ? 'border-r border-outline/40' : ''}`}
+                        key={item.id}
+                        onClick={() => handleThemeChange(item.id)}
+                        className={`flex items-center justify-between p-4 bg-surface-variant/40 hover:bg-surface-variant/60 active:bg-surface-variant/80 transition-colors duration-200 ${getGroupItemClass(index, themeOptions.length)}`}
                       >
-                        {t === 'light' && <Sun className="w-[18px] h-[18px]" />}
-                        {t === 'dark' && <Moon className="w-[18px] h-[18px]" />}
-                        {t === 'system' && <Monitor className="w-[18px] h-[18px]" />}
-                        {t}
+                        <div className="flex items-center gap-4">
+                          <item.icon className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-on-surface-variant'}`} />
+                          <span className={`m3-body-large ${isSelected ? 'text-on-surface font-semibold' : 'text-on-surface'}`}>
+                            {item.label}
+                          </span>
+                        </div>
+                        {isSelected && <Check className="w-5 h-5 text-primary" strokeWidth={3} />}
                       </button>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              <div className="border-t border-outline/10 my-2" />
-
-              {/* LEARNING SECTION */}
-              <div className="py-2">
-                <h3 className="m3-title-small text-primary px-2 mb-1 tracking-wide">Learning</h3>
-                <SettingsItem 
-                  icon={Volume2} 
-                  title="Auto Pronounce" 
-                  subtitle="Play audio automatically when viewing a word" 
-                  stateKey="autoPronounce" 
-                />
-                <SettingsItem 
-                  icon={EyeOff} 
-                  title="Hide Learned Words" 
-                  subtitle="Remove mastered words from standard lists" 
-                  stateKey="hideLearnedWords" 
-                />
+              {/* Preferences Group */}
+              <div>
+                <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Preferences</h3>
+                <div className="flex flex-col">
+                  {prefOptions.map((item, index) => {
+                    const isChecked = settings[item.id as keyof AppSettings] as boolean;
+                    return (
+                      <label
+                        key={item.id}
+                        className={`flex items-center justify-between p-4 bg-surface-variant/40 hover:bg-surface-variant/60 cursor-pointer active:bg-surface-variant/80 transition-colors duration-200 ${getGroupItemClass(index, prefOptions.length)}`}
+                      >
+                        <div className="pr-4">
+                          <p className="m3-body-large text-on-surface font-medium mb-0.5">{item.label}</p>
+                          <p className="m3-body-small text-on-surface-variant leading-tight">{item.desc}</p>
+                        </div>
+                        {/* Modern M3 Switch using pure Tailwind */}
+                        <div className="shrink-0 relative">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => handleToggle(item.id as keyof AppSettings, e.target.checked)}
+                            className="sr-only"
+                          />
+                          <div className={`w-[52px] h-8 rounded-full border-2 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] flex items-center ${
+                            isChecked ? 'bg-primary border-primary' : 'bg-surface-variant border-outline/40'
+                          }`}>
+                            <div className={`rounded-full absolute transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] shadow-sm ${
+                              isChecked ? 'w-6 h-6 right-0.5 bg-on-primary' : 'w-4 h-4 left-1 bg-outline'
+                            }`} />
+                          </div>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="border-t border-outline/10 my-2" />
-
-              {/* SYSTEM SECTION */}
-              <div className="py-2">
-                <h3 className="m3-title-small text-primary px-2 mb-1 tracking-wide">System & Device</h3>
-                <SettingsItem 
-                  icon={CloudOff} 
-                  title="Offline Mode" 
-                  subtitle="Keep all vocabulary data stored locally" 
-                  stateKey="offlineMode" 
-                />
-                <SettingsItem 
-                  icon={Smartphone} 
-                  title="Haptic Feedback" 
-                  subtitle="Vibrate slightly on taps and actions" 
-                  stateKey="hapticsEnabled" 
-                />
-                <SettingsItem 
-                  icon={Sparkles} 
-                  title="Animations" 
-                  subtitle="Smooth UI transitions and physics" 
-                  stateKey="animationsEnabled" 
-                />
+              {/* Learning Options Group */}
+              <div>
+                <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Learning</h3>
+                <div className="flex flex-col">
+                  {learningOptions.map((item, index) => {
+                    const isChecked = settings[item.id as keyof AppSettings] as boolean;
+                    return (
+                      <label
+                        key={item.id}
+                        className={`flex items-center justify-between p-4 bg-surface-variant/40 hover:bg-surface-variant/60 cursor-pointer active:bg-surface-variant/80 transition-colors duration-200 ${getGroupItemClass(index, learningOptions.length)}`}
+                      >
+                        <div className="pr-4">
+                          <p className="m3-body-large text-on-surface font-medium mb-0.5">{item.label}</p>
+                          <p className="m3-body-small text-on-surface-variant leading-tight">{item.desc}</p>
+                        </div>
+                        <div className="shrink-0 relative">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => handleToggle(item.id as keyof AppSettings, e.target.checked)}
+                            className="sr-only"
+                          />
+                          <div className={`w-[52px] h-8 rounded-full border-2 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] flex items-center ${
+                            isChecked ? 'bg-primary border-primary' : 'bg-surface-variant border-outline/40'
+                          }`}>
+                            <div className={`rounded-full absolute transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] shadow-sm ${
+                              isChecked ? 'w-6 h-6 right-0.5 bg-on-primary' : 'w-4 h-4 left-1 bg-outline'
+                            }`} />
+                          </div>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="border-t border-outline/10 my-2" />
-
-              {/* HELP SECTION */}
-              <div className="py-4 px-2 pb-10">
-                <button
-                  onClick={handleRestartTour}
-                  className="flex items-center justify-center w-full gap-2 py-3.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 active:bg-primary/30 transition-colors active:scale-[0.98] m3-label-large font-bold"
-                >
-                  <RotateCcw className="w-5 h-5" />
-                  Restart App Tour
-                </button>
+              {/* Support / Other Group */}
+              <div>
+                <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Help</h3>
+                <div className="flex flex-col">
+                  <button
+                    onClick={handleRestartTour}
+                    className={`flex items-center p-4 bg-surface-variant/40 hover:bg-surface-variant/60 active:bg-surface-variant/80 transition-colors duration-200 ${getGroupItemClass(0, 1)}`}
+                  >
+                    <RotateCcw className="w-6 h-6 text-on-surface-variant mr-4" />
+                    <div className="text-left">
+                      <p className="m3-body-large text-on-surface font-medium">Restart App Tour</p>
+                      <p className="m3-body-small text-on-surface-variant">View the introduction guide again</p>
+                    </div>
+                  </button>
+                </div>
               </div>
 
             </div>
