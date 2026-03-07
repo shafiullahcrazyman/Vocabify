@@ -36,14 +36,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
     updateSettings({ [key]: value });
   };
 
-  // Helper function for dynamic M3 rounded corners
-  const getGroupItemClass = (index: number, total: number) => {
-    if (total === 1) return 'rounded-[28px]';
-    if (index === 0) return 'rounded-t-[28px] border-b border-outline/10';
-    if (index === total - 1) return 'rounded-b-[28px]';
-    return 'border-b border-outline/10 rounded-none';
-  };
-
+  // Data mapping
   const themeOptions = [
     { id: 'light', label: 'Light', icon: Sun },
     { id: 'dark', label: 'Dark', icon: Moon },
@@ -58,7 +51,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
 
   const learningOptions = [
     { id: 'autoPronounce', label: 'Auto Pronounce', desc: 'Play audio automatically' },
-    { id: 'hideLearnedWords', label: 'Hide Learned Words', desc: "Don't show words I already know" },
+    { id: 'hideLearnedWords', label: 'Hide Learned Words', desc: "Don't show learned words" },
   ] as const;
 
   return (
@@ -94,17 +87,20 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
               {/* Theme Group (M3 Radio Buttons) */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Appearance</h3>
-                <div className="flex flex-col">
+                {/* The Parent Container handles the Background Color & Rounded Corners */}
+                <div className="bg-surface-variant/30 rounded-[28px] flex flex-col overflow-hidden">
                   {themeOptions.map((item, index) => {
                     const isSelected = settings.theme === item.id;
                     return (
                       <label
                         key={item.id}
-                        className={`flex items-center justify-between p-4 bg-surface-variant/40 hover:bg-surface-variant/60 cursor-pointer active:bg-surface-variant/80 transition-colors duration-200 ${getGroupItemClass(index, themeOptions.length)}`}
+                        className={`flex items-center justify-between p-4 bg-transparent hover:bg-on-surface/5 cursor-pointer active:bg-on-surface/10 transition-colors duration-200 ${
+                          index !== themeOptions.length - 1 ? 'border-b border-outline/10' : ''
+                        }`}
                       >
                         <div className="flex items-center gap-4 pr-4">
                           <item.icon className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-on-surface-variant'}`} />
-                          <p className={`m3-body-large ${isSelected ? 'text-on-surface font-semibold' : 'text-on-surface'}`}>
+                          <p className={`m3-body-large ${isSelected ? 'text-primary font-semibold' : 'text-on-surface'}`}>
                             {item.label}
                           </p>
                         </div>
@@ -136,13 +132,15 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
               {/* Preferences Group (M3 Switches) */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Preferences</h3>
-                <div className="flex flex-col">
+                <div className="bg-surface-variant/30 rounded-[28px] flex flex-col overflow-hidden">
                   {prefOptions.map((item, index) => {
                     const isChecked = settings[item.id as keyof AppSettings] as boolean;
                     return (
                       <label
                         key={item.id}
-                        className={`flex items-center justify-between p-4 bg-surface-variant/40 hover:bg-surface-variant/60 cursor-pointer active:bg-surface-variant/80 transition-colors duration-200 ${getGroupItemClass(index, prefOptions.length)}`}
+                        className={`flex items-center justify-between p-4 bg-transparent hover:bg-on-surface/5 cursor-pointer active:bg-on-surface/10 transition-colors duration-200 ${
+                          index !== prefOptions.length - 1 ? 'border-b border-outline/10' : ''
+                        }`}
                       >
                         <div className="pr-4">
                           <p className="m3-body-large text-on-surface font-medium mb-0.5">{item.label}</p>
@@ -173,13 +171,15 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
               {/* Learning Options Group (M3 Switches) */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Learning</h3>
-                <div className="flex flex-col">
+                <div className="bg-surface-variant/30 rounded-[28px] flex flex-col overflow-hidden">
                   {learningOptions.map((item, index) => {
                     const isChecked = settings[item.id as keyof AppSettings] as boolean;
                     return (
                       <label
                         key={item.id}
-                        className={`flex items-center justify-between p-4 bg-surface-variant/40 hover:bg-surface-variant/60 cursor-pointer active:bg-surface-variant/80 transition-colors duration-200 ${getGroupItemClass(index, learningOptions.length)}`}
+                        className={`flex items-center justify-between p-4 bg-transparent hover:bg-on-surface/5 cursor-pointer active:bg-on-surface/10 transition-colors duration-200 ${
+                          index !== learningOptions.length - 1 ? 'border-b border-outline/10' : ''
+                        }`}
                       >
                         <div className="pr-4">
                           <p className="m3-body-large text-on-surface font-medium mb-0.5">{item.label}</p>
