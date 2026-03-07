@@ -87,14 +87,14 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
               {/* Theme Group (M3 Radio Buttons) */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Appearance</h3>
-                {/* The Parent Container handles the Background Color & Rounded Corners */}
-                <div className="bg-surface-variant/30 rounded-[28px] flex flex-col overflow-hidden">
+                {/* Unified Container Background */}
+                <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden">
                   {themeOptions.map((item, index) => {
                     const isSelected = settings.theme === item.id;
                     return (
                       <label
                         key={item.id}
-                        className={`flex items-center justify-between p-4 bg-transparent hover:bg-on-surface/5 cursor-pointer active:bg-on-surface/10 transition-colors duration-200 ${
+                        className={`flex items-center justify-between p-4 cursor-pointer hover:bg-on-surface/5 active:bg-on-surface/10 transition-colors duration-200 ${
                           index !== themeOptions.length - 1 ? 'border-b border-outline/10' : ''
                         }`}
                       >
@@ -132,13 +132,14 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
               {/* Preferences Group (M3 Switches) */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Preferences</h3>
-                <div className="bg-surface-variant/30 rounded-[28px] flex flex-col overflow-hidden">
+                {/* Unified Container Background */}
+                <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden">
                   {prefOptions.map((item, index) => {
                     const isChecked = settings[item.id as keyof AppSettings] as boolean;
                     return (
                       <label
                         key={item.id}
-                        className={`flex items-center justify-between p-4 bg-transparent hover:bg-on-surface/5 cursor-pointer active:bg-on-surface/10 transition-colors duration-200 ${
+                        className={`flex items-center justify-between p-4 cursor-pointer hover:bg-on-surface/5 active:bg-on-surface/10 transition-colors duration-200 ${
                           index !== prefOptions.length - 1 ? 'border-b border-outline/10' : ''
                         }`}
                       >
@@ -155,7 +156,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                             className="sr-only"
                           />
                           <div className={`w-[52px] h-8 rounded-full border-2 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] flex items-center ${
-                            isChecked ? 'bg-primary border-primary' : 'bg-surface-variant border-outline/40'
+                            isChecked ? 'bg-primary border-primary' : 'bg-surface-variant/80 border-outline/40'
                           }`}>
                             <div className={`rounded-full absolute transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] shadow-sm ${
                               isChecked ? 'w-6 h-6 right-0.5 bg-on-primary' : 'w-4 h-4 left-1 bg-outline'
@@ -171,13 +172,14 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
               {/* Learning Options Group (M3 Switches) */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Learning</h3>
-                <div className="bg-surface-variant/30 rounded-[28px] flex flex-col overflow-hidden">
+                {/* Unified Container Background */}
+                <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden">
                   {learningOptions.map((item, index) => {
                     const isChecked = settings[item.id as keyof AppSettings] as boolean;
                     return (
                       <label
                         key={item.id}
-                        className={`flex items-center justify-between p-4 bg-transparent hover:bg-on-surface/5 cursor-pointer active:bg-on-surface/10 transition-colors duration-200 ${
+                        className={`flex items-center justify-between p-4 cursor-pointer hover:bg-on-surface/5 active:bg-on-surface/10 transition-colors duration-200 ${
                           index !== learningOptions.length - 1 ? 'border-b border-outline/10' : ''
                         }`}
                       >
@@ -194,7 +196,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                             className="sr-only"
                           />
                           <div className={`w-[52px] h-8 rounded-full border-2 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] flex items-center ${
-                            isChecked ? 'bg-primary border-primary' : 'bg-surface-variant border-outline/40'
+                            isChecked ? 'bg-primary border-primary' : 'bg-surface-variant/80 border-outline/40'
                           }`}>
                             <div className={`rounded-full absolute transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] shadow-sm ${
                               isChecked ? 'w-6 h-6 right-0.5 bg-on-primary' : 'w-4 h-4 left-1 bg-outline'
