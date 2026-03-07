@@ -1,6 +1,7 @@
-import React from 'react';
+--- START OF FILE Vocabify-main/src/components/SettingsDrawer.tsx ---
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Sun, Moon, Monitor, CloudOff } from 'lucide-react';
+import { X, Sun, Moon, Monitor } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { triggerHaptic } from '../utils/haptics';
 
@@ -11,6 +12,13 @@ interface SettingsDrawerProps {
 
 export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose }) => {
   const { settings, updateSettings, startTour } = useAppContext();
+
+  // Prevent Tour from starting if this modal is open
+  useEffect(() => {
+    if (isOpen) document.body.classList.add('modal-open');
+    else document.body.classList.remove('modal-open');
+    return () => document.body.classList.remove('modal-open');
+  }, [isOpen]);
 
   const handleClose = () => {
     triggerHaptic(settings.hapticsEnabled);
