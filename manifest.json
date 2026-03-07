@@ -1,19 +1,19 @@
 {
   "name": "Vocabify",
   "short_name": "Vocabify",
-  "start_url": "/Vocabify/",
-  "scope": "/Vocabify/",
+  "start_url": ".",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#141218",
   "theme_color": "#141218",
   "icons": [
     {
-      "src": "/Vocabify/icon.png",
+      "src": "icon.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/Vocabify/icon.png",
+      "src": "icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
