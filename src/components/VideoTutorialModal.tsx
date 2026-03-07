@@ -1,4 +1,5 @@
-import React from 'react';
+--- START OF FILE Vocabify-main/src/components/VideoTutorialModal.tsx ---
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
@@ -11,6 +12,13 @@ interface VideoTutorialModalProps {
 
 export const VideoTutorialModal: React.FC<VideoTutorialModalProps> = ({ isOpen, onClose }) => {
   const { settings } = useAppContext();
+
+  // Prevent Tour from starting if this modal is open
+  useEffect(() => {
+    if (isOpen) document.body.classList.add('modal-open');
+    else document.body.classList.remove('modal-open');
+    return () => document.body.classList.remove('modal-open');
+  }, [isOpen]);
 
   const handleClose = () => {
     triggerHaptic(settings.hapticsEnabled);
