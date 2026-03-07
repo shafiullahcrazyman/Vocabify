@@ -5,9 +5,9 @@ import { useAppContext } from '../context/AppContext';
 export const useTTS = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [isUnlocked, setIsUnlocked] = useState(false);
   const { settings } = useAppContext();
 
-  // Load voices safely and handle async loading in browsers like Chrome
   useEffect(() => {
     const loadVoices = () => {
       setVoices(window.speechSynthesis.getVoices());
@@ -16,11 +16,27 @@ export const useTTS = () => {
     loadVoices(); // Initial load attempt
     window.speechSynthesis.onvoiceschanged = loadVoices; // Async load fallback
     
+    // Apple/iOS Unlocker: Plays a silent audio clip on the first user interaction
+    const unlockAudio = () => {
+      if (isUnlocked) return;
+      const silentUtterance = new SpeechSynthesisUtterance('');
+      silentUtterance.volume = 0;
+      window.speechSynthesis.speak(silentUtterance);
+      setIsUnlocked(true);
+      window.removeEventListener('touchstart', unlockAudio);
+      window.removeEventListener('click', unlockAudio);
+    };
+
+    window.addEventListener('touchstart', unlockAudio, { once: true });
+    window.addEventListener('click', unlockAudio, { once: true });
+
     return () => {
       window.speechSynthesis.cancel();
       window.speechSynthesis.onvoiceschanged = null;
+      window.removeEventListener('touchstart', unlockAudio);
+      window.removeEventListener('click', unlockAudio);
     };
-  }, []);
+  }, [isUnlocked]);
 
   const speak = useCallback((text: string) => {
     if (!text) return;
