@@ -89,21 +89,24 @@ export const Filter: React.FC = () => {
                   </p>
                   
                 </div>
-                <div className="relative inline-block w-12 mr-2 align-middle select-none">
-                  <input
-                    type="checkbox"
-                    checked={filters.favoritesOnly}
-                    onChange={(e) => {
-                      triggerHaptic(settings.hapticsEnabled);
-                      updateFilters({ favoritesOnly: e.target.checked });
-                    }}
-                    className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all"
-                    style={{ right: filters.favoritesOnly ? '0' : '1.5rem', borderColor: filters.favoritesOnly ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline)' }}
-                  />
-                  <label className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors ${filters.favoritesOnly ? 'bg-primary-container' : 'bg-surface-variant'}`}></label>
-                </div>
-              </label>
-            </div>
+                <div className="shrink-0 relative mr-2">
+  <input
+    type="checkbox"
+    checked={filters.favoritesOnly}
+    onChange={(e) => {
+      triggerHaptic(settings.hapticsEnabled);
+      updateFilters({ favoritesOnly: e.target.checked });
+    }}
+    className="sr-only"
+  />
+  <div className={`w-[52px] h-8 rounded-full border-2 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] flex items-center ${
+    filters.favoritesOnly ? 'bg-primary border-primary' : 'bg-surface-variant border-outline/40'
+  }`}>
+    <div className={`rounded-full absolute transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] shadow-sm ${
+      filters.favoritesOnly ? 'w-6 h-6 right-0.5 bg-on-primary' : 'w-4 h-4 left-1 bg-outline'
+    }`} />
+  </div>
+</div>
             
             <FilterSection title="Difficulty Level" category="level" options={levels} />
             <FilterSection title="CEFR English Level" category="cefr" options={cefrLevels} />
