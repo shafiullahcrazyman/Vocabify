@@ -5,6 +5,7 @@ import { SettingsDrawer } from './SettingsDrawer';
 import { TipsOverlay } from './TipsOverlay';
 import { VideoTutorialModal } from './VideoTutorialModal';
 import { triggerHaptic } from '../utils/haptics';
+import { useDebounce } from '../hooks/useDebounce';
 
 interface TopAppBarProps {
   title?: string;
@@ -15,18 +16,17 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
   
   // Local state for immediate typing feedback without lag
   const [localSearch, setLocalSearch] = useState(searchQuery);
+  const debouncedSearch = useDebounce(localSearch, 300); // 300ms delay safely managed
+
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isTipsOpen, setIsTipsOpen] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Debounce effect: Wait 300ms after the user stops typing to update the global app state
+  // Sync debounced value to global state
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearchQuery(localSearch);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [localSearch, setSearchQuery]);
+    setSearchQuery(debouncedSearch);
+  }, [debouncedSearch, setSearchQuery]);
 
   // Sync external clear events back to local state
   useEffect(() => {
