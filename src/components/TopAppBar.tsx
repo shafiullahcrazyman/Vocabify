@@ -46,6 +46,12 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Check if file is larger than 2MB
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Please choose an image smaller than 2MB so it can be saved offline.");
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onloadend = () => {
         setUserAvatar(reader.result as string);
