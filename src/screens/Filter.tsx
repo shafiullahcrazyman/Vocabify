@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
-import { SlidersHorizontal, Heart, Check } from 'lucide-react';
+import { SlidersHorizontal, Heart } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import { TopAppBar } from '../components/TopAppBar';
 
@@ -37,69 +37,26 @@ export const Filter: React.FC = () => {
     return Array.from(themesSet).sort();
   }, [words]);
 
-  // M3 Connected Button Group (Segmented Buttons)
-  const ConnectedFilterGroup = ({ 
-    title, 
-    category, 
-    options 
-  }: { 
-    title: string, 
-    category: keyof typeof filters, 
-    options: string[] 
-  }) => (
-    <div className="mb-8">
+  const FilterSection = ({ title, category, options }: { title: string, category: keyof typeof filters, options: string[] }) => (
+    <div className="mb-6">
       <h3 className="m3-title-medium text-on-surface mb-3">{title}</h3>
-      
-      {/* Scrollable wrapper ensuring the group stays on one line and the pill shape never breaks */}
-      <div className="w-full overflow-x-auto touch-pan-x pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-        
-        {/* Exact structure from your snippet */}
-        <div className="inline-flex rounded-full border border-outline overflow-hidden bg-surface">
-          {options.map((opt) => {
-            const isSelected = (filters[category] as string[]).includes(opt);
-
-            return (
-              <button
-                key={opt}
-                onClick={() => toggleFilter(category, opt)}
-                className={`relative px-5 py-2.5 m3-label-large transition-colors border-r border-outline last:border-r-0
-                ${isSelected ? "text-on-primary-container" : "text-on-surface hover:bg-surface-variant/40"}
-                `}
-              >
-                {/* Animated Background mimicking your snippet */}
-                <AnimatePresence>
-                  {isSelected && (
-                    <motion.div
-                      layoutId={`segment-${category}-${opt}`} // Unique ID for spring animation
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="absolute inset-0 bg-primary-container z-0"
-                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                </AnimatePresence>
-
-                {/* Text and Icon container sitting above the background */}
-                <span className="relative z-10 flex items-center justify-center gap-2 whitespace-nowrap">
-                  {isSelected && (
-                    <motion.div
-                      initial={{ scale: 0, width: 0, opacity: 0 }}
-                      animate={{ scale: 1, width: "auto", opacity: 1 }}
-                      exit={{ scale: 0, width: 0, opacity: 0 }}
-                      className="flex items-center justify-center"
-                    >
-                      <Check className="w-4 h-4" strokeWidth={2.5} />
-                    </motion.div>
-                  )}
-                  <span className={category === 'cefr' || category === 'letter' ? 'uppercase' : 'capitalize'}>
-                    {opt}
-                  </span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
+      <div className="flex flex-wrap gap-2">
+        {options.map((opt) => {
+          const isSelected = (filters[category] as string[]).includes(opt);
+          return (
+            <button
+              key={opt}
+              onClick={() => toggleFilter(category, opt)}
+              className={`px-4 py-2 rounded-lg m3-label-large transition-colors duration-200 active:scale-[0.96] ${
+                isSelected
+                  ? 'bg-primary text-on-primary'
+                  : 'bg-surface-container-highest text-on-surface hover:bg-surface-variant'
+              }`}
+            >
+              <span className={category === 'cefr' ? 'uppercase' : 'capitalize'}>{opt}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -115,7 +72,7 @@ export const Filter: React.FC = () => {
         className="pb-24 max-w-3xl mx-auto pt-4"
       >
         <div className="px-4 space-y-8">
-          <section className="bg-surface-container-low rounded-3xl p-6 shadow-sm border border-outline/5">
+          <section className="bg-surface-container-low rounded-3xl p-6">
             <div className="flex items-center mb-4 text-on-surface">
               <SlidersHorizontal className="w-6 h-6 mr-3 text-primary" />
               <h2 className="m3-title-large">Categories</h2>
@@ -150,23 +107,42 @@ export const Filter: React.FC = () => {
                     }`} />
                   </div>
                 </div>
+                
               </label>
             </div>
             
-            {/* Dynamic Connected Button Groups */}
-            <ConnectedFilterGroup title="Difficulty Level" category="level" options={levels} />
-            <ConnectedFilterGroup title="CEFR English Level" category="cefr" options={cefrLevels} />
-            <ConnectedFilterGroup title="Part of Speech" category="pos" options={pos} />
+            <FilterSection title="Difficulty Level" category="level" options={levels} />
+            <FilterSection title="CEFR English Level" category="cefr" options={cefrLevels} />
+            <FilterSection title="Part of Speech" category="pos" options={pos} />
             
             {dynamicThemes.length > 0 && (
-              <ConnectedFilterGroup title="Theme" category="theme" options={dynamicThemes} />
+              <FilterSection title="Theme" category="theme" options={dynamicThemes} />
             )}
             
-            <ConnectedFilterGroup title="Alphabet" category="letter" options={letters} />
-
+            <div className="mb-6">
+              <h3 className="m3-title-medium text-on-surface mb-3">Alphabet</h3>
+              <div className="flex flex-wrap gap-1">
+                {letters.map((letter) => {
+                  const isSelected = filters.letter.includes(letter);
+                  return (
+                    <button
+                      key={letter}
+                      onClick={() => toggleFilter('letter', letter)}
+                      className={`w-10 h-10 rounded-full m3-label-large flex items-center justify-center transition-colors duration-200 active:scale-[0.94] ${
+                        isSelected
+                          ? 'bg-primary text-on-primary'
+                          : 'bg-surface-container-highest text-on-surface hover:bg-surface-variant'
+                      }`}
+                    >
+                      {letter}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <button
               onClick={handleClearFilters}
-              className="w-full mt-6 py-4 rounded-full bg-error text-on-error m3-label-large shadow-sm hover:bg-error/90 transition-all duration-200 active:scale-[0.98]"
+              className="w-full py-3 rounded-full bg-error text-on-error m3-label-large hover:bg-error/90 transition-colors duration-200 active:scale-[0.98]"
             >
               Clear All Filters
             </button>
