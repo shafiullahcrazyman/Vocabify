@@ -46,7 +46,7 @@ export const TipsOverlay: React.FC<TipsOverlayProps> = ({ isOpen, onClose }) => 
         >
           {/* Header */}
           <div className="flex items-center justify-between p-6 pb-4 border-b border-outline/10 shrink-0">
-            <h2 className="text-2xl font-bold text-on-surface">Grammar Tips & Rules</h2>
+            <h2 className="text-2xl font-bold text-on-surface">Grammar Tips</h2>
             <button
               onClick={handleClose}
               className="p-2 rounded-full hover:bg-surface-variant text-on-surface-variant transition-all duration-200 active:scale-90"
