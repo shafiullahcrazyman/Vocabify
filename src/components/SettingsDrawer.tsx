@@ -87,7 +87,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
             {/* Content Body */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-12 space-y-8">
               
-              {/* Appearance Group - Now matching exactly with others */}
+              {/* Appearance Group - Icons and Text are now static in color */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase font-bold">Appearance</h3>
                 <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden border border-outline/5">
@@ -101,13 +101,15 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                         }`}
                       >
                         <div className="flex items-center gap-4">
-                          <item.icon className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-on-surface-variant'}`} />
-                          <p className={`m3-body-large ${isSelected ? 'text-primary font-semibold' : 'text-on-surface'}`}>
+                          {/* Static Icon Color */}
+                          <item.icon className="w-6 h-6 text-on-surface-variant" />
+                          {/* Static Text Color */}
+                          <p className="m3-body-large text-on-surface">
                             {item.label}
                           </p>
                         </div>
                         
-                        {/* M3 Radio Button */}
+                        {/* Radio Button remains the only color-changing indicator */}
                         <div className="shrink-0 relative flex items-center justify-center mr-1">
                           <input
                             type="radio"
