@@ -80,42 +80,35 @@ export const Filter: React.FC = () => {
 
             {/* Connected Button Group for Favorites */}
             <div className="mb-6 pt-2 pb-6 border-b border-surface-container-highest">
-              <div className="flex items-center justify-between">
-                <p className="m3-body-large text-on-surface font-medium flex items-center gap-2">
-                  <Heart className={`w-8 h-8 transition-colors duration-200 ${filters.favoritesOnly ? 'fill-rose-500 text-rose-500' : 'text-on-surface-variant'}`} /> 
-                  Favorites Only
-                </p>
+              <div className="flex w-full bg-surface-container-highest rounded-2xl p-1 gap-1">
+                <button
+                  onClick={() => {
+                    triggerHaptic(settings.hapticsEnabled);
+                    updateFilters({ favoritesOnly: false });
+                  }}
+                  className={`flex-1 py-3 rounded-xl m3-label-large transition-all duration-200 flex items-center justify-center ${
+                    !filters.favoritesOnly 
+                      ? 'bg-primary text-on-primary shadow-lg' 
+                      : 'text-on-surface-variant hover:bg-surface-variant'
+                  }`}
+                >
+                  Show All
+                </button>
                 
-                {/* Segmented/Connected Button Group */}
-                <div className="flex bg-surface-container-highest rounded-xl overflow-hidden p-1 border border-outline-variant">
-                  <button
-                    onClick={() => {
-                      triggerHaptic(settings.hapticsEnabled);
-                      updateFilters({ favoritesOnly: false });
-                    }}
-                    className={`px-4 py-1.5 rounded-l-lg m3-label-large transition-all duration-200 ${
-                      !filters.favoritesOnly 
-                        ? 'bg-primary text-on-primary shadow-sm' 
-                        : 'text-on-surface-variant hover:bg-surface-variant'
-                    }`}
-                  >
-                    All
-                  </button>
-                  <div className="w-[1px] bg-outline-variant my-1" /> {/* Divider */}
-                  <button
-                    onClick={() => {
-                      triggerHaptic(settings.hapticsEnabled);
-                      updateFilters({ favoritesOnly: true });
-                    }}
-                    className={`px-4 py-1.5 rounded-r-lg m3-label-large transition-all duration-200 ${
-                      filters.favoritesOnly 
-                        ? 'bg-primary text-on-primary shadow-sm' 
-                        : 'text-on-surface-variant hover:bg-surface-variant'
-                    }`}
-                  >
-                    Favorites
-                  </button>
-                </div>
+                <button
+                  onClick={() => {
+                    triggerHaptic(settings.hapticsEnabled);
+                    updateFilters({ favoritesOnly: true });
+                  }}
+                  className={`flex-1 py-3 rounded-xl m3-label-large transition-all duration-200 flex items-center justify-center gap-2 ${
+                    filters.favoritesOnly 
+                      ? 'bg-primary text-on-primary shadow-lg' 
+                      : 'text-on-surface-variant hover:bg-surface-variant'
+                  }`}
+                >
+                  <Heart className={`w-5 h-5 ${filters.favoritesOnly ? 'fill-on-primary' : 'text-on-surface-variant'}`} />
+                  Favorites Only
+                </button>
               </div>
             </div>
             
