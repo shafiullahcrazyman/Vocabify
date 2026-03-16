@@ -47,10 +47,10 @@ export const Filter: React.FC = () => {
             <button
               key={opt}
               onClick={() => toggleFilter(category, opt)}
-              className={`px-4 py-2 rounded-lg m3-label-large transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.96] border ${
+              className={`px-4 py-2 rounded-lg m3-label-large transition-colors duration-200 active:scale-[0.96] ${
                 isSelected
-                  ? 'bg-primary text-on-primary border-primary shadow-sm'
-                  : 'bg-surface border-outline/30 text-on-surface hover:bg-surface-variant'
+                  ? 'bg-primary text-on-primary'
+                  : 'bg-surface-container-highest text-on-surface hover:bg-surface-variant'
               }`}
             >
               <span className={category === 'cefr' ? 'uppercase' : 'capitalize'}>{opt}</span>
@@ -72,15 +72,15 @@ export const Filter: React.FC = () => {
         className="pb-24 max-w-3xl mx-auto pt-4"
       >
         <div className="px-4 space-y-8">
-          <section className="bg-surface rounded-3xl p-6 shadow-sm border border-outline/10">
+          <section className="bg-surface-container-low rounded-3xl p-6">
             <div className="flex items-center mb-4 text-on-surface">
               <SlidersHorizontal className="w-6 h-6 mr-3 text-primary" />
               <h2 className="m3-title-large">Categories</h2>
             </div>
 
-            {/* Favorites Toggle - Updated to M3 Design */}
-            <div className="mb-6 pt-2 pb-6 border-b border-outline/10">
-              <label className="flex justify-between items-center cursor-pointer">
+            {/* Favorites Toggle */}
+            <div className="mb-6 pt-2 pb-6 border-b border-surface-container-highest">
+              <label className="flex justify-between items-center cursor-pointer group">
                 <div>
                   <p className="m3-body-large text-on-surface font-medium flex items-center gap-2">
                     <Heart className="w-8 h-8 fill-rose-500 text-rose-500" /> 
@@ -89,7 +89,7 @@ export const Filter: React.FC = () => {
                 </div>
                 
                 {/* M3 Toggle Switch */}
-                <div className="shrink-0 relative mr-2">
+                <div className="shrink-0 relative flex items-center">
                   <input
                     type="checkbox"
                     checked={filters.favoritesOnly}
@@ -99,11 +99,11 @@ export const Filter: React.FC = () => {
                     }}
                     className="sr-only"
                   />
-                  <div className={`w-[52px] h-8 rounded-full border-2 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] flex items-center ${
-                    filters.favoritesOnly ? 'bg-primary border-primary' : 'bg-surface-variant border-outline/40'
+                  <div className={`w-[52px] h-8 rounded-full border-2 transition-colors duration-200 flex items-center px-1 ${
+                    filters.favoritesOnly ? 'bg-primary border-primary' : 'bg-surface-container-highest border-outline'
                   }`}>
-                    <div className={`rounded-full absolute transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] shadow-sm ${
-                      filters.favoritesOnly ? 'w-6 h-6 right-0.5 bg-on-primary' : 'w-4 h-4 left-1 bg-outline'
+                    <div className={`rounded-full transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${
+                      filters.favoritesOnly ? 'w-6 h-6 bg-on-primary translate-x-[20px]' : 'w-4 h-4 bg-outline translate-x-0'
                     }`} />
                   </div>
                 </div>
@@ -128,10 +128,10 @@ export const Filter: React.FC = () => {
                     <button
                       key={letter}
                       onClick={() => toggleFilter('letter', letter)}
-                      className={`w-10 h-10 rounded-full m3-label-large flex items-center justify-center transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.94] border ${
+                      className={`w-10 h-10 rounded-full m3-label-large flex items-center justify-center transition-colors duration-200 active:scale-[0.94] ${
                         isSelected
-                          ? 'bg-primary text-on-primary border-primary shadow-sm'
-                          : 'bg-surface border-outline/30 text-on-surface hover:bg-surface-variant'
+                          ? 'bg-primary text-on-primary'
+                          : 'bg-surface-container-highest text-on-surface hover:bg-surface-variant'
                       }`}
                     >
                       {letter}
@@ -142,7 +142,7 @@ export const Filter: React.FC = () => {
             </div>
             <button
               onClick={handleClearFilters}
-              className="w-full py-3 rounded-full bg-error text-on-error m3-label-large hover:bg-error/90 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.98] shadow-sm"
+              className="w-full py-3 rounded-full bg-error text-on-error m3-label-large hover:bg-error/90 transition-colors duration-200 active:scale-[0.98]"
             >
               Clear All Filters
             </button>

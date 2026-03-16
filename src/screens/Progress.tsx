@@ -12,7 +12,6 @@ export const Progress: React.FC = () => {
   const [exportCount, setExportCount] = useState<number>(-1);
   const [copied, setCopied] = useState(false);
 
-  // --- OPTIMIZED PROGRESS CALCULATIONS ---
   const { learnedWordsData, learnedWords, percentage, totalWords } = useMemo(() => {
     const total = words.length;
     const learnedData = words.filter(w => progress.learned.includes(w.id));
@@ -57,8 +56,8 @@ export const Progress: React.FC = () => {
       >
         <div className="px-4 space-y-6">
           
-          {/* Overview Card (Unified Layout & Flat 2D Bar) */}
-          <section className="bg-primary text-on-primary rounded-3xl p-6 shadow-md">
+          {/* Overview Card */}
+          <section className="bg-primary text-on-primary rounded-3xl p-6">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <div className="flex items-center gap-2.5 mb-1">
@@ -82,8 +81,8 @@ export const Progress: React.FC = () => {
             <p className="m3-body-small opacity-80 text-right">{percentage}% of entire dictionary</p>
           </section>
 
-          {/* Today's Goal Card (Unified Layout & Flat 2D Bar) */}
-          <section className="bg-surface rounded-3xl p-6 shadow-sm border border-outline/10">
+          {/* Today's Goal Card */}
+          <section className="bg-surface-container-low rounded-3xl p-6">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <div className="flex items-center gap-2.5 mb-1">
@@ -98,7 +97,7 @@ export const Progress: React.FC = () => {
                 <motion.div 
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  className="bg-orange-500/15 border border-orange-500/30 text-orange-600 dark:text-orange-400 px-3 py-1.5 rounded-xl text-sm font-bold flex items-center gap-1 shadow-sm mt-1"
+                  className="bg-orange-500/15 text-orange-600 dark:text-orange-400 px-3 py-1.5 rounded-xl text-sm font-bold flex items-center gap-1 mt-1"
                 >
                   <Sparkles size={16} />
                   Reached!
@@ -106,7 +105,7 @@ export const Progress: React.FC = () => {
               )}
             </div>
 
-            <div className="w-full bg-surface-variant rounded-full h-4 mb-2 overflow-hidden">
+            <div className="w-full bg-surface-container-highest rounded-full h-4 mb-2 overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${dailyPercentage}%` }}
@@ -122,7 +121,7 @@ export const Progress: React.FC = () => {
           </section>
 
           {/* Learning Goals Settings */}
-          <section className="bg-surface rounded-3xl p-6 shadow-sm border border-outline/10">
+          <section className="bg-surface-container-low rounded-3xl p-6">
             <div className="flex items-center mb-6 text-on-surface">
               <Target className="w-6 h-6 mr-3 text-primary" />
               <h2 className="m3-title-large">Manage Goals</h2>
@@ -142,7 +141,7 @@ export const Progress: React.FC = () => {
                         triggerHaptic(settings.hapticsEnabled);
                         updateSettings({ dailyGoal: Number(e.target.value) });
                       }}
-                      className="appearance-none bg-surface-variant text-on-surface rounded-xl pl-4 pr-10 py-2 outline-none border-none m3-body-large cursor-pointer transition-colors hover:bg-surface-variant/80 font-medium"
+                      className="appearance-none bg-surface-container-highest text-on-surface rounded-xl pl-4 pr-10 py-2 outline-none border-none m3-body-large cursor-pointer transition-colors font-medium"
                     >
                       <option value={5}>5 words</option>
                       <option value={10}>10 words</option>
@@ -154,7 +153,7 @@ export const Progress: React.FC = () => {
                 </label>
               </div>
 
-              <div className="pt-6 border-t border-outline/10">
+              <div className="pt-6 border-t border-surface-container-highest">
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="m3-body-large text-on-surface">Reset Progress</p>
@@ -167,13 +166,13 @@ export const Progress: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handleCancelReset}
-                        className="px-4 py-2 text-on-surface-variant bg-surface-variant/50 hover:bg-surface-variant rounded-full m3-label-large transition-all duration-200 active:scale-95"
+                        className="px-4 py-2 text-on-surface-variant bg-surface-container-highest hover:opacity-80 rounded-full m3-label-large transition-all duration-200 active:scale-95"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={handleConfirmReset}
-                        className="px-4 py-2 bg-error text-on-error hover:bg-error/90 rounded-full m3-label-large transition-all duration-200 active:scale-95 shadow-sm"
+                        className="px-4 py-2 bg-error text-on-error hover:bg-error/90 rounded-full m3-label-large transition-all duration-200 active:scale-95"
                       >
                         Confirm
                       </button>
@@ -193,7 +192,7 @@ export const Progress: React.FC = () => {
           </section>
 
           {/* Export Words */}
-          <section className="bg-surface rounded-3xl p-6 shadow-sm border border-outline/10">
+          <section className="bg-surface-container-low rounded-3xl p-6">
             <div className="flex items-center mb-6 text-on-surface">
               <Download className="w-6 h-6 mr-3 text-primary" />
               <h2 className="m3-title-large">Export Words</h2>
@@ -207,7 +206,7 @@ export const Progress: React.FC = () => {
               
               <button
                 onClick={handleOpenExport}
-                className="px-6 py-2.5 bg-primary text-on-primary rounded-full m3-label-large hover:bg-primary/90 transition-all duration-200 active:scale-95 shadow-sm"
+                className="px-6 py-2.5 bg-primary text-on-primary rounded-full m3-label-large hover:bg-primary/90 transition-all duration-200 active:scale-95"
               >
                 Open
               </button>
@@ -223,17 +222,15 @@ export const Progress: React.FC = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={settings.animationsEnabled ? { duration: 0.3, ease: [0.2, 0, 0, 1] } : { duration: 0.15, ease: "easeOut" }}
-              className="bg-surface w-full max-w-2xl max-h-full rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+              className="bg-surface-container-high w-full max-w-2xl max-h-full rounded-3xl flex flex-col overflow-hidden"
             >
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-outline/10">
+              <div className="flex items-center justify-between p-4 px-6 border-b border-outline/10">
                 <h2 className="m3-title-large text-on-surface">Export Learned Words</h2>
-                <button onClick={handleCloseExport} className="p-2 rounded-full hover:bg-surface-variant text-on-surface-variant transition-colors active:scale-90">
+                <button onClick={handleCloseExport} className="p-2 -mr-2 rounded-full hover:bg-on-surface/10 text-on-surface-variant transition-colors active:scale-90">
                   <X className="w-6 h-6" />
                 </button>
               </div>
 
-              {/* Content */}
               <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <p className="m3-body-large text-on-surface">
@@ -244,7 +241,7 @@ export const Progress: React.FC = () => {
                     <select
                       value={exportCount}
                       onChange={(e) => setExportCount(Number(e.target.value))}
-                      className="appearance-none bg-surface-variant text-on-surface rounded-xl pl-4 pr-10 py-2 outline-none border-none m3-body-large cursor-pointer transition-colors hover:bg-surface-variant/80 font-medium"
+                      className="appearance-none bg-surface-container-highest text-on-surface rounded-xl pl-4 pr-10 py-2 outline-none border-none m3-body-large cursor-pointer transition-colors"
                     >
                       <option value={10}>10 words</option>
                       <option value={20}>20 words</option>
@@ -256,18 +253,17 @@ export const Progress: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="bg-surface-variant/30 rounded-2xl p-4 flex-1 overflow-y-auto border border-outline/10 min-h-[250px] max-h-[400px]">
+                <div className="bg-surface-container-highest rounded-2xl p-4 flex-1 overflow-y-auto min-h-[250px] max-h-[400px]">
                   <pre className="text-[13px] font-mono text-on-surface-variant whitespace-pre-wrap break-words">
                     {JSON.stringify(exportCount === -1 ? learnedWordsData : learnedWordsData.slice(0, exportCount), null, 2)}
                   </pre>
                 </div>
               </div>
 
-              {/* Footer */}
-              <div className="p-4 border-t border-outline/10 flex justify-end bg-surface">
+              <div className="p-4 border-t border-outline/10 flex justify-end bg-surface-container-high">
                 <button
                   onClick={handleCopyJSON}
-                  className={`flex items-center px-6 py-2.5 rounded-full transition-all duration-200 active:scale-95 m3-label-large shadow-sm ${
+                  className={`flex items-center px-6 py-2.5 rounded-full transition-colors duration-200 active:scale-95 m3-label-large ${
                     copied 
                       ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' 
                       : 'bg-primary text-on-primary hover:bg-primary/90'
