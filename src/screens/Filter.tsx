@@ -37,53 +37,58 @@ export const Filter: React.FC = () => {
     return Array.from(themesSet).sort();
   }, [words]);
 
-  // M3 Connected Button Group Component
+  // M3 Connected Button Group (Segmented Control)
   const ConnectedFilterGroup = ({ 
     title, 
     category, 
-    options,
-    minWClass = "min-w-[33%]",
-    isSingleRow = false,
-    showCheck = true
+    options 
   }: { 
     title: string, 
     category: keyof typeof filters, 
-    options: string[],
-    minWClass?: string,
-    isSingleRow?: boolean,
-    showCheck?: boolean
+    options: string[] 
   }) => (
     <div className="mb-8">
       <h3 className="m3-title-medium text-on-surface mb-3">{title}</h3>
-      {/* Outer container with Top and Left borders. Overflow-hidden handles the outer rounded corners beautifully */}
-      <div className={`flex flex-wrap ${isSingleRow ? 'rounded-full' : 'rounded-[20px]'} border-t border-l border-outline/20 overflow-hidden shadow-sm`}>
-        {options.map((opt) => {
-          const isSelected = (filters[category] as string[]).includes(opt);
-          return (
-            <button
-              key={opt}
-              onClick={() => toggleFilter(category, opt)}
-              className={`flex-auto ${minWClass} relative flex items-center justify-center gap-1.5 py-3 px-3 text-[14px] font-medium border-r border-b border-outline/20 transition-colors duration-200 active:bg-on-surface/5 ${
-                isSelected
-                  ? 'bg-primary text-on-primary'
-                  : 'bg-surface-container-lowest text-on-surface hover:bg-surface-variant/50'
-              }`}
-            >
-              {showCheck && isSelected && (
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="shrink-0"
-                >
-                  <Check className="w-4 h-4" strokeWidth={3} />
-                </motion.div>
-              )}
-              <span className={`truncate ${category === 'cefr' || category === 'letter' ? 'uppercase' : 'capitalize'}`}>
-                {opt}
-              </span>
-            </button>
-          );
-        })}
+      
+      {/* Scrollable wrapper to handle long groups (like Themes and Alphabet) without breaking the pill shape */}
+      <div className="w-full overflow-x-auto scrollbar-hide touch-pan-x pb-1 -mx-1 px-1">
+        
+        {/* The Group Container: Outer border and full rounding applied here */}
+        <div className="flex flex-row w-fit border border-outline rounded-full overflow-hidden bg-surface">
+          {options.map((opt) => {
+            const isSelected = (filters[category] as string[]).includes(opt);
+            
+            return (
+              <button
+                key={opt}
+                onClick={() => toggleFilter(category, opt)}
+                className={`
+                  relative flex items-center justify-center gap-2 px-5 py-2.5 
+                  m3-label-large transition-colors duration-200 
+                  border-r border-outline last:border-r-0
+                  ${isSelected 
+                    ? 'bg-primary-container text-on-primary-container' 
+                    : 'bg-transparent text-on-surface hover:bg-on-surface/5 active:bg-on-surface/10'
+                  }
+                `}
+              >
+                {isSelected && (
+                  <motion.div 
+                    initial={{ scale: 0, width: 0, opacity: 0 }} 
+                    animate={{ scale: 1, width: 'auto', opacity: 1 }} 
+                    className="shrink-0 flex items-center justify-center"
+                  >
+                    <Check className="w-[18px] h-[18px]" strokeWidth={2.5} />
+                  </motion.div>
+                )}
+                <span className={`whitespace-nowrap ${category === 'cefr' || category === 'letter' ? 'uppercase' : 'capitalize'}`}>
+                  {opt}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
       </div>
     </div>
   );
@@ -134,52 +139,24 @@ export const Filter: React.FC = () => {
                     }`} />
                   </div>
                 </div>
+                
               </label>
             </div>
             
-            {/* Dynamic M3 Connected Button Groups */}
-            <ConnectedFilterGroup 
-              title="Difficulty Level" 
-              category="level" 
-              options={levels} 
-              minWClass="min-w-[33%]" 
-              isSingleRow={true} 
-            />
-            
-            <ConnectedFilterGroup 
-              title="CEFR English Level" 
-              category="cefr" 
-              options={cefrLevels} 
-              minWClass="min-w-[33%] sm:min-w-[16%]" 
-            />
-            
-            <ConnectedFilterGroup 
-              title="Part of Speech" 
-              category="pos" 
-              options={pos} 
-              minWClass="min-w-[50%] sm:min-w-[25%]" 
-            />
+            {/* MD3 Connected Button Groups */}
+            <ConnectedFilterGroup title="Difficulty Level" category="level" options={levels} />
+            <ConnectedFilterGroup title="CEFR English Level" category="cefr" options={cefrLevels} />
+            <ConnectedFilterGroup title="Part of Speech" category="pos" options={pos} />
             
             {dynamicThemes.length > 0 && (
-              <ConnectedFilterGroup 
-                title="Theme" 
-                category="theme" 
-                options={dynamicThemes} 
-                minWClass="min-w-[50%] sm:min-w-[33%]" 
-              />
+              <ConnectedFilterGroup title="Theme" category="theme" options={dynamicThemes} />
             )}
             
-            <ConnectedFilterGroup 
-              title="Alphabet" 
-              category="letter" 
-              options={letters} 
-              minWClass="min-w-[14%]" 
-              showCheck={false} 
-            />
+            <ConnectedFilterGroup title="Alphabet" category="letter" options={letters} />
 
             <button
               onClick={handleClearFilters}
-              className="w-full mt-4 py-4 rounded-full bg-error text-on-error m3-label-large shadow-sm hover:bg-error/90 transition-all duration-200 active:scale-[0.98]"
+              className="w-full mt-6 py-4 rounded-full bg-error text-on-error m3-label-large hover:bg-error/90 transition-all duration-200 active:scale-[0.98]"
             >
               Clear All Filters
             </button>
