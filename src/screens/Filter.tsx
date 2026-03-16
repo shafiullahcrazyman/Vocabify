@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
-import { SlidersHorizontal, Heart } from 'lucide-react';
+import { SlidersHorizontal, Heart, Check } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import { TopAppBar } from '../components/TopAppBar';
 
@@ -78,17 +78,15 @@ export const Filter: React.FC = () => {
               <h2 className="m3-title-large">Categories</h2>
             </div>
 
-            {/* Favorites Section: Two matched buttons */}
+            {/* Favorites Section */}
             <div className="mb-6 pt-2 pb-6 border-b border-surface-container-highest">
               <h3 className="m3-title-medium text-on-surface mb-3">Favorites</h3>
               <div className="flex gap-2">
-                {/* Static Button (Icon + Label) */}
                 <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-highest text-on-surface">
                   <Heart className={`w-5 h-5 ${filters.favoritesOnly ? 'fill-rose-500 text-rose-500' : 'text-on-surface-variant'}`} />
                   <span className="m3-label-large">Favorites Only</span>
                 </div>
 
-                {/* Clickable Toggle Button */}
                 <button
                   onClick={() => {
                     triggerHaptic(settings.hapticsEnabled);
@@ -134,11 +132,14 @@ export const Filter: React.FC = () => {
                 })}
               </div>
             </div>
+
+            {/* Styled "Clear All Filters" button matching the "Do" reference */}
             <button
               onClick={handleClearFilters}
-              className="w-full py-3 rounded-full bg-error text-on-error m3-label-large hover:bg-error/90 transition-colors duration-200 active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2 py-4 rounded-full bg-primary text-on-primary m3-label-large hover:bg-primary/90 transition-all duration-200 active:scale-[0.98] shadow-sm"
             >
-              Clear All Filters
+              <Check className="w-5 h-5" />
+              <span>Clear All Filters</span>
             </button>
           </section>
         </div>
