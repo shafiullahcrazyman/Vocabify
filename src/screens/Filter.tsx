@@ -78,37 +78,45 @@ export const Filter: React.FC = () => {
               <h2 className="m3-title-large">Categories</h2>
             </div>
 
-            {/* Favorites Toggle */}
+            {/* Connected Button Group for Favorites */}
             <div className="mb-6 pt-2 pb-6 border-b border-surface-container-highest">
-              <label className="flex justify-between items-center cursor-pointer group">
-                <div>
-                  <p className="m3-body-large text-on-surface font-medium flex items-center gap-2">
-                    <Heart className="w-8 h-8 fill-rose-500 text-rose-500" /> 
-                    Favorites Only
-                  </p>
-                </div>
+              <div className="flex items-center justify-between">
+                <p className="m3-body-large text-on-surface font-medium flex items-center gap-2">
+                  <Heart className={`w-8 h-8 transition-colors duration-200 ${filters.favoritesOnly ? 'fill-rose-500 text-rose-500' : 'text-on-surface-variant'}`} /> 
+                  Favorites Only
+                </p>
                 
-                {/* M3 Toggle Switch */}
-                <div className="shrink-0 relative flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={filters.favoritesOnly}
-                    onChange={(e) => {
+                {/* Segmented/Connected Button Group */}
+                <div className="flex bg-surface-container-highest rounded-xl overflow-hidden p-1 border border-outline-variant">
+                  <button
+                    onClick={() => {
                       triggerHaptic(settings.hapticsEnabled);
-                      updateFilters({ favoritesOnly: e.target.checked });
+                      updateFilters({ favoritesOnly: false });
                     }}
-                    className="sr-only"
-                  />
-                  <div className={`w-[52px] h-8 rounded-full border-2 transition-colors duration-200 flex items-center px-1 ${
-                    filters.favoritesOnly ? 'bg-primary border-primary' : 'bg-surface-container-highest border-outline'
-                  }`}>
-                    <div className={`rounded-full transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${
-                      filters.favoritesOnly ? 'w-6 h-6 bg-on-primary translate-x-[20px]' : 'w-4 h-4 bg-outline translate-x-0'
-                    }`} />
-                  </div>
+                    className={`px-4 py-1.5 rounded-l-lg m3-label-large transition-all duration-200 ${
+                      !filters.favoritesOnly 
+                        ? 'bg-primary text-on-primary shadow-sm' 
+                        : 'text-on-surface-variant hover:bg-surface-variant'
+                    }`}
+                  >
+                    All
+                  </button>
+                  <div className="w-[1px] bg-outline-variant my-1" /> {/* Divider */}
+                  <button
+                    onClick={() => {
+                      triggerHaptic(settings.hapticsEnabled);
+                      updateFilters({ favoritesOnly: true });
+                    }}
+                    className={`px-4 py-1.5 rounded-r-lg m3-label-large transition-all duration-200 ${
+                      filters.favoritesOnly 
+                        ? 'bg-primary text-on-primary shadow-sm' 
+                        : 'text-on-surface-variant hover:bg-surface-variant'
+                    }`}
+                  >
+                    Favorites
+                  </button>
                 </div>
-                
-              </label>
+              </div>
             </div>
             
             <FilterSection title="Difficulty Level" category="level" options={levels} />
