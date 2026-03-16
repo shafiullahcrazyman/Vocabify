@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
 import { SlidersHorizontal, Heart, Check } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
@@ -37,7 +37,7 @@ export const Filter: React.FC = () => {
     return Array.from(themesSet).sort();
   }, [words]);
 
-  // M3 Connected Button Group (Segmented Control)
+  // M3 Connected Button Group (Segmented Buttons)
   const ConnectedFilterGroup = ({ 
     title, 
     category, 
@@ -50,45 +50,56 @@ export const Filter: React.FC = () => {
     <div className="mb-8">
       <h3 className="m3-title-medium text-on-surface mb-3">{title}</h3>
       
-      {/* Scrollable wrapper to handle long groups (like Themes and Alphabet) without breaking the pill shape */}
-      <div className="w-full overflow-x-auto scrollbar-hide touch-pan-x pb-1 -mx-1 px-1">
+      {/* Scrollable wrapper ensuring the group stays on one line and the pill shape never breaks */}
+      <div className="w-full overflow-x-auto touch-pan-x pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
         
-        {/* The Group Container: Outer border and full rounding applied here */}
-        <div className="flex flex-row w-fit border border-outline rounded-full overflow-hidden bg-surface">
+        {/* Exact structure from your snippet */}
+        <div className="inline-flex rounded-full border border-outline overflow-hidden bg-surface">
           {options.map((opt) => {
             const isSelected = (filters[category] as string[]).includes(opt);
-            
+
             return (
               <button
                 key={opt}
                 onClick={() => toggleFilter(category, opt)}
-                className={`
-                  relative flex items-center justify-center gap-2 px-5 py-2.5 
-                  m3-label-large transition-colors duration-200 
-                  border-r border-outline last:border-r-0
-                  ${isSelected 
-                    ? 'bg-primary-container text-on-primary-container' 
-                    : 'bg-transparent text-on-surface hover:bg-on-surface/5 active:bg-on-surface/10'
-                  }
+                className={`relative px-5 py-2.5 m3-label-large transition-colors border-r border-outline last:border-r-0
+                ${isSelected ? "text-on-primary-container" : "text-on-surface hover:bg-surface-variant/40"}
                 `}
               >
-                {isSelected && (
-                  <motion.div 
-                    initial={{ scale: 0, width: 0, opacity: 0 }} 
-                    animate={{ scale: 1, width: 'auto', opacity: 1 }} 
-                    className="shrink-0 flex items-center justify-center"
-                  >
-                    <Check className="w-[18px] h-[18px]" strokeWidth={2.5} />
-                  </motion.div>
-                )}
-                <span className={`whitespace-nowrap ${category === 'cefr' || category === 'letter' ? 'uppercase' : 'capitalize'}`}>
-                  {opt}
+                {/* Animated Background mimicking your snippet */}
+                <AnimatePresence>
+                  {isSelected && (
+                    <motion.div
+                      layoutId={`segment-${category}-${opt}`} // Unique ID for spring animation
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute inset-0 bg-primary-container z-0"
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                </AnimatePresence>
+
+                {/* Text and Icon container sitting above the background */}
+                <span className="relative z-10 flex items-center justify-center gap-2 whitespace-nowrap">
+                  {isSelected && (
+                    <motion.div
+                      initial={{ scale: 0, width: 0, opacity: 0 }}
+                      animate={{ scale: 1, width: "auto", opacity: 1 }}
+                      exit={{ scale: 0, width: 0, opacity: 0 }}
+                      className="flex items-center justify-center"
+                    >
+                      <Check className="w-4 h-4" strokeWidth={2.5} />
+                    </motion.div>
+                  )}
+                  <span className={category === 'cefr' || category === 'letter' ? 'uppercase' : 'capitalize'}>
+                    {opt}
+                  </span>
                 </span>
               </button>
             );
           })}
         </div>
-
       </div>
     </div>
   );
@@ -104,7 +115,7 @@ export const Filter: React.FC = () => {
         className="pb-24 max-w-3xl mx-auto pt-4"
       >
         <div className="px-4 space-y-8">
-          <section className="bg-surface-container-low rounded-3xl p-6">
+          <section className="bg-surface-container-low rounded-3xl p-6 shadow-sm border border-outline/5">
             <div className="flex items-center mb-4 text-on-surface">
               <SlidersHorizontal className="w-6 h-6 mr-3 text-primary" />
               <h2 className="m3-title-large">Categories</h2>
@@ -139,11 +150,10 @@ export const Filter: React.FC = () => {
                     }`} />
                   </div>
                 </div>
-                
               </label>
             </div>
             
-            {/* MD3 Connected Button Groups */}
+            {/* Dynamic Connected Button Groups */}
             <ConnectedFilterGroup title="Difficulty Level" category="level" options={levels} />
             <ConnectedFilterGroup title="CEFR English Level" category="cefr" options={cefrLevels} />
             <ConnectedFilterGroup title="Part of Speech" category="pos" options={pos} />
@@ -156,7 +166,7 @@ export const Filter: React.FC = () => {
 
             <button
               onClick={handleClearFilters}
-              className="w-full mt-6 py-4 rounded-full bg-error text-on-error m3-label-large hover:bg-error/90 transition-all duration-200 active:scale-[0.98]"
+              className="w-full mt-6 py-4 rounded-full bg-error text-on-error m3-label-large shadow-sm hover:bg-error/90 transition-all duration-200 active:scale-[0.98]"
             >
               Clear All Filters
             </button>
