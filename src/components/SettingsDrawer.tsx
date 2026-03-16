@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Sun, Moon, Monitor } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { AppSettings } from '../types';
 import { triggerHaptic } from '../utils/haptics';
@@ -37,9 +37,9 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
   };
 
   const themeOptions = [
-    { id: 'light', label: 'Light' },
-    { id: 'dark', label: 'Dark' },
-    { id: 'system', label: 'System default' },
+    { id: 'light', label: 'Light', icon: Sun },
+    { id: 'dark', label: 'Dark', icon: Moon },
+    { id: 'system', label: 'System default', icon: Monitor },
   ] as const;
 
   const prefOptions = [
@@ -72,8 +72,8 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
             transition={settings.animationsEnabled ? { type: 'spring', damping: 25, stiffness: 200 } : { duration: 0.15, ease: "easeOut" }}
             className="relative bg-surface w-[calc(100%-56px)] max-w-[380px] h-full shadow-2xl flex flex-col"
           >
-            {/* Header */}
-            <div className="flex items-center gap-2 p-2 shrink-0">
+            {/* Header with Arrow instead of Cross */}
+            <div className="flex items-center gap-4 p-4 px-2 shrink-0">
               <button 
                 onClick={handleClose} 
                 className="p-3 rounded-full hover:bg-surface-variant text-on-surface transition-all duration-200 active:scale-90"
@@ -87,19 +87,28 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
             {/* Content Body */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-12 space-y-8">
               
-              {/* Appearance Section - Flat M3 Style */}
+              {/* Appearance Group (M3 Dynamic Color Radio Buttons) */}
               <div>
-                <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase font-bold">Appearance</h3>
-                <div className="flex flex-col">
-                  {themeOptions.map((item) => {
+                <h3 className="m3-label-large text-primary px-4 mb-3 tracking-wide uppercase font-bold">Appearance</h3>
+                <div className="bg-surface-container-low rounded-[28px] flex flex-col overflow-hidden border border-outline/5">
+                  {themeOptions.map((item, index) => {
                     const isSelected = settings.theme === item.id;
                     return (
                       <label
                         key={item.id}
-                        className="flex items-center gap-4 p-4 cursor-pointer hover:bg-on-surface/5 active:bg-on-surface/10 transition-colors duration-200 rounded-xl"
+                        className={`flex items-center justify-between p-4 cursor-pointer transition-colors duration-200 ${
+                          isSelected ? 'bg-primary-container/30' : 'hover:bg-on-surface/5'
+                        } ${index !== themeOptions.length - 1 ? 'border-b border-outline/5' : ''}`}
                       >
-                        {/* Radio Button on the LEFT */}
-                        <div className="relative flex items-center justify-center w-6 h-6 shrink-0">
+                        <div className="flex items-center gap-4 flex-1">
+                          <item.icon className={`w-5 h-5 ${isSelected ? 'text-primary' : 'text-on-surface-variant'}`} />
+                          <p className={`m3-body-large ${isSelected ? 'text-on-surface font-semibold' : 'text-on-surface'}`}>
+                            {item.label}
+                          </p>
+                        </div>
+                        
+                        {/* Material 3 Styled Radio Button */}
+                        <div className="relative flex items-center justify-center w-10 h-10">
                           <input
                             type="radio"
                             name="theme"
@@ -109,24 +118,20 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                             className="sr-only"
                           />
                           <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                            isSelected ? 'border-primary' : 'border-outline'
+                            isSelected ? 'border-primary' : 'border-on-surface-variant'
                           }`}>
                             {isSelected && (
                               <div className="w-2.5 h-2.5 rounded-full bg-primary" />
                             )}
                           </div>
                         </div>
-
-                        <p className={`m3-body-large ${isSelected ? 'text-on-surface font-medium' : 'text-on-surface'}`}>
-                          {item.label}
-                        </p>
                       </label>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Preferences Group - Card Style maintained */}
+              {/* Preferences Group */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-3 tracking-wide uppercase font-bold">Preferences</h3>
                 <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden border border-outline/5">
@@ -164,7 +169,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                 </div>
               </div>
 
-              {/* Learning Options Group - Card Style maintained */}
+              {/* Learning Options Group */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-3 tracking-wide uppercase font-bold">Learning</h3>
                 <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden border border-outline/5">
