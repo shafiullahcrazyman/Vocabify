@@ -5,6 +5,50 @@ import { Target, RotateCcw, Award, Copy, Check, Download, X, Flame, Sparkles, Ch
 import { triggerHaptic } from '../utils/haptics';
 import { TopAppBar } from '../components/TopAppBar';
 
+// Reusable grouped card section that dynamically adjusts corners based on position
+interface SectionGroupProps {
+  title?: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+  containerBg?: string;
+}
+
+const SectionGroup: React.FC<SectionGroupProps> = ({ title, icon, children, containerBg = 'bg-surface-container-low' }) => {
+  // Filter valid children to prevent empty renders and support dynamic lists
+  const validChildren = React.Children.toArray(children).filter(Boolean);
+  const total = validChildren.length;
+
+  const getCornerClass = (index: number) => {
+    if (total === 1) return 'rounded-[28px]';
+    if (index === 0) return 'rounded-t-[28px] rounded-b-none';
+    if (index === total - 1) return 'rounded-b-[28px] rounded-t-none';
+    return 'rounded-none';
+  };
+
+  return (
+    <div>
+      {title && (
+        <div className="flex items-center px-4 mb-2 text-on-surface">
+          {icon && <span className="mr-2 text-primary">{icon}</span>}
+          <h2 className="m3-label-large text-primary font-bold uppercase tracking-wide">{title}</h2>
+        </div>
+      )}
+      <div className="flex flex-col shadow-sm">
+        {validChildren.map((child, index) => (
+          <div 
+            key={index} 
+            className={`${containerBg} p-5 sm:p-6 transition-colors duration-200 ${
+              index !== total - 1 ? 'border-b border-outline/10' : ''
+            } ${getCornerClass(index)}`}
+          >
+            {child}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export const Progress: React.FC = () => {
   const { settings, updateSettings, progress, resetProgress, words } = useAppContext();
   const [showConfirm, setShowConfirm] = useState(false);
@@ -57,161 +101,149 @@ export const Progress: React.FC = () => {
         <div className="px-4 space-y-6">
           
           {/* Overview Card */}
-          <section className="bg-primary text-on-primary rounded-3xl p-6">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <div className="flex items-center gap-2.5 mb-1">
-                  <Award className="w-8 h-8" />
-                  <h2 className="m3-title-large text-on-primary">Total Mastery</h2>
+          <SectionGroup containerBg="bg-primary text-on-primary">
+            <div className="w-full">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <div className="flex items-center gap-2.5 mb-1">
+                    <Award className="w-8 h-8" />
+                    <h2 className="m3-title-large text-on-primary">Total Mastery</h2>
+                  </div>
+                  <p className="text-3xl font-bold tracking-tight mt-2">
+                    {learnedWords} <span className="text-xl font-medium opacity-80">/ {totalWords}</span>
+                  </p>
                 </div>
-                <p className="text-3xl font-bold tracking-tight mt-2">
-                  {learnedWords} <span className="text-xl font-medium opacity-80">/ {totalWords}</span>
-                </p>
               </div>
+              
+              <div className="w-full bg-on-primary/20 rounded-full h-4 mb-2 overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${percentage}%` }}
+                  transition={settings.animationsEnabled ? { duration: 1, ease: [0.2, 0, 0, 1], delay: 0.2 } : { duration: 0.2, ease: "easeOut" }}
+                  className="bg-on-primary h-full rounded-full" 
+                />
+              </div>
+              <p className="m3-body-small opacity-80 text-right">{percentage}% of entire dictionary</p>
             </div>
-            
-            <div className="w-full bg-on-primary/20 rounded-full h-4 mb-2 overflow-hidden">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: `${percentage}%` }}
-                transition={settings.animationsEnabled ? { duration: 1, ease: [0.2, 0, 0, 1], delay: 0.2 } : { duration: 0.2, ease: "easeOut" }}
-                className="bg-on-primary h-full rounded-full" 
-              />
-            </div>
-            <p className="m3-body-small opacity-80 text-right">{percentage}% of entire dictionary</p>
-          </section>
+          </SectionGroup>
 
           {/* Today's Goal Card */}
-          <section className="bg-surface-container-low rounded-3xl p-6">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <div className="flex items-center gap-2.5 mb-1">
-                  <Flame className="w-8 h-8 text-orange-500 fill-orange-500" />
-                  <h2 className="m3-title-large text-on-surface">Today's Goal</h2>
+          <SectionGroup>
+            <div className="w-full">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <div className="flex items-center gap-2.5 mb-1">
+                    <Flame className="w-8 h-8 text-orange-500 fill-orange-500" />
+                    <h2 className="m3-title-large text-on-surface">Today's Goal</h2>
+                  </div>
+                  <p className="text-3xl font-bold text-on-surface tracking-tight mt-2">
+                    {wordsLearnedToday} <span className="text-xl font-medium text-on-surface-variant">/ {settings.dailyGoal}</span>
+                  </p>
                 </div>
-                <p className="text-3xl font-bold text-on-surface tracking-tight mt-2">
-                  {wordsLearnedToday} <span className="text-xl font-medium text-on-surface-variant">/ {settings.dailyGoal}</span>
-                </p>
+                {isGoalReached && (
+                  <motion.div 
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="bg-orange-500/15 text-orange-600 dark:text-orange-400 px-3 py-1.5 rounded-xl text-sm font-bold flex items-center gap-1 mt-1"
+                  >
+                    <Sparkles size={16} />
+                    Reached!
+                  </motion.div>
+                )}
               </div>
-              {isGoalReached && (
-                <motion.div 
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="bg-orange-500/15 text-orange-600 dark:text-orange-400 px-3 py-1.5 rounded-xl text-sm font-bold flex items-center gap-1 mt-1"
-                >
-                  <Sparkles size={16} />
-                  Reached!
-                </motion.div>
-              )}
-            </div>
 
-            <div className="w-full bg-surface-container-highest rounded-full h-4 mb-2 overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${dailyPercentage}%` }}
-                transition={settings.animationsEnabled ? { duration: 1.2, ease: "easeOut" } : { duration: 0.2 }}
-                className={`h-full rounded-full ${isGoalReached ? 'bg-orange-500' : 'bg-primary'}`}
-              />
+              <div className="w-full bg-surface-container-highest rounded-full h-4 mb-2 overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${dailyPercentage}%` }}
+                  transition={settings.animationsEnabled ? { duration: 1.2, ease: "easeOut" } : { duration: 0.2 }}
+                  className={`h-full rounded-full ${isGoalReached ? 'bg-orange-500' : 'bg-primary'}`}
+                />
+              </div>
+              <p className="m3-body-small text-on-surface-variant text-right">
+                {isGoalReached
+                  ? "Streak maintained!"
+                  : `${settings.dailyGoal - wordsLearnedToday} more to go`}
+              </p>
             </div>
-            <p className="m3-body-small text-on-surface-variant text-right">
-              {isGoalReached
-                ? "Streak maintained!"
-                : `${settings.dailyGoal - wordsLearnedToday} more to go`}
-            </p>
-          </section>
+          </SectionGroup>
 
           {/* Learning Goals Settings */}
-          <section className="bg-surface-container-low rounded-3xl p-6">
-            <div className="flex items-center mb-6 text-on-surface">
-              <Target className="w-6 h-6 mr-3 text-primary" />
-              <h2 className="m3-title-large">Manage Goals</h2>
-            </div>
-            
-            <div className="space-y-6">
-              <div>
-                <label className="flex justify-between items-center">
-                  <div>
-                    <p className="m3-body-large text-on-surface">Daily Target</p>
-                    <p className="m3-body-small text-on-surface-variant">Update your current goal</p>
-                  </div>
-                  <div className="relative inline-block">
-                    <select
-                      value={settings.dailyGoal}
-                      onChange={(e) => {
-                        triggerHaptic(settings.hapticsEnabled);
-                        updateSettings({ dailyGoal: Number(e.target.value) });
-                      }}
-                      className="appearance-none bg-surface-container-highest text-on-surface rounded-xl pl-4 pr-10 py-2 outline-none border-none m3-body-large cursor-pointer transition-colors font-medium"
-                    >
-                      <option value={5}>5 words</option>
-                      <option value={10}>10 words</option>
-                      <option value={20}>20 words</option>
-                      <option value={50}>50 words</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface pointer-events-none opacity-70" />
-                  </div>
-                </label>
+          <SectionGroup title="Manage Goals" icon={<Target className="w-5 h-5" />}>
+            <div className="flex justify-between items-center w-full">
+              <div className="pr-4">
+                <p className="m3-body-large text-on-surface font-medium mb-0.5">Daily Target</p>
+                <p className="m3-body-small text-on-surface-variant leading-tight">Update your current goal</p>
               </div>
+              <div className="relative inline-block shrink-0">
+                <select
+                  value={settings.dailyGoal}
+                  onChange={(e) => {
+                    triggerHaptic(settings.hapticsEnabled);
+                    updateSettings({ dailyGoal: Number(e.target.value) });
+                  }}
+                  className="appearance-none bg-surface-container-highest text-on-surface rounded-xl pl-4 pr-10 py-2 outline-none border-none m3-body-large cursor-pointer transition-colors font-medium"
+                >
+                  <option value={5}>5 words</option>
+                  <option value={10}>10 words</option>
+                  <option value={20}>20 words</option>
+                  <option value={50}>50 words</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface pointer-events-none opacity-70" />
+              </div>
+            </div>
 
-              <div className="pt-6 border-t border-surface-container-highest">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="m3-body-large text-on-surface">Reset Progress</p>
-                    <p className="m3-body-small text-on-surface-variant">
-                      Start over from scratch
-                    </p>
-                  </div>
-                  
-                  {showConfirm ? (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handleCancelReset}
-                        className="px-4 py-2 text-on-surface-variant bg-surface-container-highest hover:opacity-80 rounded-full m3-label-large transition-all duration-200 active:scale-95"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleConfirmReset}
-                        className="px-4 py-2 bg-error text-on-error hover:bg-error/90 rounded-full m3-label-large transition-all duration-200 active:scale-95"
-                      >
-                        Confirm
-                      </button>
-                    </div>
-                  ) : (
+            <div className="flex justify-between items-center w-full">
+              <div className="pr-4">
+                <p className="m3-body-large text-on-surface font-medium mb-0.5">Reset Progress</p>
+                <p className="m3-body-small text-on-surface-variant leading-tight">Start over from scratch</p>
+              </div>
+              <div className="shrink-0">
+                {showConfirm ? (
+                  <div className="flex items-center gap-2">
                     <button
-                      onClick={handleResetClick}
-                      className="flex items-center px-4 py-2 text-error hover:bg-error/10 rounded-full transition-all duration-200 active:scale-95 m3-label-large"
+                      onClick={handleCancelReset}
+                      className="px-4 py-2 text-on-surface-variant bg-surface-container-highest hover:opacity-80 rounded-full m3-label-large transition-all duration-200 active:scale-95"
                     >
-                      <RotateCcw className="w-4 h-4 mr-2" />
-                      Reset
+                      Cancel
                     </button>
-                  )}
-                </div>
+                    <button
+                      onClick={handleConfirmReset}
+                      className="px-4 py-2 bg-error text-on-error hover:bg-error/90 rounded-full m3-label-large transition-all duration-200 active:scale-95"
+                    >
+                      Confirm
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleResetClick}
+                    className="flex items-center px-4 py-2 text-error hover:bg-error/10 rounded-full transition-all duration-200 active:scale-95 m3-label-large"
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Reset
+                  </button>
+                )}
               </div>
             </div>
-          </section>
+          </SectionGroup>
 
           {/* Export Words */}
-          <section className="bg-surface-container-low rounded-3xl p-6">
-            <div className="flex items-center mb-6 text-on-surface">
-              <Download className="w-6 h-6 mr-3 text-primary" />
-              <h2 className="m3-title-large">Export Words</h2>
-            </div>
-            
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="m3-body-large text-on-surface">Export JSON</p>
-                <p className="m3-body-small text-on-surface-variant">Copy your learned words</p>
+          <SectionGroup title="Export Words" icon={<Download className="w-5 h-5" />}>
+            <div className="flex justify-between items-center w-full">
+              <div className="pr-4">
+                <p className="m3-body-large text-on-surface font-medium mb-0.5">Export JSON</p>
+                <p className="m3-body-small text-on-surface-variant leading-tight">Copy your learned words</p>
               </div>
               
               <button
                 onClick={handleOpenExport}
-                className="px-6 py-2.5 bg-primary text-on-primary rounded-full m3-label-large hover:bg-primary/90 transition-all duration-200 active:scale-95"
+                className="shrink-0 px-6 py-2.5 bg-primary text-on-primary rounded-full m3-label-large hover:bg-primary/90 transition-all duration-200 active:scale-95"
               >
                 Open
               </button>
             </div>
-          </section>
+          </SectionGroup>
+          
         </div>
 
         {/* Export Modal */}
