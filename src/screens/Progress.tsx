@@ -33,8 +33,9 @@ const SectionGroup: React.FC<SectionGroupProps> = ({ title, icon, children, cont
           <h2 className="m3-label-large text-primary font-bold uppercase tracking-wide">{title}</h2>
         </div>
       )}
-      {/* Added rounded-[28px] to the parent to ensure the drop-shadow curves perfectly and doesn't bleed sharp corners */}
-      <div className="flex flex-col shadow-sm rounded-[28px]">
+      {/* M3 relies on tonal elevation (background colors) without drop shadows. 
+          overflow-hidden ensures corners never bleed out. */}
+      <div className="flex flex-col rounded-[28px] overflow-hidden">
         {validChildren.map((child, index) => (
           <div 
             key={index} 
@@ -57,12 +58,12 @@ export const Progress: React.FC = () => {
   const [exportCount, setExportCount] = useState<number>(-1);
   const [copied, setCopied] = useState(false);
 
-  const { learnedWordsData, learnedWords, percentage, totalWords } = useMemo(() => {
+  const { learnedWordsData, learnedWords, percentage } = useMemo(() => {
     const total = words.length;
     const learnedData = words.filter(w => progress.learned.includes(w.id));
     const count = learnedData.length;
     const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-    return { learnedWordsData: learnedData, learnedWords: count, percentage: pct, totalWords: total };
+    return { learnedWordsData: learnedData, learnedWords: count, percentage: pct };
   }, [words, progress.learned]);
 
   const { wordsLearnedToday, dailyPercentage, isGoalReached } = useMemo(() => {
@@ -104,19 +105,21 @@ export const Progress: React.FC = () => {
           {/* Overview Card */}
           <SectionGroup containerBg="bg-primary text-on-primary">
             <div className="w-full">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <div className="flex items-center gap-2.5 mb-1">
-                    <Award className="w-8 h-8" />
-                    <h2 className="m3-title-large text-on-primary">Total Mastery</h2>
-                  </div>
-                  <p className="text-3xl font-bold tracking-tight mt-2">
-                    {learnedWords} <span className="text-xl font-medium opacity-80">/ {totalWords}</span>
-                  </p>
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-2 bg-on-primary/10 rounded-full">
+                  <Award className="w-6 h-6 text-on-primary" />
                 </div>
+                <h2 className="m3-title-medium text-on-primary">Total Mastery</h2>
               </div>
               
-              <div className="w-full bg-on-primary/20 rounded-full h-4 mb-2 overflow-hidden">
+              <div className="mb-5">
+                <p className="text-[48px] leading-none font-normal tracking-tight mb-1">
+                  {learnedWords}
+                </p>
+                <p className="m3-body-medium opacity-80">Words learned</p>
+              </div>
+              
+              <div className="w-full bg-on-primary/20 rounded-full h-2 mb-2 overflow-hidden">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${percentage}%` }}
@@ -124,36 +127,40 @@ export const Progress: React.FC = () => {
                   className="bg-on-primary h-full rounded-full" 
                 />
               </div>
-              <p className="m3-body-small opacity-80 text-right">{percentage}% of entire dictionary</p>
+              <p className="m3-label-small opacity-80 text-right">{percentage}% of entire dictionary</p>
             </div>
           </SectionGroup>
 
           {/* Today's Goal Card */}
           <SectionGroup>
             <div className="w-full">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <div className="flex items-center gap-2.5 mb-1">
-                    <Flame className="w-8 h-8 text-orange-500 fill-orange-500" />
-                    <h2 className="m3-title-large text-on-surface">Today's Goal</h2>
+              <div className="flex justify-between items-center mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-orange-500/10 rounded-full">
+                    <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
                   </div>
-                  <p className="text-3xl font-bold text-on-surface tracking-tight mt-2">
-                    {wordsLearnedToday} <span className="text-xl font-medium text-on-surface-variant">/ {settings.dailyGoal}</span>
-                  </p>
+                  <h2 className="m3-title-medium text-on-surface">Today's Goal</h2>
                 </div>
                 {isGoalReached && (
                   <motion.div 
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="bg-orange-500/15 text-orange-600 dark:text-orange-400 px-3 py-1.5 rounded-xl text-sm font-bold flex items-center gap-1 mt-1"
+                    className="bg-orange-500/15 text-orange-600 dark:text-orange-400 px-3 py-1 rounded-lg m3-label-small flex items-center gap-1"
                   >
-                    <Sparkles size={16} />
+                    <Sparkles size={14} />
                     Reached!
                   </motion.div>
                 )}
               </div>
 
-              <div className="w-full bg-surface-container-highest rounded-full h-4 mb-2 overflow-hidden">
+              <div className="mb-5">
+                <p className="text-[48px] leading-none font-normal text-on-surface tracking-tight mb-1">
+                  {wordsLearnedToday}
+                </p>
+                <p className="m3-body-medium text-on-surface-variant">Words today</p>
+              </div>
+
+              <div className="w-full bg-surface-container-highest rounded-full h-2 mb-2 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${dailyPercentage}%` }}
@@ -161,7 +168,7 @@ export const Progress: React.FC = () => {
                   className={`h-full rounded-full ${isGoalReached ? 'bg-orange-500' : 'bg-primary'}`}
                 />
               </div>
-              <p className="m3-body-small text-on-surface-variant text-right">
+              <p className="m3-label-small text-on-surface-variant text-right">
                 {isGoalReached
                   ? "Streak maintained!"
                   : `${settings.dailyGoal - wordsLearnedToday} more to go`}
