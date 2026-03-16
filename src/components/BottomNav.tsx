@@ -1,7 +1,6 @@
 import React from 'react';
 import { Home, SlidersHorizontal, TrendingUp } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
 import { triggerHaptic } from '../utils/haptics';
 
@@ -22,42 +21,26 @@ export const BottomNav: React.FC = () => {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-surface-container h-[80px] flex justify-around items-center px-2 z-10 pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline/20 h-[60px] flex justify-around items-center px-2 z-10 pb-safe">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = location.pathname.startsWith(tab.path);
-        
         return (
           <button
             key={tab.id}
             onClick={() => handleTabClick(tab.path)}
-            className="relative flex flex-col items-center justify-center w-20 h-full select-none"
+            className={`tour-${tab.id}-tab flex flex-col items-center justify-center w-16 h-full transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95 ${
+              isActive ? 'text-on-surface' : 'text-on-surface-variant hover:text-on-surface'
+            }`}
           >
-            {/* The M3 Active Pill (32x64dp) */}
-            <div className="relative w-16 h-8 flex items-center justify-center mb-1 rounded-full">
-              {isActive && (
-                <motion.div
-                  layoutId="bottom-nav-indicator"
-                  className="absolute inset-0 bg-primary-container rounded-full"
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                />
-              )}
-              <Icon 
-                className={`relative z-10 w-6 h-6 transition-colors duration-200 ${
-                  isActive ? 'text-on-primary-container fill-on-primary-container/20' : 'text-on-surface-variant'
-                }`} 
-                strokeWidth={isActive ? 2.5 : 2} 
-              />
-            </div>
-            
-            {/* The Label */}
-            <span 
-              className={`m3-label-small transition-colors duration-200 ${
-                isActive ? 'text-on-surface font-bold' : 'text-on-surface-variant'
+            <div
+              className={`px-4 py-0.5 rounded-full mb-0.5 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${
+                isActive ? 'bg-primary-container text-on-primary-container scale-100' : 'bg-transparent scale-95'
               }`}
             >
-              {tab.label}
-            </span>
+              <Icon className="w-[22px] h-[22px]" />
+            </div>
+            <span className={`text-[11px] font-medium tracking-wide transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-80'}`}>{tab.label}</span>
           </button>
         );
       })}
