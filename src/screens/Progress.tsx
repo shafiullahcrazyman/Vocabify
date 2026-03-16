@@ -33,7 +33,8 @@ const SectionGroup: React.FC<SectionGroupProps> = ({ title, icon, children, cont
           <h2 className="m3-label-large text-primary font-bold uppercase tracking-wide">{title}</h2>
         </div>
       )}
-      <div className="flex flex-col shadow-sm">
+      {/* Added rounded-[28px] to the parent to ensure the drop-shadow curves perfectly and doesn't bleed sharp corners */}
+      <div className="flex flex-col shadow-sm rounded-[28px]">
         {validChildren.map((child, index) => (
           <div 
             key={index} 
