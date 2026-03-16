@@ -81,7 +81,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
             <h1 className="text-[22px] font-medium text-on-surface truncate">{title}</h1>
           </div>
         ) : (
-          <div className="tour-search-bar flex-1 min-w-0 flex items-center bg-surface-variant rounded-full pl-4 pr-2 h-14 shadow-sm transition-all duration-300 focus-within:shadow-md">
+          <div className="tour-search-bar flex-1 min-w-0 flex items-center bg-surface-variant/40 rounded-full pl-4 pr-2 h-14 shadow-sm transition-all duration-300 focus-within:bg-surface-variant/70 focus-within:shadow-md border border-transparent hover:border-outline/10">
 
             <input
               type="text"

@@ -72,8 +72,8 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
             transition={settings.animationsEnabled ? { type: 'spring', damping: 25, stiffness: 200 } : { duration: 0.15, ease: "easeOut" }}
             className="relative bg-surface w-[calc(100%-56px)] max-w-[380px] h-full shadow-2xl flex flex-col"
           >
-            {/* Header with Arrow instead of Cross */}
-            <div className="flex items-center gap-4 p-4 px-2 shrink-0">
+            {/* Header with Arrow Navigation */}
+            <div className="flex items-center gap-2 p-3 shrink-0">
               <button 
                 onClick={handleClose} 
                 className="p-3 rounded-full hover:bg-surface-variant text-on-surface transition-all duration-200 active:scale-90"
@@ -87,28 +87,28 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
             {/* Content Body */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-12 space-y-8">
               
-              {/* Appearance Group (M3 Dynamic Color Radio Buttons) */}
+              {/* Appearance Group - Now matching exactly with others */}
               <div>
-                <h3 className="m3-label-large text-primary px-4 mb-3 tracking-wide uppercase font-bold">Appearance</h3>
-                <div className="bg-surface-container-low rounded-[28px] flex flex-col overflow-hidden border border-outline/5">
+                <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase font-bold">Appearance</h3>
+                <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden border border-outline/5">
                   {themeOptions.map((item, index) => {
                     const isSelected = settings.theme === item.id;
                     return (
                       <label
                         key={item.id}
-                        className={`flex items-center justify-between p-4 cursor-pointer transition-colors duration-200 ${
-                          isSelected ? 'bg-primary-container/30' : 'hover:bg-on-surface/5'
-                        } ${index !== themeOptions.length - 1 ? 'border-b border-outline/5' : ''}`}
+                        className={`flex items-center justify-between p-4 cursor-pointer hover:bg-on-surface/5 active:bg-on-surface/10 transition-colors duration-200 ${
+                          index !== themeOptions.length - 1 ? 'border-b border-outline/10' : ''
+                        }`}
                       >
-                        <div className="flex items-center gap-4 flex-1">
-                          <item.icon className={`w-5 h-5 ${isSelected ? 'text-primary' : 'text-on-surface-variant'}`} />
-                          <p className={`m3-body-large ${isSelected ? 'text-on-surface font-semibold' : 'text-on-surface'}`}>
+                        <div className="flex items-center gap-4">
+                          <item.icon className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-on-surface-variant'}`} />
+                          <p className={`m3-body-large ${isSelected ? 'text-primary font-semibold' : 'text-on-surface'}`}>
                             {item.label}
                           </p>
                         </div>
                         
-                        {/* Material 3 Styled Radio Button */}
-                        <div className="relative flex items-center justify-center w-10 h-10">
+                        {/* M3 Radio Button */}
+                        <div className="shrink-0 relative flex items-center justify-center mr-1">
                           <input
                             type="radio"
                             name="theme"
@@ -117,12 +117,12 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                             onChange={() => handleThemeChange(item.id)}
                             className="sr-only"
                           />
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                            isSelected ? 'border-primary' : 'border-on-surface-variant'
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors duration-200 ${
+                            isSelected ? 'border-primary' : 'border-outline'
                           }`}>
-                            {isSelected && (
-                              <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                            )}
+                            <div className={`w-2.5 h-2.5 rounded-full bg-primary transition-transform duration-200 ${
+                              isSelected ? 'scale-100' : 'scale-0'
+                            }`} />
                           </div>
                         </div>
                       </label>
@@ -133,7 +133,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
 
               {/* Preferences Group */}
               <div>
-                <h3 className="m3-label-large text-primary px-4 mb-3 tracking-wide uppercase font-bold">Preferences</h3>
+                <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase font-bold">Preferences</h3>
                 <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden border border-outline/5">
                   {prefOptions.map((item, index) => {
                     const isChecked = settings[item.id as keyof AppSettings] as boolean;
@@ -171,7 +171,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
 
               {/* Learning Options Group */}
               <div>
-                <h3 className="m3-label-large text-primary px-4 mb-3 tracking-wide uppercase font-bold">Learning</h3>
+                <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase font-bold">Learning</h3>
                 <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden border border-outline/5">
                   {learningOptions.map((item, index) => {
                     const isChecked = settings[item.id as keyof AppSettings] as boolean;
