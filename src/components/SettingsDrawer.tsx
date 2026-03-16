@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Sun, Moon, Monitor } from 'lucide-react';
+import { ArrowLeft, Sun, Moon, Monitor } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { AppSettings } from '../types';
 import { triggerHaptic } from '../utils/haptics';
@@ -36,6 +36,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
     updateSettings({ [key]: value });
   };
 
+  // Data mapping
   const themeOptions = [
     { id: 'light', label: 'Light', icon: Sun },
     { id: 'dark', label: 'Dark', icon: Moon },
@@ -56,7 +57,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex">
+        <div className="fixed inset-0 z-50 flex justify-end sm:justify-start">
           {/* Backdrop */}
           <motion.div 
             initial={{ opacity: 0 }}
@@ -69,41 +70,50 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
           
           {/* Drawer (M3 Side Sheet uses surface-container-low) */}
           <motion.div 
-            initial={{ x: '-100%' }}
+            initial={{ x: '100%' }} // Slides in from right on mobile
             animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
+            exit={{ x: '100%' }}
             transition={settings.animationsEnabled ? { type: 'spring', damping: 25, stiffness: 200 } : { duration: 0.15, ease: "easeOut" }}
-            className="relative bg-surface-container-low w-[calc(100%-56px)] max-w-[380px] h-full flex flex-col"
+            className="relative bg-surface-container-low w-full sm:max-w-[380px] h-full flex flex-col shadow-none"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 px-6 shrink-0 h-16">
-              <h2 className="text-[22px] font-medium text-on-surface tracking-tight">Settings</h2>
-              <button onClick={handleClose} className="p-2 -mr-2 rounded-full hover:bg-on-surface/10 text-on-surface-variant transition-colors active:bg-on-surface/20">
-                <X className="w-6 h-6" />
+            {/* M3 Header with ArrowLeft */}
+            <div className="flex items-center gap-4 p-4 shrink-0 h-[64px]">
+              <button 
+                onClick={handleClose} 
+                className="p-2 rounded-full hover:bg-on-surface/10 text-on-surface transition-colors active:bg-on-surface/20"
+                aria-label="Go back"
+              >
+                <ArrowLeft className="w-6 h-6" />
               </button>
+              <h2 className="text-[22px] font-medium text-on-surface tracking-tight">Settings</h2>
             </div>
             
             {/* Content Body */}
-            <div className="flex-1 overflow-y-auto pb-12">
+            <div className="flex-1 overflow-y-auto p-4 pt-2 pb-12 space-y-6">
               
-              {/* Theme Group */}
-              <div className="mb-6">
-                <h3 className="m3-label-medium text-primary px-6 py-3 tracking-wide uppercase">Appearance</h3>
-                <div className="flex flex-col">
-                  {themeOptions.map((item) => {
+              {/* Theme Group (Grouped M3 Radio Buttons) */}
+              <div>
+                <h3 className="m3-label-medium text-primary px-4 mb-2 tracking-wide uppercase">Appearance</h3>
+                {/* M3 Tonal Elevation Container */}
+                <div className="bg-surface-container rounded-[28px] flex flex-col overflow-hidden">
+                  {themeOptions.map((item, index) => {
                     const isSelected = settings.theme === item.id;
                     return (
                       <label
                         key={item.id}
-                        className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-on-surface/5 active:bg-on-surface/10 transition-colors"
+                        className={`flex items-center justify-between p-4 px-5 cursor-pointer hover:bg-on-surface/5 active:bg-on-surface/10 transition-colors duration-200 ${
+                          index !== themeOptions.length - 1 ? 'border-b border-outline-variant/30' : ''
+                        }`}
                       >
-                        <div className="flex items-center gap-4">
-                          <item.icon className="w-6 h-6 text-on-surface-variant" />
-                          <p className="m3-body-large text-on-surface">{item.label}</p>
+                        <div className="flex items-center gap-4 pr-4">
+                          <item.icon className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-on-surface-variant'}`} />
+                          <p className={`m3-body-large ${isSelected ? 'text-on-surface font-medium' : 'text-on-surface'}`}>
+                            {item.label}
+                          </p>
                         </div>
                         
-                        {/* M3 Radio Button */}
-                        <div className="shrink-0 relative flex items-center justify-center w-5 h-5">
+                        {/* Perfect M3 Radio Button */}
+                        <div className="shrink-0 relative flex items-center justify-center w-5 h-5 mr-1">
                           <input
                             type="radio"
                             name="theme"
@@ -125,23 +135,26 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                 </div>
               </div>
 
-              {/* Preferences Group */}
-              <div className="mb-6">
-                <h3 className="m3-label-medium text-primary px-6 py-3 tracking-wide uppercase">Preferences</h3>
-                <div className="flex flex-col">
-                  {prefOptions.map((item) => {
+              {/* Preferences Group (Grouped M3 Switches) */}
+              <div>
+                <h3 className="m3-label-medium text-primary px-4 mb-2 tracking-wide uppercase">Preferences</h3>
+                {/* M3 Tonal Elevation Container */}
+                <div className="bg-surface-container rounded-[28px] flex flex-col overflow-hidden">
+                  {prefOptions.map((item, index) => {
                     const isChecked = settings[item.id as keyof AppSettings] as boolean;
                     return (
                       <label
                         key={item.id}
-                        className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-on-surface/5 active:bg-on-surface/10 transition-colors"
+                        className={`flex items-center justify-between p-4 px-5 cursor-pointer hover:bg-on-surface/5 active:bg-on-surface/10 transition-colors duration-200 ${
+                          index !== prefOptions.length - 1 ? 'border-b border-outline-variant/30' : ''
+                        }`}
                       >
                         <div className="pr-4">
-                          <p className="m3-body-large text-on-surface mb-0.5">{item.label}</p>
-                          <p className="m3-body-medium text-on-surface-variant">{item.desc}</p>
+                          <p className="m3-body-large text-on-surface font-medium mb-0.5">{item.label}</p>
+                          <p className="m3-body-medium text-on-surface-variant leading-tight">{item.desc}</p>
                         </div>
                         
-                        {/* M3 Switch */}
+                        {/* Perfect M3 Toggle Switch */}
                         <div className="shrink-0 relative flex items-center">
                           <input
                             type="checkbox"
@@ -163,23 +176,26 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                 </div>
               </div>
 
-              {/* Learning Options Group */}
-              <div className="mb-6">
-                <h3 className="m3-label-medium text-primary px-6 py-3 tracking-wide uppercase">Learning</h3>
-                <div className="flex flex-col">
-                  {learningOptions.map((item) => {
+              {/* Learning Options Group (Grouped M3 Switches) */}
+              <div>
+                <h3 className="m3-label-medium text-primary px-4 mb-2 tracking-wide uppercase">Learning</h3>
+                {/* M3 Tonal Elevation Container */}
+                <div className="bg-surface-container rounded-[28px] flex flex-col overflow-hidden">
+                  {learningOptions.map((item, index) => {
                     const isChecked = settings[item.id as keyof AppSettings] as boolean;
                     return (
                       <label
                         key={item.id}
-                        className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-on-surface/5 active:bg-on-surface/10 transition-colors"
+                        className={`flex items-center justify-between p-4 px-5 cursor-pointer hover:bg-on-surface/5 active:bg-on-surface/10 transition-colors duration-200 ${
+                          index !== learningOptions.length - 1 ? 'border-b border-outline-variant/30' : ''
+                        }`}
                       >
                         <div className="pr-4">
-                          <p className="m3-body-large text-on-surface mb-0.5">{item.label}</p>
-                          <p className="m3-body-medium text-on-surface-variant">{item.desc}</p>
+                          <p className="m3-body-large text-on-surface font-medium mb-0.5">{item.label}</p>
+                          <p className="m3-body-medium text-on-surface-variant leading-tight">{item.desc}</p>
                         </div>
                         
-                        {/* M3 Switch */}
+                        {/* Perfect M3 Toggle Switch */}
                         <div className="shrink-0 relative flex items-center">
                           <input
                             type="checkbox"
