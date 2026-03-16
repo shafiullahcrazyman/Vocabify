@@ -25,28 +25,30 @@ export const useWordFilter = (
   const filteredWords = useMemo(() => {
     if (!hasActiveFilters) return [];
 
+    const query = searchQuery.trim().toLowerCase();
+    const isSearching = query !== '';
+
     let result = words.filter((word) => {
-      // 1. Favorites Filter (DYNAMIC FIX: Don't hide if it's currently open!)
+      // 1. Favorites Filter
       if (filters.favoritesOnly && !favorites.includes(word.id)) {
         if (word.id !== activeWordId) return false;
       }
 
-      // 2. Search
-      if (searchQuery.trim() !== '') {
-        const query = searchQuery.toLowerCase();
-        const matchesSearch = (
-          (word.noun?.toLowerCase().includes(query)) ||
-          (word.verb?.toLowerCase().includes(query)) ||
-          (word.adjective?.toLowerCase().includes(query)) ||
-          (word.adverb?.toLowerCase().includes(query)) ||
-          (word.meaning_bn.includes(query))
-        );
-        if (!matchesSearch) return false;
-      }
-
-      // 3. Smart Hide
+      // 2. Smart Hide
       if (settings.hideLearnedWords && progress.learned.includes(word.id)) {
         if (word.id !== activeWordId) return false;
+      }
+
+      // 3. Search (Optimized for speed)
+      if (isSearching) {
+        const n = word.noun?.toLowerCase() || '';
+        const v = word.verb?.toLowerCase() || '';
+        const adj = word.adjective?.toLowerCase() || '';
+        const adv = word.adverb?.toLowerCase() || '';
+        const m = word.meaning_bn || ''; 
+
+        const matchesSearch = n.includes(query) || v.includes(query) || adj.includes(query) || adv.includes(query) || m.includes(query);
+        if (!matchesSearch) return false;
       }
 
       // 4. Difficulty
@@ -67,10 +69,10 @@ export const useWordFilter = (
       // 6. POS
       if (filters.pos.length > 0) {
         const hasPos = filters.pos.some(pos => {
-          if (pos === 'noun' && word.noun) return true;
-          if (pos === 'verb' && word.verb) return true;
-          if (pos === 'adjective' && word.adjective) return true;
-          if (pos === 'adverb' && word.adverb) return true;
+          if (pos === 'noun' && word.noun && word.noun.toLowerCase() !== 'x') return true;
+          if (pos === 'verb' && word.verb && word.verb.toLowerCase() !== 'x') return true;
+          if (pos === 'adjective' && word.adjective && word.adjective.toLowerCase() !== 'x') return true;
+          if (pos === 'adverb' && word.adverb && word.adverb.toLowerCase() !== 'x') return true;
           return false;
         });
         if (!hasPos) return false;
@@ -79,21 +81,22 @@ export const useWordFilter = (
       return true;
     });
 
-    // Smart Sorting
-    if (searchQuery.trim() !== '') {
-      const query = searchQuery.toLowerCase();
+    // Smart Sorting (Optimized)
+    if (isSearching) {
       result.sort((a, b) => {
-        const getWords = (w: WordFamily) => [w.noun, w.verb, w.adjective, w.adverb].map(v => (v || '').toLowerCase());
-        const aWords = getWords(a);
-        const bWords = getWords(b);
+        const aN = a.noun?.toLowerCase() || ''; const aV = a.verb?.toLowerCase() || '';
+        const aAdj = a.adjective?.toLowerCase() || ''; const aAdv = a.adverb?.toLowerCase() || '';
+        
+        const bN = b.noun?.toLowerCase() || ''; const bV = b.verb?.toLowerCase() || '';
+        const bAdj = b.adjective?.toLowerCase() || ''; const bAdv = b.adverb?.toLowerCase() || '';
 
-        const aExact = aWords.includes(query);
-        const bExact = bWords.includes(query);
+        const aExact = aN === query || aV === query || aAdj === query || aAdv === query;
+        const bExact = bN === query || bV === query || bAdj === query || bAdv === query;
         if (aExact && !bExact) return -1;
         if (!aExact && bExact) return 1;
 
-        const aStarts = aWords.some(w => w.startsWith(query));
-        const bStarts = bWords.some(w => w.startsWith(query));
+        const aStarts = aN.startsWith(query) || aV.startsWith(query) || aAdj.startsWith(query) || aAdv.startsWith(query);
+        const bStarts = bN.startsWith(query) || bV.startsWith(query) || bAdj.startsWith(query) || bAdv.startsWith(query);
         if (aStarts && !bStarts) return -1;
         if (!aStarts && bStarts) return 1;
 
