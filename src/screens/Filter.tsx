@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
-import { SlidersHorizontal, Heart } from 'lucide-react';
+import { SlidersHorizontal, Heart, Check } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import { TopAppBar } from '../components/TopAppBar';
 
@@ -37,23 +37,50 @@ export const Filter: React.FC = () => {
     return Array.from(themesSet).sort();
   }, [words]);
 
-  const FilterSection = ({ title, category, options }: { title: string, category: keyof typeof filters, options: string[] }) => (
-    <div className="mb-6">
+  // M3 Connected Button Group Component
+  const ConnectedFilterGroup = ({ 
+    title, 
+    category, 
+    options,
+    minWClass = "min-w-[33%]",
+    isSingleRow = false,
+    showCheck = true
+  }: { 
+    title: string, 
+    category: keyof typeof filters, 
+    options: string[],
+    minWClass?: string,
+    isSingleRow?: boolean,
+    showCheck?: boolean
+  }) => (
+    <div className="mb-8">
       <h3 className="m3-title-medium text-on-surface mb-3">{title}</h3>
-      <div className="flex flex-wrap gap-2">
+      {/* Outer container with Top and Left borders. Overflow-hidden handles the outer rounded corners beautifully */}
+      <div className={`flex flex-wrap ${isSingleRow ? 'rounded-full' : 'rounded-[20px]'} border-t border-l border-outline/20 overflow-hidden shadow-sm`}>
         {options.map((opt) => {
           const isSelected = (filters[category] as string[]).includes(opt);
           return (
             <button
               key={opt}
               onClick={() => toggleFilter(category, opt)}
-              className={`px-4 py-2 rounded-lg m3-label-large transition-colors duration-200 active:scale-[0.96] ${
+              className={`flex-auto ${minWClass} relative flex items-center justify-center gap-1.5 py-3 px-3 text-[14px] font-medium border-r border-b border-outline/20 transition-colors duration-200 active:bg-on-surface/5 ${
                 isSelected
                   ? 'bg-primary text-on-primary'
-                  : 'bg-surface-container-highest text-on-surface hover:bg-surface-variant'
+                  : 'bg-surface-container-lowest text-on-surface hover:bg-surface-variant/50'
               }`}
             >
-              <span className={category === 'cefr' ? 'uppercase' : 'capitalize'}>{opt}</span>
+              {showCheck && isSelected && (
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="shrink-0"
+                >
+                  <Check className="w-4 h-4" strokeWidth={3} />
+                </motion.div>
+              )}
+              <span className={`truncate ${category === 'cefr' || category === 'letter' ? 'uppercase' : 'capitalize'}`}>
+                {opt}
+              </span>
             </button>
           );
         })}
@@ -107,42 +134,52 @@ export const Filter: React.FC = () => {
                     }`} />
                   </div>
                 </div>
-                
               </label>
             </div>
             
-            <FilterSection title="Difficulty Level" category="level" options={levels} />
-            <FilterSection title="CEFR English Level" category="cefr" options={cefrLevels} />
-            <FilterSection title="Part of Speech" category="pos" options={pos} />
+            {/* Dynamic M3 Connected Button Groups */}
+            <ConnectedFilterGroup 
+              title="Difficulty Level" 
+              category="level" 
+              options={levels} 
+              minWClass="min-w-[33%]" 
+              isSingleRow={true} 
+            />
+            
+            <ConnectedFilterGroup 
+              title="CEFR English Level" 
+              category="cefr" 
+              options={cefrLevels} 
+              minWClass="min-w-[33%] sm:min-w-[16%]" 
+            />
+            
+            <ConnectedFilterGroup 
+              title="Part of Speech" 
+              category="pos" 
+              options={pos} 
+              minWClass="min-w-[50%] sm:min-w-[25%]" 
+            />
             
             {dynamicThemes.length > 0 && (
-              <FilterSection title="Theme" category="theme" options={dynamicThemes} />
+              <ConnectedFilterGroup 
+                title="Theme" 
+                category="theme" 
+                options={dynamicThemes} 
+                minWClass="min-w-[50%] sm:min-w-[33%]" 
+              />
             )}
             
-            <div className="mb-6">
-              <h3 className="m3-title-medium text-on-surface mb-3">Alphabet</h3>
-              <div className="flex flex-wrap gap-1">
-                {letters.map((letter) => {
-                  const isSelected = filters.letter.includes(letter);
-                  return (
-                    <button
-                      key={letter}
-                      onClick={() => toggleFilter('letter', letter)}
-                      className={`w-10 h-10 rounded-full m3-label-large flex items-center justify-center transition-colors duration-200 active:scale-[0.94] ${
-                        isSelected
-                          ? 'bg-primary text-on-primary'
-                          : 'bg-surface-container-highest text-on-surface hover:bg-surface-variant'
-                      }`}
-                    >
-                      {letter}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <ConnectedFilterGroup 
+              title="Alphabet" 
+              category="letter" 
+              options={letters} 
+              minWClass="min-w-[14%]" 
+              showCheck={false} 
+            />
+
             <button
               onClick={handleClearFilters}
-              className="w-full py-3 rounded-full bg-error text-on-error m3-label-large hover:bg-error/90 transition-colors duration-200 active:scale-[0.98]"
+              className="w-full mt-4 py-4 rounded-full bg-error text-on-error m3-label-large shadow-sm hover:bg-error/90 transition-all duration-200 active:scale-[0.98]"
             >
               Clear All Filters
             </button>
