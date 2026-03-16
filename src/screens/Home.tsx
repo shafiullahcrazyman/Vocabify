@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
 import { TopAppBar } from '../components/TopAppBar';
@@ -7,13 +7,24 @@ import { WordOverlay } from '../components/WordOverlay';
 import { Filter as FilterIcon } from 'lucide-react';
 import { useWordFilter } from '../hooks/useWordFilter';
 
+// How many words to load into the DOM at once
+const WORDS_PER_PAGE = 20;
+
 export const Home: React.FC = () => {
   const { words, searchQuery, filters, settings, progress, favorites } = useAppContext();
   const [activeWordId, setActiveWordId] = useState<string | null>(null);
+  
+  // State for pagination
+  const [displayedCount, setDisplayedCount] = useState(WORDS_PER_PAGE);
 
   const { filteredWords, hasActiveFilters } = useWordFilter(
     words, searchQuery, filters, settings, progress, favorites, activeWordId
   );
+
+  // Reset pagination back to page 1 whenever the user searches or filters
+  useEffect(() => {
+    setDisplayedCount(WORDS_PER_PAGE);
+  }, [searchQuery, filters, settings.hideLearnedWords]);
 
   const activeIndex = filteredWords.findIndex(w => w.id === activeWordId);
   const activeWord = activeIndex >= 0 ? filteredWords[activeIndex] : null;
@@ -30,8 +41,14 @@ export const Home: React.FC = () => {
     }
   };
 
-  const handleClose = () => {
-    setActiveWordId(null);
+  const handleClose = () => setActiveWordId(null);
+
+  // Slice the array so the browser doesn't freeze rendering 2000 cards at once
+  const displayedWords = filteredWords.slice(0, displayedCount);
+  const hasMore = displayedCount < filteredWords.length;
+
+  const loadMore = () => {
+    setDisplayedCount(prev => prev + WORDS_PER_PAGE);
   };
 
   return (
@@ -40,7 +57,7 @@ export const Home: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={settings.animationsEnabled ? { duration: 0.25, ease: [0.2, 0, 0, 1] } : { duration: 0.15, ease: "easeOut" }}
-      className="pb-24"
+      className="pb-32"
     >
       <TopAppBar />
       
@@ -65,24 +82,38 @@ export const Home: React.FC = () => {
             <p className="m3-body-large text-on-surface-variant">No words found matching your criteria.</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-[2px] sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
-            {filteredWords.map((word, index) => {
-              const position = 
-                filteredWords.length === 1 ? 'only' :
-                index === 0 ? 'first' :
-                index === filteredWords.length - 1 ? 'last' :
-                'middle';
-                
-              return (
-                <WordCard
-                  key={word.id}
-                  word={word}
-                  position={position}
-                  onClick={() => setActiveWordId(word.id)}
-                />
-              );
-            })}
-          </div>
+          <>
+            <div className="flex flex-col gap-[2px] sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
+              {displayedWords.map((word, index) => {
+                const position = 
+                  displayedWords.length === 1 ? 'only' :
+                  index === 0 ? 'first' :
+                  index === displayedWords.length - 1 ? 'last' :
+                  'middle';
+                  
+                return (
+                  <WordCard
+                    key={word.id}
+                    word={word}
+                    position={position}
+                    onClick={() => setActiveWordId(word.id)}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Load More Button */}
+            {hasMore && (
+              <div className="flex justify-center mt-8">
+                <button 
+                  onClick={loadMore}
+                  className="px-8 py-3.5 bg-surface-variant text-on-surface rounded-full m3-label-large hover:bg-on-surface/10 active:scale-95 transition-all duration-200 shadow-sm"
+                >
+                  Load More Words ({filteredWords.length - displayedCount} remaining)
+                </button>
+              </div>
+            )}
+          </>
         )}
       </main>
 
