@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AppSettings, FilterOptions, WordFamily } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useIndexedDB } from '../hooks/useIndexedDB';
 import wordsData from '../data/words.json';
 
 interface AppContextType {
@@ -43,15 +44,17 @@ const defaultFilters: FilterOptions = {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  // UI preferences stay in LocalStorage because they are tiny and needed instantly for rendering CSS
   const [storedSettings, setSettings] = useLocalStorage<AppSettings>('vocab_settings', defaultSettings);
   const settings = { ...defaultSettings, ...storedSettings };
-  
-  const [progress, setProgress] = useLocalStorage<{ learned: string[], learnedDates?: Record<string, string> }>('vocab_progress', { learned: [], learnedDates: {} });
-  const [userAvatar, setUserAvatar] = useLocalStorage<string | null>('vocab_user_avatar', null);
-  const [favorites, setFavorites] = useLocalStorage<string[]>('vocab_favorites', []);
   const [filters, setFilters] = useLocalStorage<FilterOptions>('vocab_filters', defaultFilters);
-  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Heavy user data moves to IndexedDB to prevent app freezing
+  const [progress, setProgress, progressLoaded] = useIndexedDB<{ learned: string[], learnedDates?: Record<string, string> }>('vocab_progress', { learned: [], learnedDates: {} });
+  const [userAvatar, setUserAvatar, avatarLoaded] = useIndexedDB<string | null>('vocab_user_avatar', null);
+  const [favorites, setFavorites, favsLoaded] = useIndexedDB<string[]>('vocab_favorites', []);
 
+  const [searchQuery, setSearchQuery] = useState('');
   const words = wordsData as WordFamily[];
 
   useEffect(() => {
@@ -107,6 +110,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       prev.includes(id) ? prev.filter((favId) => favId !== id) : [...prev, id]
     );
   };
+
+  // Prevent app from rendering until IndexedDB has loaded the user's data
+  if (!progressLoaded || !avatarLoaded || !favsLoaded) {
+    return <div className="min-h-screen bg-background" />;
+  }
 
   return (
     <AppContext.Provider
