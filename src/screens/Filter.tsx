@@ -78,41 +78,29 @@ export const Filter: React.FC = () => {
               <h2 className="m3-title-large">Categories</h2>
             </div>
 
-            {/* UPDATED: Connected Button Group (Matched styling with other buttons) */}
+            {/* Favorites Section: Two matched buttons */}
             <div className="mb-6 pt-2 pb-6 border-b border-surface-container-highest">
-              {/* Changed to inline-flex and rounded-lg */}
-              <div className="inline-flex rounded-lg border border-outline/30 overflow-hidden">
-                
-                {/* Left Side: Static (Looks like a button, but not clickable) */}
-                {/* Adjusted padding to py-2 px-4 to match other buttons */}
-                <div className="flex items-center justify-center gap-2 py-2 px-4 bg-surface-container-highest">
-                  <Heart 
-                    className={`w-5 h-5 transition-colors duration-200 ${
-                      filters.favoritesOnly ? 'fill-rose-500 text-rose-500' : 'text-on-surface-variant'
-                    }`} 
-                  />
-                  <span className="m3-label-large text-on-surface font-medium">Favorites Only</span>
+              <h3 className="m3-title-medium text-on-surface mb-3">Favorites</h3>
+              <div className="flex gap-2">
+                {/* Static Button (Icon + Label) */}
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-highest text-on-surface">
+                  <Heart className={`w-5 h-5 ${filters.favoritesOnly ? 'fill-rose-500 text-rose-500' : 'text-on-surface-variant'}`} />
+                  <span className="m3-label-large">Favorites Only</span>
                 </div>
 
-                {/* Vertical Divider */}
-                <div className="w-[1px] bg-outline/30"></div>
-
-                {/* Right Side: Dynamic Toggle Button */}
-                {/* Adjusted padding to py-2 px-5 for a balanced look */}
+                {/* Clickable Toggle Button */}
                 <button
                   onClick={() => {
                     triggerHaptic(settings.hapticsEnabled);
                     updateFilters({ favoritesOnly: !filters.favoritesOnly });
                   }}
-                  className={`flex items-center justify-center py-2 px-5 m3-label-large transition-colors duration-200 active:bg-opacity-80 ${
+                  className={`px-4 py-2 rounded-lg m3-label-large transition-colors duration-200 active:scale-[0.96] ${
                     filters.favoritesOnly
                       ? 'bg-primary text-on-primary'
-                      : 'bg-surface-container-low text-on-surface hover:bg-surface-variant'
+                      : 'bg-surface-container-highest text-on-surface hover:bg-surface-variant'
                   }`}
                 >
-                  <span className={filters.favoritesOnly ? "font-bold" : ""}>
-                    {filters.favoritesOnly ? 'On' : 'Off'}
-                  </span>
+                  {filters.favoritesOnly ? 'On' : 'Off'}
                 </button>
               </div>
             </div>
