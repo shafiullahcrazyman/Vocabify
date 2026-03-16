@@ -72,50 +72,42 @@ export const Filter: React.FC = () => {
         className="pb-24 max-w-3xl mx-auto pt-4"
       >
         <div className="px-4 space-y-8">
-          <section className="bg-surface-container-low rounded-3xl p-6 shadow-sm">
+          <section className="bg-surface-container-low rounded-3xl p-6">
             <div className="flex items-center mb-4 text-on-surface">
               <SlidersHorizontal className="w-6 h-6 mr-3 text-primary" />
               <h2 className="m3-title-large">Categories</h2>
             </div>
 
-            {/* M3 Connected Segmented Control for Favorites */}
-            <div className="mb-8 pt-2 pb-6 border-b border-surface-container-highest">
-              <div className="flex w-full h-12 bg-surface-container-highest rounded-full border border-outline-variant/30 overflow-hidden">
+            {/* NEW: Connected Button Group for Favorites */}
+            <div className="mb-6 pt-2 pb-6 border-b border-surface-container-highest">
+              <div className="flex w-full rounded-full border border-outline/30 overflow-hidden">
                 
-                {/* 1. Static Label (Unclickable) */}
-                <div className="flex items-center gap-2 px-5 bg-surface-container-low/40 text-on-surface-variant border-r border-outline-variant/20 rounded-l-full">
-                  <Heart className={`w-5 h-5 transition-colors duration-300 ${filters.favoritesOnly ? 'fill-rose-500 text-rose-500' : 'text-on-surface-variant'}`} />
-                  <span className="m3-label-large whitespace-nowrap opacity-90">Favorites Only</span>
+                {/* Left Side: Static (Looks like a button, but not clickable) */}
+                <div className="flex-[2] flex items-center justify-center gap-2 py-3 px-4 bg-surface-container-highest">
+                  <Heart 
+                    className={`w-6 h-6 transition-colors duration-200 ${
+                      filters.favoritesOnly ? 'fill-rose-500 text-rose-500' : 'text-on-surface-variant'
+                    }`} 
+                  />
+                  <span className="m3-label-large text-on-surface font-medium">Favorites Only</span>
                 </div>
 
-                {/* 2. "Off" Button */}
-                <button
-                  onClick={() => {
-                    triggerHaptic(settings.hapticsEnabled);
-                    updateFilters({ favoritesOnly: false });
-                  }}
-                  className={`flex-1 px-4 m3-label-large transition-all duration-300 border-r border-outline-variant/20 ${
-                    !filters.favoritesOnly 
-                      ? 'bg-primary text-on-primary font-bold' 
-                      : 'text-on-surface-variant hover:bg-surface-variant/50'
-                  }`}
-                >
-                  Off
-                </button>
+                {/* Vertical Divider */}
+                <div className="w-[1px] bg-outline/30"></div>
 
-                {/* 3. "On" Button */}
+                {/* Right Side: Dynamic Toggle Button */}
                 <button
                   onClick={() => {
                     triggerHaptic(settings.hapticsEnabled);
-                    updateFilters({ favoritesOnly: true });
+                    updateFilters({ favoritesOnly: !filters.favoritesOnly });
                   }}
-                  className={`flex-1 px-4 rounded-r-full m3-label-large transition-all duration-300 ${
-                    filters.favoritesOnly 
-                      ? 'bg-primary text-on-primary font-bold' 
-                      : 'text-on-surface-variant hover:bg-surface-variant/50'
+                  className={`flex-1 flex items-center justify-center py-3 px-4 m3-label-large font-medium transition-colors duration-200 active:bg-opacity-80 ${
+                    filters.favoritesOnly
+                      ? 'bg-primary text-on-primary'
+                      : 'bg-surface-container-low text-on-surface hover:bg-surface-variant'
                   }`}
                 >
-                  On
+                  {filters.favoritesOnly ? 'On' : 'Off'}
                 </button>
               </div>
             </div>
