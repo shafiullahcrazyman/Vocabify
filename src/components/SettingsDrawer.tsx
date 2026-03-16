@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Sun, Moon, Monitor } from 'lucide-react';
+import { ArrowLeft, Sun, Moon, Monitor } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { AppSettings } from '../types';
 import { triggerHaptic } from '../utils/haptics';
@@ -36,11 +36,10 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
     updateSettings({ [key]: value });
   };
 
-  // Data mapping
   const themeOptions = [
     { id: 'light', label: 'Light', icon: Sun },
     { id: 'dark', label: 'Dark', icon: Moon },
-    { id: 'system', label: 'System', icon: Monitor },
+    { id: 'system', label: 'System default', icon: Monitor },
   ] as const;
 
   const prefOptions = [
@@ -73,40 +72,43 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
             transition={settings.animationsEnabled ? { type: 'spring', damping: 25, stiffness: 200 } : { duration: 0.15, ease: "easeOut" }}
             className="relative bg-surface w-[calc(100%-56px)] max-w-[380px] h-full shadow-2xl flex flex-col"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 px-6 border-b border-outline/10 shrink-0">
-              <h2 className="text-[22px] font-bold text-on-surface tracking-tight">Settings</h2>
-              <button onClick={handleClose} className="p-2 -mr-2 rounded-full hover:bg-surface-variant text-on-surface-variant transition-all duration-200 active:scale-90">
-                <X className="w-6 h-6" />
+            {/* Header with Arrow instead of Cross */}
+            <div className="flex items-center gap-4 p-4 px-2 shrink-0">
+              <button 
+                onClick={handleClose} 
+                className="p-3 rounded-full hover:bg-surface-variant text-on-surface transition-all duration-200 active:scale-90"
+                aria-label="Go back"
+              >
+                <ArrowLeft className="w-6 h-6" />
               </button>
+              <h2 className="text-[22px] font-medium text-on-surface tracking-tight">Settings</h2>
             </div>
             
             {/* Content Body */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-12 space-y-8">
               
-              {/* Theme Group (M3 Radio Buttons) */}
+              {/* Appearance Group (M3 Dynamic Color Radio Buttons) */}
               <div>
-                <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Appearance</h3>
-                {/* Unified Container Background */}
-                <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden">
+                <h3 className="m3-label-large text-primary px-4 mb-3 tracking-wide uppercase font-bold">Appearance</h3>
+                <div className="bg-surface-container-low rounded-[28px] flex flex-col overflow-hidden border border-outline/5">
                   {themeOptions.map((item, index) => {
                     const isSelected = settings.theme === item.id;
                     return (
                       <label
                         key={item.id}
-                        className={`flex items-center justify-between p-4 cursor-pointer hover:bg-on-surface/5 active:bg-on-surface/10 transition-colors duration-200 ${
-                          index !== themeOptions.length - 1 ? 'border-b border-outline/10' : ''
-                        }`}
+                        className={`flex items-center justify-between p-4 cursor-pointer transition-colors duration-200 ${
+                          isSelected ? 'bg-primary-container/30' : 'hover:bg-on-surface/5'
+                        } ${index !== themeOptions.length - 1 ? 'border-b border-outline/5' : ''}`}
                       >
-                        <div className="flex items-center gap-4 pr-4">
-                          <item.icon className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-on-surface-variant'}`} />
-                          <p className={`m3-body-large ${isSelected ? 'text-primary font-semibold' : 'text-on-surface'}`}>
+                        <div className="flex items-center gap-4 flex-1">
+                          <item.icon className={`w-5 h-5 ${isSelected ? 'text-primary' : 'text-on-surface-variant'}`} />
+                          <p className={`m3-body-large ${isSelected ? 'text-on-surface font-semibold' : 'text-on-surface'}`}>
                             {item.label}
                           </p>
                         </div>
                         
-                        {/* M3 Radio Button */}
-                        <div className="shrink-0 relative flex items-center justify-center">
+                        {/* Material 3 Styled Radio Button */}
+                        <div className="relative flex items-center justify-center w-10 h-10">
                           <input
                             type="radio"
                             name="theme"
@@ -115,12 +117,12 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                             onChange={() => handleThemeChange(item.id)}
                             className="sr-only"
                           />
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors duration-200 ${
-                            isSelected ? 'border-primary' : 'border-outline/50'
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                            isSelected ? 'border-primary' : 'border-on-surface-variant'
                           }`}>
-                            <div className={`w-2.5 h-2.5 rounded-full bg-primary transition-transform duration-200 ${
-                              isSelected ? 'scale-100' : 'scale-0'
-                            }`} />
+                            {isSelected && (
+                              <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+                            )}
                           </div>
                         </div>
                       </label>
@@ -129,11 +131,10 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                 </div>
               </div>
 
-              {/* Preferences Group (M3 Switches) */}
+              {/* Preferences Group */}
               <div>
-                <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Preferences</h3>
-                {/* Unified Container Background */}
-                <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden">
+                <h3 className="m3-label-large text-primary px-4 mb-3 tracking-wide uppercase font-bold">Preferences</h3>
+                <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden border border-outline/5">
                   {prefOptions.map((item, index) => {
                     const isChecked = settings[item.id as keyof AppSettings] as boolean;
                     return (
@@ -147,7 +148,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                           <p className="m3-body-large text-on-surface font-medium mb-0.5">{item.label}</p>
                           <p className="m3-body-small text-on-surface-variant leading-tight">{item.desc}</p>
                         </div>
-                        {/* M3 Toggle Switch */}
                         <div className="shrink-0 relative">
                           <input
                             type="checkbox"
@@ -169,11 +169,10 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                 </div>
               </div>
 
-              {/* Learning Options Group (M3 Switches) */}
+              {/* Learning Options Group */}
               <div>
-                <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase">Learning</h3>
-                {/* Unified Container Background */}
-                <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden">
+                <h3 className="m3-label-large text-primary px-4 mb-3 tracking-wide uppercase font-bold">Learning</h3>
+                <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden border border-outline/5">
                   {learningOptions.map((item, index) => {
                     const isChecked = settings[item.id as keyof AppSettings] as boolean;
                     return (
@@ -187,7 +186,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                           <p className="m3-body-large text-on-surface font-medium mb-0.5">{item.label}</p>
                           <p className="m3-body-small text-on-surface-variant leading-tight">{item.desc}</p>
                         </div>
-                        {/* M3 Toggle Switch */}
                         <div className="shrink-0 relative">
                           <input
                             type="checkbox"
