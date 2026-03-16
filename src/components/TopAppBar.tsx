@@ -81,7 +81,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
             <h1 className="text-[22px] font-medium text-on-surface truncate">{title}</h1>
           </div>
         ) : (
-          <div className="tour-search-bar flex-1 min-w-0 flex items-center bg-surface-variant/40 rounded-full pl-4 pr-2 h-14 shadow-sm transition-all duration-300 focus-within:bg-surface-variant/70 focus-within:shadow-md border border-transparent hover:border-outline/10">
+          <div className="tour-search-bar flex-1 min-w-0 flex items-center bg-surface-variant/40 hover:bg-surface-variant/70 rounded-full pl-4 pr-1.5 h-14 transition-colors duration-200 focus-within:bg-surface-variant/70">
 
             <input
               type="text"
@@ -91,7 +91,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
               className="bg-transparent border-none outline-none flex-1 min-w-0 w-full text-on-surface placeholder:text-on-surface-variant m3-body-large truncate mr-2"
             />
 
-            <div className="flex items-center shrink-0 gap-0.5">
+            <div className="flex items-center shrink-0">
 
               {localSearch.length > 0 && (
                 <button
@@ -100,9 +100,10 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
                     setLocalSearch('');
                     setSearchQuery('');
                   }}
-                  className="p-1.5 rounded-full hover:bg-on-surface/10 text-on-surface-variant transition-colors"
+                  className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-on-surface/10 text-on-surface-variant transition-colors active:scale-90"
+                  aria-label="Clear search"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-6 h-6" />
                 </button>
               )}
 
@@ -111,10 +112,10 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
                   triggerHaptic(settings.hapticsEnabled);
                   setIsVideoOpen(true);
                 }}
-                className="tour-video-tutorial p-2 rounded-full hover:bg-on-surface/10 text-on-surface-variant transition-colors active:scale-90"
+                className="tour-video-tutorial w-10 h-10 flex items-center justify-center rounded-full hover:bg-on-surface/10 text-on-surface-variant transition-colors active:scale-90"
                 aria-label="Video Tutorial"
               >
-                <PlayCircle className="w-6 h-6 text-primary" strokeWidth={2.5} />
+                <PlayCircle className="w-6 h-6" />
               </button>
 
               <button
@@ -122,10 +123,10 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
                   triggerHaptic(settings.hapticsEnabled);
                   setIsTipsOpen(true);
                 }}
-                className="tour-grammar-tips p-2 rounded-full hover:bg-on-surface/10 text-on-surface-variant transition-colors active:scale-90"
+                className="tour-grammar-tips w-10 h-10 flex items-center justify-center rounded-full hover:bg-on-surface/10 text-on-surface-variant transition-colors active:scale-90"
                 aria-label="Grammar Tips"
               >
-                <Info className="w-6 h-6 text-primary" strokeWidth={2.5} />
+                <Info className="w-6 h-6" />
               </button>
 
             </div>
@@ -135,7 +136,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
         {/* USER AVATAR */}
         <button
           onClick={handleAvatarClick}
-          className="tour-user-avatar w-9 h-9 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-surface-variant/40 border border-outline/5 hover:bg-surface-variant transition-all duration-200 active:scale-90"
+          className="tour-user-avatar w-9 h-9 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-surface-variant/40 hover:bg-surface-variant transition-all duration-200 active:scale-90"
           aria-label="Upload user avatar"
         >
           {userAvatar && (
