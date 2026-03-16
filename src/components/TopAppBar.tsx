@@ -60,12 +60,12 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
 
   return (
     <>
-      <header className="sticky top-0 z-30 bg-background text-on-surface px-3 sm:px-4 py-3 flex items-center gap-3 sm:gap-4 w-full max-w-full overflow-hidden">
+      <header className="sticky top-0 z-30 bg-surface px-3 sm:px-4 py-3 flex items-center gap-3 sm:gap-4 w-full max-w-full overflow-hidden">
 
         {/* MENU BUTTON */}
         <button
           onClick={handleMenuClick}
-          className="tour-menu-btn w-10 h-10 flex items-center justify-center rounded-xl hover:bg-surface-variant transition-all duration-200 active:scale-90 text-on-surface-variant flex-shrink-0"
+          className="tour-menu-btn w-12 h-12 flex items-center justify-center rounded-full hover:bg-on-surface/10 transition-colors active:scale-90 text-on-surface-variant flex-shrink-0"
           aria-label="Open settings menu"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
@@ -81,7 +81,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
             <h1 className="text-[22px] font-medium text-on-surface truncate">{title}</h1>
           </div>
         ) : (
-          <div className="tour-search-bar flex-1 min-w-0 flex items-center bg-surface-variant rounded-full pl-4 pr-2 h-14 shadow-sm transition-all duration-300 focus-within:shadow-md">
+          <div className="tour-search-bar flex-1 min-w-0 flex items-center bg-surface-container-high rounded-full pl-5 pr-2 h-14 transition-colors focus-within:bg-surface-container-highest">
 
             <input
               type="text"
@@ -135,7 +135,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
         {/* USER AVATAR */}
         <button
           onClick={handleAvatarClick}
-          className="tour-user-avatar w-9 h-9 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-surface-variant/40 border border-outline/5 hover:bg-surface-variant transition-all duration-200 active:scale-90"
+          className="tour-user-avatar w-10 h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-surface-container-highest border border-outline/5 hover:opacity-80 transition-opacity active:scale-90"
           aria-label="Upload user avatar"
         >
           {userAvatar && (
