@@ -78,14 +78,16 @@ export const Filter: React.FC = () => {
               <h2 className="m3-title-large">Categories</h2>
             </div>
 
-            {/* NEW: Connected Button Group for Favorites */}
+            {/* UPDATED: Connected Button Group (Matched styling with other buttons) */}
             <div className="mb-6 pt-2 pb-6 border-b border-surface-container-highest">
-              <div className="flex w-full rounded-full border border-outline/30 overflow-hidden">
+              {/* Changed to inline-flex and rounded-lg */}
+              <div className="inline-flex rounded-lg border border-outline/30 overflow-hidden">
                 
                 {/* Left Side: Static (Looks like a button, but not clickable) */}
-                <div className="flex-[2] flex items-center justify-center gap-2 py-3 px-4 bg-surface-container-highest">
+                {/* Adjusted padding to py-2 px-4 to match other buttons */}
+                <div className="flex items-center justify-center gap-2 py-2 px-4 bg-surface-container-highest">
                   <Heart 
-                    className={`w-6 h-6 transition-colors duration-200 ${
+                    className={`w-5 h-5 transition-colors duration-200 ${
                       filters.favoritesOnly ? 'fill-rose-500 text-rose-500' : 'text-on-surface-variant'
                     }`} 
                   />
@@ -96,18 +98,21 @@ export const Filter: React.FC = () => {
                 <div className="w-[1px] bg-outline/30"></div>
 
                 {/* Right Side: Dynamic Toggle Button */}
+                {/* Adjusted padding to py-2 px-5 for a balanced look */}
                 <button
                   onClick={() => {
                     triggerHaptic(settings.hapticsEnabled);
                     updateFilters({ favoritesOnly: !filters.favoritesOnly });
                   }}
-                  className={`flex-1 flex items-center justify-center py-3 px-4 m3-label-large font-medium transition-colors duration-200 active:bg-opacity-80 ${
+                  className={`flex items-center justify-center py-2 px-5 m3-label-large transition-colors duration-200 active:bg-opacity-80 ${
                     filters.favoritesOnly
                       ? 'bg-primary text-on-primary'
                       : 'bg-surface-container-low text-on-surface hover:bg-surface-variant'
                   }`}
                 >
-                  {filters.favoritesOnly ? 'On' : 'Off'}
+                  <span className={filters.favoritesOnly ? "font-bold" : ""}>
+                    {filters.favoritesOnly ? 'On' : 'Off'}
+                  </span>
                 </button>
               </div>
             </div>
