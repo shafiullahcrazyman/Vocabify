@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
 import { TopAppBar } from '../components/TopAppBar';
 import { WordCard } from '../components/WordCard';
 import { WordOverlay } from '../components/WordOverlay';
-import { Filter as FilterIcon } from 'lucide-react';
+import { Filter as FilterIcon, Loader2 } from 'lucide-react';
 import { useWordFilter } from '../hooks/useWordFilter';
 
 // How many words to load into the DOM at once
@@ -16,6 +16,9 @@ export const Home: React.FC = () => {
   
   // State for pagination
   const [displayedCount, setDisplayedCount] = useState(WORDS_PER_PAGE);
+  
+  // Ref for the invisible sensor at the bottom
+  const loaderRef = useRef<HTMLDivElement>(null);
 
   const { filteredWords, hasActiveFilters } = useWordFilter(
     words, searchQuery, filters, settings, progress, favorites, activeWordId
@@ -43,13 +46,41 @@ export const Home: React.FC = () => {
 
   const handleClose = () => setActiveWordId(null);
 
-  // Slice the array so the browser doesn't freeze rendering 2000 cards at once
   const displayedWords = filteredWords.slice(0, displayedCount);
   const hasMore = displayedCount < filteredWords.length;
 
-  const loadMore = () => {
-    setDisplayedCount(prev => prev + WORDS_PER_PAGE);
-  };
+  // INFINITE SCROLL LOGIC
+  useEffect(() => {
+    // Create the Intersection Observer (the "Sensor")
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0];
+        // If the sensor is on the screen AND we have more words to load
+        if (target.isIntersecting && hasMore) {
+          setDisplayedCount((prev) => prev + WORDS_PER_PAGE);
+        }
+      },
+      { 
+        root: null,
+        // Trigger the load 200px BEFORE they actually hit the bottom
+        // This makes the scrolling feel completely seamless
+        rootMargin: '200px', 
+        threshold: 0.1 
+      }
+    );
+
+    // Attach the sensor to our loader div
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    // Cleanup the sensor when the component updates or unmounts
+    return () => {
+      if (loaderRef.current) {
+        observer.unobserve(loaderRef.current);
+      }
+    };
+  }, [hasMore]);
 
   return (
     <motion.div 
@@ -102,15 +133,13 @@ export const Home: React.FC = () => {
               })}
             </div>
 
-            {/* Load More Button */}
+            {/* Invisible Sensor / Subtle Loading Indicator */}
             {hasMore && (
-              <div className="flex justify-center mt-8">
-                <button 
-                  onClick={loadMore}
-                  className="px-8 py-3.5 bg-surface-variant text-on-surface rounded-full m3-label-large hover:bg-on-surface/10 active:scale-95 transition-all duration-200 shadow-sm"
-                >
-                  Load More Words ({filteredWords.length - displayedCount} remaining)
-                </button>
+              <div 
+                ref={loaderRef} 
+                className="w-full flex justify-center items-center py-8"
+              >
+                <Loader2 className="w-6 h-6 text-on-surface-variant animate-spin opacity-50" />
               </div>
             )}
           </>
