@@ -14,7 +14,8 @@ interface AppContextType {
   setSearchQuery: (query: string) => void;
   progress: { learned: string[], learnedDates?: Record<string, string> };
   markLearned: (id: string) => void;
-  resetProgress: () => void;
+  resetTotalProgress: () => void;
+  resetDailyProgress: () => void;
   userAvatar: string | null;
   setUserAvatar: (avatar: string | null) => void;
   favorites: string[];
@@ -101,8 +102,35 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     });
   };
 
-  const resetProgress = () => {
+  const resetTotalProgress = () => {
     setProgress({ learned: [], learnedDates: {} });
+  };
+
+  const resetDailyProgress = () => {
+    const today = new Date().toISOString().split('T')[0];
+    
+    setProgress((prev) => {
+      const prevLearned = prev.learned || [];
+      const prevDates = prev.learnedDates || {};
+      
+      const newDates = { ...prevDates };
+      
+      // Find all word IDs that were learned today
+      const todayLearnedIds = Object.keys(newDates).filter(id => newDates[id] === today);
+      
+      // Remove today's dates from tracking
+      todayLearnedIds.forEach(id => {
+        delete newDates[id];
+      });
+      
+      // Un-learn those specific words
+      const newLearned = prevLearned.filter(id => !todayLearnedIds.includes(id));
+      
+      return {
+        learned: newLearned,
+        learnedDates: newDates,
+      };
+    });
   };
 
   const toggleFavorite = (id: string) => {
@@ -128,7 +156,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setSearchQuery,
         progress,
         markLearned,
-        resetProgress,
+        resetTotalProgress,
+        resetDailyProgress,
         userAvatar,
         setUserAvatar,
         favorites,
