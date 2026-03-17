@@ -73,8 +73,8 @@ export const Filter: React.FC = () => {
       >
         <div className="px-4 space-y-8">
           
-          {/* Flex container with the tiny 2px gap for the M3 grouped look */}
-          <div className="flex flex-col gap-[2px]">
+          {/* Flex container with the tiny 4px gap for the M3 grouped look */}
+          <div className="flex flex-col gap-[4px]">
             
             {/* Top Section - Filters Content */}
             <section className="bg-surface-container-low rounded-t-[28px] rounded-b-[4px] p-6">
