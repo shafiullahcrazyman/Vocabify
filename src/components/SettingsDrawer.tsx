@@ -70,7 +70,8 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={settings.animationsEnabled ? { type: 'spring', damping: 25, stiffness: 200 } : { duration: 0.15, ease: "easeOut" }}
-            className="relative bg-surface-container-high w-[calc(100%-56px)] max-w-[380px] h-full flex flex-col"
+            /* CHANGED: bg-surface-container-high is now bg-background */
+            className="relative bg-background w-[calc(100%-56px)] max-w-[380px] h-full flex flex-col"
           >
             {/* Header with Arrow Navigation */}
             <div className="flex items-center gap-2 p-3 shrink-0">
