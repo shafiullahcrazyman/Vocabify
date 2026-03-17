@@ -29,17 +29,10 @@ export const useWordFilter = (
     const isSearching = query !== '';
 
     let result = words.filter((word) => {
-      // 1. Favorites Filter
-      if (filters.favoritesOnly && !favorites.includes(word.id)) {
-        if (word.id !== activeWordId) return false;
-      }
-
-      // 2. Smart Hide
-      if (settings.hideLearnedWords && progress.learned.includes(word.id)) {
-        if (word.id !== activeWordId) return false;
-      }
-
-      // 3. Search (Optimized for speed)
+      
+      // 1. UNIVERSAL SEARCH OVERRIDE
+      // If the user is actively typing in the search bar, ignore all other filters
+      // and search the entire dictionary universally.
       if (isSearching) {
         const n = word.noun?.toLowerCase() || '';
         const v = word.verb?.toLowerCase() || '';
@@ -47,8 +40,19 @@ export const useWordFilter = (
         const adv = word.adverb?.toLowerCase() || '';
         const m = word.meaning_bn || ''; 
 
-        const matchesSearch = n.includes(query) || v.includes(query) || adj.includes(query) || adv.includes(query) || m.includes(query);
-        if (!matchesSearch) return false;
+        return n.includes(query) || v.includes(query) || adj.includes(query) || adv.includes(query) || m.includes(query);
+      }
+
+      // --- THE FOLLOWING FILTERS ONLY APPLY IF NOT SEARCHING ---
+
+      // 2. Favorites Filter
+      if (filters.favoritesOnly && !favorites.includes(word.id)) {
+        if (word.id !== activeWordId) return false;
+      }
+
+      // 3. Smart Hide
+      if (settings.hideLearnedWords && progress.learned.includes(word.id)) {
+        if (word.id !== activeWordId) return false;
       }
 
       // 4. Difficulty
@@ -81,7 +85,7 @@ export const useWordFilter = (
       return true;
     });
 
-    // Smart Sorting (Optimized)
+    // Smart Sorting for Search Results (Optimized)
     if (isSearching) {
       result.sort((a, b) => {
         const aN = a.noun?.toLowerCase() || ''; const aV = a.verb?.toLowerCase() || '';
