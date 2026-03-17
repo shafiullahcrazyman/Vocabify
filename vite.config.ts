@@ -7,7 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
-    base: './', // Fixed base path for GitHub Pages
+    base: '/Vocabify/', // MUST be the exact GitHub Repo name with slashes for the Service Worker scope
     build: {
       outDir: 'dist',
     },
@@ -16,6 +16,7 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
+        injectRegister: 'auto', // Tells Vite to auto-inject the service worker into index.html
         includeAssets: ['icon.png', 'tutorial.mp4'],
         manifest: {
           name: 'Vocabify',
@@ -24,9 +25,12 @@ export default defineConfig(({mode}) => {
           theme_color: '#141218',
           background_color: '#141218',
           display: 'standalone',
+          scope: '/Vocabify/',
+          start_url: '/Vocabify/',
           icons: [
             { src: 'icon.png', sizes: '192x192', type: 'image/png' },
-            { src: 'icon.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+            { src: 'icon.png', sizes: '512x512', type: 'image/png' }, // Standard icon required by Chrome
+            { src: 'icon.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' } // Maskable fallback
           ]
         },
         workbox: {
