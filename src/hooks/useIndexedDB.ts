@@ -19,16 +19,18 @@ export function useIndexedDB<T>(key: string, initialValue: T) {
     });
   }, [key]);
 
-  const setValue = async (value: T | ((val: T) => T)) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      // Update React state immediately for a snappy UI
-      setStoredValue(valueToStore);
-      // Save to IndexedDB asynchronously in the background so it never freezes
-      await localforage.setItem(key, valueToStore);
-    } catch (error) {
-      console.error(`[IndexedDB] Failed to save data for "${key}":`, error);
-    }
+  const setValue = (value: T | ((val: T) => T)) => {
+    // We use React's 'prev' to absolutely guarantee we never use a stale state
+    setStoredValue((prev) => {
+      const valueToStore = value instanceof Function ? value(prev) : value;
+      
+      // Fire and forget save to IndexedDB in the background
+      localforage.setItem(key, valueToStore).catch(err => {
+        console.error(`[IndexedDB] Failed to save data for "${key}":`, err);
+      });
+      
+      return valueToStore;
+    });
   };
 
   return [storedValue, setValue, isLoaded] as const;
