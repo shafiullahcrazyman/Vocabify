@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
-import { SlidersHorizontal, Heart } from 'lucide-react';
+import { SlidersHorizontal, Heart, X } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import { TopAppBar } from '../components/TopAppBar';
 
@@ -72,74 +72,80 @@ export const Filter: React.FC = () => {
         className="pb-24 max-w-3xl mx-auto pt-4"
       >
         <div className="px-4 space-y-8">
-          <section className="bg-surface-container-low rounded-3xl p-6">
-            <div className="flex items-center mb-4 text-on-surface">
-              <SlidersHorizontal className="w-6 h-6 mr-3 text-primary" />
-              <h2 className="m3-title-large">Categories</h2>
-            </div>
+          <section className="bg-surface-container-low rounded-3xl overflow-hidden flex flex-col">
+            
+            {/* Inner Content Padding Wrapper */}
+            <div className="p-6 pb-6">
+              <div className="flex items-center mb-4 text-on-surface">
+                <SlidersHorizontal className="w-6 h-6 mr-3 text-primary" />
+                <h2 className="m3-title-large">Categories</h2>
+              </div>
 
-            {/* Favorites Section: Two matched buttons */}
-            <div className="mb-6 pt-2 pb-6 border-b border-surface-container-highest">
-              <h3 className="m3-title-medium text-on-surface mb-3">Favorites</h3>
-              <div className="flex gap-2">
-                {/* Static Button (Icon + Label) */}
-                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-highest text-on-surface">
-                  <Heart className={`w-5 h-5 ${filters.favoritesOnly ? 'fill-rose-500 text-rose-500' : 'text-on-surface-variant'}`} />
-                  <span className="m3-label-large">Favorites Only</span>
+              {/* Favorites Section */}
+              <div className="mb-6 pt-2 pb-6 border-b border-surface-container-highest">
+                <h3 className="m3-title-medium text-on-surface mb-3">Favorites</h3>
+                <div className="flex gap-2">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-highest text-on-surface">
+                    <Heart className={`w-5 h-5 ${filters.favoritesOnly ? 'fill-rose-500 text-rose-500' : 'text-on-surface-variant'}`} />
+                    <span className="m3-label-large">Favorites Only</span>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      triggerHaptic(settings.hapticsEnabled);
+                      updateFilters({ favoritesOnly: !filters.favoritesOnly });
+                    }}
+                    className={`px-4 py-2 rounded-lg m3-label-large transition-colors duration-200 active:scale-[0.96] ${
+                      filters.favoritesOnly
+                        ? 'bg-primary text-on-primary'
+                        : 'bg-surface-container-highest text-on-surface hover:bg-surface-variant'
+                    }`}
+                  >
+                    {filters.favoritesOnly ? 'On' : 'Off'}
+                  </button>
                 </div>
-
-                {/* Clickable Toggle Button */}
-                <button
-                  onClick={() => {
-                    triggerHaptic(settings.hapticsEnabled);
-                    updateFilters({ favoritesOnly: !filters.favoritesOnly });
-                  }}
-                  className={`px-4 py-2 rounded-lg m3-label-large transition-colors duration-200 active:scale-[0.96] ${
-                    filters.favoritesOnly
-                      ? 'bg-primary text-on-primary'
-                      : 'bg-surface-container-highest text-on-surface hover:bg-surface-variant'
-                  }`}
-                >
-                  {filters.favoritesOnly ? 'On' : 'Off'}
-                </button>
+              </div>
+              
+              <FilterSection title="Difficulty Level" category="level" options={levels} />
+              <FilterSection title="CEFR English Level" category="cefr" options={cefrLevels} />
+              <FilterSection title="Part of Speech" category="pos" options={pos} />
+              
+              {dynamicThemes.length > 0 && (
+                <FilterSection title="Theme" category="theme" options={dynamicThemes} />
+              )}
+              
+              <div className="mb-2">
+                <h3 className="m3-title-medium text-on-surface mb-3">Alphabet</h3>
+                <div className="flex flex-wrap gap-1">
+                  {letters.map((letter) => {
+                    const isSelected = filters.letter.includes(letter);
+                    return (
+                      <button
+                        key={letter}
+                        onClick={() => toggleFilter('letter', letter)}
+                        className={`w-10 h-10 rounded-full m3-label-large flex items-center justify-center transition-colors duration-200 active:scale-[0.94] ${
+                          isSelected
+                            ? 'bg-primary text-on-primary'
+                            : 'bg-surface-container-highest text-on-surface hover:bg-surface-variant'
+                        }`}
+                      >
+                        {letter}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
             
-            <FilterSection title="Difficulty Level" category="level" options={levels} />
-            <FilterSection title="CEFR English Level" category="cefr" options={cefrLevels} />
-            <FilterSection title="Part of Speech" category="pos" options={pos} />
-            
-            {dynamicThemes.length > 0 && (
-              <FilterSection title="Theme" category="theme" options={dynamicThemes} />
-            )}
-            
-            <div className="mb-6">
-              <h3 className="m3-title-medium text-on-surface mb-3">Alphabet</h3>
-              <div className="flex flex-wrap gap-1">
-                {letters.map((letter) => {
-                  const isSelected = filters.letter.includes(letter);
-                  return (
-                    <button
-                      key={letter}
-                      onClick={() => toggleFilter('letter', letter)}
-                      className={`w-10 h-10 rounded-full m3-label-large flex items-center justify-center transition-colors duration-200 active:scale-[0.94] ${
-                        isSelected
-                          ? 'bg-primary text-on-primary'
-                          : 'bg-surface-container-highest text-on-surface hover:bg-surface-variant'
-                      }`}
-                    >
-                      {letter}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            {/* Connected Edge-to-Edge Bottom Button */}
             <button
               onClick={handleClearFilters}
-              className="w-full py-3 rounded-full bg-error text-on-error m3-label-large hover:bg-error/90 transition-colors duration-200 active:scale-[0.98]"
+              className="w-full py-4 bg-error text-on-error m3-title-medium hover:bg-error/90 transition-colors duration-200 active:bg-error/80 flex items-center justify-center gap-2"
             >
+              <X className="w-5 h-5" />
               Clear All Filters
             </button>
+            
           </section>
         </div>
       </motion.div>
