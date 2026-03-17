@@ -5,7 +5,6 @@ import { Target, RotateCcw, Award, Copy, Check, Download, X, Flame, Sparkles, Ch
 import { triggerHaptic } from '../utils/haptics';
 import { TopAppBar } from '../components/TopAppBar';
 
-// Reusable grouped card section that dynamically adjusts corners based on position
 interface SectionGroupProps {
   title?: string;
   icon?: React.ReactNode;
@@ -14,7 +13,6 @@ interface SectionGroupProps {
 }
 
 const SectionGroup: React.FC<SectionGroupProps> = ({ title, icon, children, containerBg = 'bg-surface-container-low' }) => {
-  // Filter valid children to prevent empty renders and support dynamic lists
   const validChildren = React.Children.toArray(children).filter(Boolean);
   const total = validChildren.length;
 
@@ -33,8 +31,6 @@ const SectionGroup: React.FC<SectionGroupProps> = ({ title, icon, children, cont
           <h2 className="m3-label-large text-primary font-bold uppercase tracking-wide">{title}</h2>
         </div>
       )}
-      {/* M3 relies on tonal elevation (background colors) without drop shadows. 
-          overflow-hidden ensures corners never bleed out. */}
       <div className="flex flex-col rounded-[28px] overflow-hidden">
         {validChildren.map((child, index) => (
           <div 
@@ -52,8 +48,12 @@ const SectionGroup: React.FC<SectionGroupProps> = ({ title, icon, children, cont
 };
 
 export const Progress: React.FC = () => {
-  const { settings, updateSettings, progress, resetProgress, words } = useAppContext();
-  const [showConfirm, setShowConfirm] = useState(false);
+  const { settings, updateSettings, progress, resetTotalProgress, resetDailyProgress, words } = useAppContext();
+  
+  // Independent confirmation states for each reset button
+  const [confirmDaily, setConfirmDaily] = useState(false);
+  const [confirmTotal, setConfirmTotal] = useState(false);
+  
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportCount, setExportCount] = useState<number>(-1);
   const [copied, setCopied] = useState(false);
@@ -67,7 +67,7 @@ export const Progress: React.FC = () => {
   }, [words, progress.learned]);
 
   const { wordsLearnedToday, dailyPercentage, isGoalReached } = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0]; // Dynamically grabs current day
     const learnedDates = progress.learnedDates || {};
     const count = Object.values(learnedDates).filter(date => date === today).length;
     const goal = settings.dailyGoal;
@@ -84,9 +84,6 @@ export const Progress: React.FC = () => {
     });
   };
 
-  const handleResetClick = () => { triggerHaptic(settings.hapticsEnabled); setShowConfirm(true); };
-  const handleCancelReset = () => { triggerHaptic(settings.hapticsEnabled); setShowConfirm(false); };
-  const handleConfirmReset = () => { triggerHaptic(settings.hapticsEnabled); resetProgress(); setShowConfirm(false); };
   const handleOpenExport = () => { triggerHaptic(settings.hapticsEnabled); setShowExportModal(true); };
   const handleCloseExport = () => { triggerHaptic(settings.hapticsEnabled); setShowExportModal(false); };
 
@@ -178,6 +175,7 @@ export const Progress: React.FC = () => {
 
           {/* Learning Goals Settings */}
           <SectionGroup title="Manage Goals" icon={<Target className="w-5 h-5" />}>
+            {/* Row 1: Target Goal Selector */}
             <div className="flex justify-between items-center w-full">
               <div className="pr-4">
                 <p className="m3-body-large text-on-surface font-medium mb-0.5">Daily Target</p>
@@ -201,22 +199,57 @@ export const Progress: React.FC = () => {
               </div>
             </div>
 
+            {/* Row 2: Reset Today's Goal */}
             <div className="flex justify-between items-center w-full">
               <div className="pr-4">
-                <p className="m3-body-large text-on-surface font-medium mb-0.5">Reset Progress</p>
-                <p className="m3-body-small text-on-surface-variant leading-tight">Start over from scratch</p>
+                <p className="m3-body-large text-on-surface font-medium mb-0.5">Reset Today</p>
+                <p className="m3-body-small text-on-surface-variant leading-tight">Un-learn words learned today</p>
               </div>
               <div className="shrink-0">
-                {showConfirm ? (
+                {confirmDaily ? (
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={handleCancelReset}
+                      onClick={() => { triggerHaptic(settings.hapticsEnabled); setConfirmDaily(false); }}
                       className="px-4 py-2 text-on-surface-variant bg-surface-container-highest hover:opacity-80 rounded-full m3-label-large transition-all duration-200 active:scale-95"
                     >
                       Cancel
                     </button>
                     <button
-                      onClick={handleConfirmReset}
+                      onClick={() => { triggerHaptic(settings.hapticsEnabled); resetDailyProgress(); setConfirmDaily(false); }}
+                      className="px-4 py-2 bg-orange-500 text-white hover:bg-orange-600 rounded-full m3-label-large transition-all duration-200 active:scale-95"
+                    >
+                      Confirm
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => { triggerHaptic(settings.hapticsEnabled); setConfirmDaily(true); setConfirmTotal(false); }}
+                    className="flex items-center px-4 py-2 text-orange-500 dark:text-orange-400 hover:bg-orange-500/10 rounded-full transition-all duration-200 active:scale-95 m3-label-large"
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Reset
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Row 3: Reset Total Mastery */}
+            <div className="flex justify-between items-center w-full">
+              <div className="pr-4">
+                <p className="m3-body-large text-on-surface font-medium mb-0.5">Reset All Progress</p>
+                <p className="m3-body-small text-on-surface-variant leading-tight">Clear all learned words forever</p>
+              </div>
+              <div className="shrink-0">
+                {confirmTotal ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => { triggerHaptic(settings.hapticsEnabled); setConfirmTotal(false); }}
+                      className="px-4 py-2 text-on-surface-variant bg-surface-container-highest hover:opacity-80 rounded-full m3-label-large transition-all duration-200 active:scale-95"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => { triggerHaptic(settings.hapticsEnabled); resetTotalProgress(); setConfirmTotal(false); }}
                       className="px-4 py-2 bg-error text-on-error hover:bg-error/90 rounded-full m3-label-large transition-all duration-200 active:scale-95"
                     >
                       Confirm
@@ -224,7 +257,7 @@ export const Progress: React.FC = () => {
                   </div>
                 ) : (
                   <button
-                    onClick={handleResetClick}
+                    onClick={() => { triggerHaptic(settings.hapticsEnabled); setConfirmTotal(true); setConfirmDaily(false); }}
                     className="flex items-center px-4 py-2 text-error hover:bg-error/10 rounded-full transition-all duration-200 active:scale-95 m3-label-large"
                   >
                     <RotateCcw className="w-4 h-4 mr-2" />
