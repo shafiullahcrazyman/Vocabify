@@ -134,21 +134,21 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
         )}
 
         {/* USER AVATAR */}
-<button
-  onClick={handleAvatarClick}
-  className="tour-user-avatar w-9 h-9 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-surface-variant/40 hover:bg-surface-variant transition-all duration-200 active:scale-90"
-  aria-label="Upload user avatar"
->
-  {userAvatar ? (
-    <img
-      src={userAvatar}
-      alt="User avatar"
-      className="w-full h-full object-cover"
-    />
-  ) : (
-    <div className="w-full h-full rounded-full" />
-  )}
-</button>
+        <button
+          onClick={handleAvatarClick}
+          className="tour-user-avatar w-9 h-9 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-surface-variant/40 hover:bg-surface-variant transition-all duration-200 active:scale-90"
+          aria-label="Upload user avatar"
+        >
+          {userAvatar ? (
+            <img
+              src={userAvatar}
+              alt="User avatar"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full rounded-full" />
+          )}
+        </button>
 
         <input
           type="file"
@@ -157,6 +157,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
           accept="image/*"
           className="hidden"
         />
+
       </header>
 
       <SettingsDrawer
