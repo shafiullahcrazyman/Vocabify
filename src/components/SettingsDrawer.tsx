@@ -70,7 +70,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={settings.animationsEnabled ? { type: 'spring', damping: 25, stiffness: 200 } : { duration: 0.15, ease: "easeOut" }}
-            className="relative bg-surface w-[calc(100%-56px)] max-w-[380px] h-full shadow-2xl flex flex-col"
+            className="relative bg-surface-container-high w-[calc(100%-56px)] max-w-[380px] h-full flex flex-col"
           >
             {/* Header with Arrow Navigation */}
             <div className="flex items-center gap-2 p-3 shrink-0">
@@ -160,7 +160,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                           <div className={`w-[52px] h-8 rounded-full border-2 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] flex items-center ${
                             isChecked ? 'bg-primary border-primary' : 'bg-surface-variant/80 border-outline/40'
                           }`}>
-                            <div className={`rounded-full absolute transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] shadow-sm ${
+                            <div className={`rounded-full absolute transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${
                               isChecked ? 'w-6 h-6 right-0.5 bg-on-primary' : 'w-4 h-4 left-1 bg-outline'
                             }`} />
                           </div>
@@ -198,7 +198,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                           <div className={`w-[52px] h-8 rounded-full border-2 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] flex items-center ${
                             isChecked ? 'bg-primary border-primary' : 'bg-surface-variant/80 border-outline/40'
                           }`}>
-                            <div className={`rounded-full absolute transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] shadow-sm ${
+                            <div className={`rounded-full absolute transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${
                               isChecked ? 'w-6 h-6 right-0.5 bg-on-primary' : 'w-4 h-4 left-1 bg-outline'
                             }`} />
                           </div>

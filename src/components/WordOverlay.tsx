@@ -133,7 +133,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         onDragEnd={handleDragEnd}
-        className="relative bg-surface w-full max-w-2xl max-h-[92dvh] sm:max-h-[85vh] rounded-[32px] shadow-2xl flex flex-col overflow-hidden"
+        className="relative bg-surface-container-high w-full max-w-2xl max-h-[92dvh] sm:max-h-[85vh] rounded-[32px] flex flex-col overflow-hidden"
       >
         <div className="flex items-center justify-between px-4 h-[88px] border-b border-outline/10 shrink-0">
           <button onClick={handleClose} className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-variant text-on-surface-variant transition-all duration-200 active:scale-90">
@@ -253,7 +253,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
           </div>
         </div>
 
-        <div className="px-4 h-[88px] border-t border-outline/10 flex justify-between items-center gap-3 bg-surface shrink-0 z-10">
+        <div className="px-4 h-[88px] border-t border-outline/10 flex justify-between items-center gap-3 bg-surface-container-high shrink-0 z-10">
           <button onClick={handlePrev} disabled={!hasPrev} className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-variant/50 disabled:opacity-30 text-on-surface transition-all active:scale-90"><ChevronLeft className="w-7 h-7" /></button>
           <button onClick={handleMarkLearned} className={`flex-1 h-14 flex items-center justify-center rounded-full transition-all active:scale-[0.98] font-bold tracking-wide ${isLearned ? 'bg-emerald-500/15 text-emerald-700' : 'bg-surface-variant/50 text-on-surface'}`}>
             <CheckCircle2 className={`w-6 h-6 mr-2 ${isLearned ? 'text-emerald-600' : 'text-on-surface-variant'}`} />

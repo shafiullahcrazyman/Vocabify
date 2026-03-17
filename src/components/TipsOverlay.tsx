@@ -42,7 +42,7 @@ export const TipsOverlay: React.FC<TipsOverlayProps> = ({ isOpen, onClose }) => 
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={settings.animationsEnabled ? { type: 'spring', damping: 25, stiffness: 300 } : { duration: 0.15, ease: "easeOut" }}
-          className="relative bg-surface w-full max-w-2xl max-h-[90vh] rounded-[32px] shadow-2xl flex flex-col overflow-hidden"
+          className="relative bg-surface-container-high w-full max-w-2xl max-h-[90vh] rounded-[32px] flex flex-col overflow-hidden"
         >
           {/* Header */}
           <div className="flex items-center justify-between p-6 pb-4 border-b border-outline/10 shrink-0">
@@ -243,25 +243,25 @@ export const TipsOverlay: React.FC<TipsOverlayProps> = ({ isOpen, onClose }) => 
                 <div className="bg-blue-500/5 border border-blue-500/20 rounded-2xl p-4">
                   <div className="font-bold text-blue-700 dark:text-blue-300 mb-1">Noun</div>
                   <p className="text-sm text-on-surface-variant mb-2">Names a thing (-tion, -ment, -ness, -ity)</p>
-                  <div className="text-sm font-medium text-on-surface bg-surface rounded-lg px-3 py-2 inline-block shadow-sm">Education</div>
+                  <div className="text-sm font-medium text-on-surface bg-surface-container-highest rounded-lg px-3 py-2 inline-block">Education</div>
                 </div>
                 
                 <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4">
                   <div className="font-bold text-emerald-700 dark:text-emerald-300 mb-1">Verb</div>
                   <p className="text-sm text-on-surface-variant mb-2">Shows action (-ate, -ify, -ize, -en)</p>
-                  <div className="text-sm font-medium text-on-surface bg-surface rounded-lg px-3 py-2 inline-block shadow-sm">Educate</div>
+                  <div className="text-sm font-medium text-on-surface bg-surface-container-highest rounded-lg px-3 py-2 inline-block">Educate</div>
                 </div>
                 
                 <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4">
                   <div className="font-bold text-amber-700 dark:text-amber-300 mb-1">Adjective</div>
                   <p className="text-sm text-on-surface-variant mb-2">Describes noun (-ful, -able, -al, -ive)</p>
-                  <div className="text-sm font-medium text-on-surface bg-surface rounded-lg px-3 py-2 inline-block shadow-sm">Educative</div>
+                  <div className="text-sm font-medium text-on-surface bg-surface-container-highest rounded-lg px-3 py-2 inline-block">Educative</div>
                 </div>
                 
                 <div className="bg-purple-500/5 border border-purple-500/20 rounded-2xl p-4">
                   <div className="font-bold text-purple-700 dark:text-purple-300 mb-1">Adverb</div>
                   <p className="text-sm text-on-surface-variant mb-2">Describes verb (-ly)</p>
-                  <div className="text-sm font-medium text-on-surface bg-surface rounded-lg px-3 py-2 inline-block shadow-sm">Beautifully</div>
+                  <div className="text-sm font-medium text-on-surface bg-surface-container-highest rounded-lg px-3 py-2 inline-block">Beautifully</div>
                 </div>
               </div>
             </section>

@@ -56,7 +56,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <div className="flex flex-col gap-4 w-full max-w-[280px]">
             <button 
               onClick={this.handleSoftReset} 
-              className="w-full py-4 bg-primary text-on-primary rounded-full m3-label-large flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md hover:bg-primary/90"
+              className="w-full py-4 bg-primary text-on-primary rounded-full m3-label-large flex items-center justify-center gap-2 active:scale-95 transition-all hover:bg-primary/90"
             >
               <RefreshCw className="w-5 h-5" />
               Reload App Safely

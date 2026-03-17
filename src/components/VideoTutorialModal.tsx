@@ -42,7 +42,7 @@ export const VideoTutorialModal: React.FC<VideoTutorialModalProps> = ({ isOpen, 
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={settings.animationsEnabled ? { type: 'spring', damping: 25, stiffness: 300 } : { duration: 0.15, ease: "easeOut" }}
-          className="relative bg-surface w-full max-w-4xl max-h-[90vh] rounded-[32px] shadow-2xl flex flex-col overflow-hidden"
+          className="relative bg-surface-container-high w-full max-w-4xl max-h-[90vh] rounded-[32px] flex flex-col overflow-hidden"
         >
           {/* Header */}
           <div className="flex items-center justify-between p-6 pb-4 border-b border-outline/10 shrink-0">
@@ -58,7 +58,7 @@ export const VideoTutorialModal: React.FC<VideoTutorialModalProps> = ({ isOpen, 
 
           {/* Content */}
           <div className="p-6 overflow-y-auto flex-1 flex flex-col items-center justify-center bg-surface-variant/20">
-            <div className="w-full aspect-square max-w-[60vh] max-h-[60vh] mx-auto bg-black rounded-2xl overflow-hidden shadow-lg flex items-center justify-center">
+            <div className="w-full aspect-square max-w-[60vh] max-h-[60vh] mx-auto bg-black rounded-2xl overflow-hidden flex items-center justify-center">
               <video 
                 controls 
                 autoPlay 

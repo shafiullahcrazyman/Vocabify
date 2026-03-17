@@ -21,7 +21,7 @@ export const BottomNav: React.FC = () => {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline/20 h-[60px] flex justify-around items-center px-2 z-10 pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 bg-surface-container h-[60px] flex justify-around items-center px-2 z-10 pb-safe">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = location.pathname.startsWith(tab.path);
