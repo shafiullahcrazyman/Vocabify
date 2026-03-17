@@ -4,6 +4,12 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useIndexedDB } from '../hooks/useIndexedDB';
 import wordsData from '../data/words.json';
 
+// Helper to get local YYYY-MM-DD instead of UTC which can cause timezone bugs
+export const getLocalDateString = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
 interface AppContextType {
   settings: AppSettings;
   updateSettings: (newSettings: Partial<AppSettings>) => void;
@@ -45,12 +51,10 @@ const defaultFilters: FilterOptions = {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // UI preferences stay in LocalStorage because they are tiny and needed instantly for rendering CSS
   const [storedSettings, setSettings] = useLocalStorage<AppSettings>('vocab_settings', defaultSettings);
   const settings = { ...defaultSettings, ...storedSettings };
   const [filters, setFilters] = useLocalStorage<FilterOptions>('vocab_filters', defaultFilters);
   
-  // Heavy user data moves to IndexedDB to prevent app freezing
   const [progress, setProgress, progressLoaded] = useIndexedDB<{ learned: string[], learnedDates?: Record<string, string> }>('vocab_progress', { learned: [], learnedDates: {} });
   const [userAvatar, setUserAvatar, avatarLoaded] = useIndexedDB<string | null>('vocab_user_avatar', null);
   const [favorites, setFavorites, favsLoaded] = useIndexedDB<string[]>('vocab_favorites', []);
@@ -79,7 +83,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const markLearned = (id: string) => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString();
 
     setProgress((prev) => {
       const prevLearned = prev.learned || [];
@@ -107,7 +111,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const resetDailyProgress = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString();
     
     setProgress((prev) => {
       const prevLearned = prev.learned || [];
@@ -115,7 +119,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       
       const newDates = { ...prevDates };
       
-      // Find all word IDs that were learned today
+      // Find all word IDs that were learned specifically today
       const todayLearnedIds = Object.keys(newDates).filter(id => newDates[id] === today);
       
       // Remove today's dates from tracking
@@ -123,7 +127,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         delete newDates[id];
       });
       
-      // Un-learn those specific words
+      // Filter out today's words from the learned array, keeping all older words
       const newLearned = prevLearned.filter(id => !todayLearnedIds.includes(id));
       
       return {
@@ -139,7 +143,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     );
   };
 
-  // Prevent app from rendering until IndexedDB has loaded the user's data
   if (!progressLoaded || !avatarLoaded || !favsLoaded) {
     return <div className="min-h-screen bg-background" />;
   }
