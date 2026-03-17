@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { useAppContext } from '../context/AppContext';
+import { useAppContext, getLocalDateString } from '../context/AppContext';
 import { Target, RotateCcw, Award, Copy, Check, Download, X, Flame, Sparkles, ChevronDown } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import { TopAppBar } from '../components/TopAppBar';
@@ -50,7 +50,6 @@ const SectionGroup: React.FC<SectionGroupProps> = ({ title, icon, children, cont
 export const Progress: React.FC = () => {
   const { settings, updateSettings, progress, resetTotalProgress, resetDailyProgress, words } = useAppContext();
   
-  // Independent confirmation states for each reset button
   const [confirmDaily, setConfirmDaily] = useState(false);
   const [confirmTotal, setConfirmTotal] = useState(false);
   
@@ -67,7 +66,7 @@ export const Progress: React.FC = () => {
   }, [words, progress.learned]);
 
   const { wordsLearnedToday, dailyPercentage, isGoalReached } = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0]; // Dynamically grabs current day
+    const today = getLocalDateString();
     const learnedDates = progress.learnedDates || {};
     const count = Object.values(learnedDates).filter(date => date === today).length;
     const goal = settings.dailyGoal;
@@ -175,7 +174,8 @@ export const Progress: React.FC = () => {
 
           {/* Learning Goals Settings */}
           <SectionGroup title="Manage Goals" icon={<Target className="w-5 h-5" />}>
-            {/* Row 1: Target Goal Selector */}
+            
+            {/* Target Goal Selector */}
             <div className="flex justify-between items-center w-full">
               <div className="pr-4">
                 <p className="m3-body-large text-on-surface font-medium mb-0.5">Daily Target</p>
@@ -199,11 +199,11 @@ export const Progress: React.FC = () => {
               </div>
             </div>
 
-            {/* Row 2: Reset Today's Goal */}
+            {/* Reset Today's Goal */}
             <div className="flex justify-between items-center w-full">
               <div className="pr-4">
                 <p className="m3-body-large text-on-surface font-medium mb-0.5">Reset Today</p>
-                <p className="m3-body-small text-on-surface-variant leading-tight">Un-learn words learned today</p>
+                <p className="m3-body-small text-on-surface-variant leading-tight">Clear all words learned today</p>
               </div>
               <div className="shrink-0">
                 {confirmDaily ? (
@@ -233,7 +233,7 @@ export const Progress: React.FC = () => {
               </div>
             </div>
 
-            {/* Row 3: Reset Total Mastery */}
+            {/* Reset Total Mastery */}
             <div className="flex justify-between items-center w-full">
               <div className="pr-4">
                 <p className="m3-body-large text-on-surface font-medium mb-0.5">Reset All Progress</p>
