@@ -72,10 +72,11 @@ export const Filter: React.FC = () => {
         className="pb-24 max-w-3xl mx-auto pt-4"
       >
         <div className="px-4 space-y-8">
-          <section className="bg-surface-container-low rounded-[32px] flex flex-col">
-            
-            {/* Inner Content */}
-            <div className="p-6 pb-4">
+          
+          {/* Flex column with a small gap separates the card from the button */}
+          <div className="flex flex-col gap-3">
+            <section className="bg-surface-container-low rounded-3xl p-6">
+              
               <div className="flex items-center mb-4 text-on-surface">
                 <SlidersHorizontal className="w-6 h-6 mr-3 text-primary" />
                 <h2 className="m3-title-large">Categories</h2>
@@ -135,20 +136,19 @@ export const Filter: React.FC = () => {
                   })}
                 </div>
               </div>
-            </div>
+
+            </section>
             
-            {/* Spaced & Rounded Action Button */}
-            <div className="px-4 pb-4 pt-2">
-              <button
-                onClick={handleClearFilters}
-                className="w-full py-4 bg-error text-on-error m3-title-medium rounded-[20px] hover:bg-error/90 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
-              >
-                <X className="w-5 h-5" />
-                Clear All Filters
-              </button>
-            </div>
-            
-          </section>
+            {/* Detached Button with slightly rounded corners (rounded-2xl) */}
+            <button
+              onClick={handleClearFilters}
+              className="w-full py-4 bg-error text-on-error m3-title-medium rounded-2xl hover:bg-error/90 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm"
+            >
+              <X className="w-5 h-5" />
+              Clear All Filters
+            </button>
+          </div>
+
         </div>
       </motion.div>
     </>
