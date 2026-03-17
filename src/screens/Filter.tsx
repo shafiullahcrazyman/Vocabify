@@ -73,10 +73,11 @@ export const Filter: React.FC = () => {
       >
         <div className="px-4 space-y-8">
           
-          {/* Flex column with a small gap separates the card from the button */}
-          <div className="flex flex-col gap-3">
-            <section className="bg-surface-container-low rounded-3xl p-6">
-              
+          {/* Flex container with the tiny 2px gap for the M3 grouped look */}
+          <div className="flex flex-col gap-[2px]">
+            
+            {/* Top Section - Filters Content */}
+            <section className="bg-surface-container-low rounded-t-[28px] rounded-b-[4px] p-6">
               <div className="flex items-center mb-4 text-on-surface">
                 <SlidersHorizontal className="w-6 h-6 mr-3 text-primary" />
                 <h2 className="m3-title-large">Categories</h2>
@@ -136,19 +137,18 @@ export const Filter: React.FC = () => {
                   })}
                 </div>
               </div>
-
             </section>
             
-            {/* Detached Button with slightly rounded corners (rounded-2xl) */}
+            {/* Bottom Section - Connected Button */}
             <button
               onClick={handleClearFilters}
-              className="w-full py-4 bg-error text-on-error m3-title-medium rounded-2xl hover:bg-error/90 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm"
+              className="w-full py-4 bg-error text-on-error m3-title-medium hover:bg-error/90 transition-colors duration-200 active:bg-error/80 flex items-center justify-center gap-2 rounded-t-[4px] rounded-b-[28px]"
             >
               <X className="w-5 h-5" />
               Clear All Filters
             </button>
-          </div>
 
+          </div>
         </div>
       </motion.div>
     </>
