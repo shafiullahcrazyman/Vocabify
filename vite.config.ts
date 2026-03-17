@@ -7,7 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
-    base: '/Vocabify/', // MUST be the exact GitHub Repo name with slashes for the Service Worker scope
+    base: '/Vocabify/', 
     build: {
       outDir: 'dist',
     },
@@ -16,12 +16,12 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        injectRegister: 'auto', // Tells Vite to auto-inject the service worker into index.html
-        includeAssets: ['icon.png', 'tutorial.mp4'],
+        injectRegister: 'script', // More reliable injection method
+        includeAssets: ['icon.png', 'tutorial.mp4'], // These MUST be in the public/ folder
         manifest: {
           name: 'Vocabify',
           short_name: 'Vocabify',
-          description: 'A modern, offline-first vocabulary application specifically built for mastering English word derivatives.',
+          description: 'A modern, offline-first vocabulary application.',
           theme_color: '#141218',
           background_color: '#141218',
           display: 'standalone',
@@ -29,8 +29,8 @@ export default defineConfig(({mode}) => {
           start_url: '/Vocabify/',
           icons: [
             { src: 'icon.png', sizes: '192x192', type: 'image/png' },
-            { src: 'icon.png', sizes: '512x512', type: 'image/png' }, // Standard icon required by Chrome
-            { src: 'icon.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' } // Maskable fallback
+            { src: 'icon.png', sizes: '512x512', type: 'image/png' },
+            { src: 'icon.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
           ]
         },
         workbox: {
@@ -45,9 +45,6 @@ export default defineConfig(({mode}) => {
       alias: {
         '@': path.resolve(__dirname, '.'),
       },
-    },
-    server: {
-      hmr: process.env.DISABLE_HMR !== 'true',
     },
   };
 });
