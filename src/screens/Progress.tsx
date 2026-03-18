@@ -102,9 +102,9 @@ export const Progress: React.FC = () => {
           <SectionGroup containerBg="bg-primary text-on-primary">
             <div className="w-full">
               <div className="flex items-center gap-3 mb-5">
-                {/* UPDATED: Beautiful Gold/Amber filled Award Icon for Mastery */}
-                <div className="p-2 bg-amber-400/20 dark:bg-amber-600/20 rounded-full">
-                  <Award className="w-6 h-6 text-amber-400 dark:text-amber-600 fill-current" />
+                {/* Icon container using Amber/Gold for an achievement feel */}
+                <div className="p-2 bg-amber-500/15 rounded-full">
+                  <Award className="w-6 h-6 text-amber-500 fill-amber-500" />
                 </div>
                 <h2 className="m3-title-medium text-on-primary">Total Mastery</h2>
               </div>
@@ -133,9 +133,9 @@ export const Progress: React.FC = () => {
             <div className="w-full">
               <div className="flex justify-between items-center mb-5">
                 <div className="flex items-center gap-3">
-                  {/* UPDATED: Vibrant Orange filled Flame Icon restored */}
-                  <div className="p-2 bg-orange-400/20 dark:bg-orange-600/20 rounded-full">
-                    <Flame className="w-6 h-6 text-orange-400 dark:text-orange-600 fill-current" />
+                  {/* Icon container using the same orange-500 as the Reset button */}
+                  <div className="p-2 bg-orange-500/10 rounded-full">
+                    <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
                   </div>
                   <h2 className="m3-title-medium text-on-primary">Today's Goal</h2>
                 </div>
