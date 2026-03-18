@@ -233,7 +233,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
 
           <div className="space-y-6 pb-4">
             {/* Word Forms */}
-            <div className="bg-surface-container-high rounded-3xl p-5">
+            <div className="rounded-3xl p-5">
               <h4 className="m3-title-medium text-on-surface mb-4">Word Forms</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
