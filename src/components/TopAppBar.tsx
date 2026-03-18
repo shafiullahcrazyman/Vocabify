@@ -44,8 +44,17 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
     const file = event.target.files?.[0];
 
     if (file) {
+      // Block SVGs — they can embed scripts. Only allow safe raster formats.
+      const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        alert("Only JPEG, PNG, GIF, or WebP images are allowed.");
+        event.target.value = '';
+        return;
+      }
+
       if (file.size > 2 * 1024 * 1024) {
         alert("Please choose an image smaller than 2MB so it can be saved offline.");
+        event.target.value = '';
         return;
       }
 
