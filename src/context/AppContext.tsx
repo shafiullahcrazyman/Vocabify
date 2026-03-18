@@ -38,6 +38,9 @@ interface AppContextType {
   favorites: string[];
   toggleFavorite: (id: string) => void;
   streak: StreakData;
+  // Global settings drawer state — lifted here so swipe gestures can open it
+  isSettingsOpen: boolean;
+  setIsSettingsOpen: (open: boolean) => void;
 }
 
 const defaultSettings: AppSettings = {
@@ -77,6 +80,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [streakData, setStreakData, streakLoaded] = useIndexedDB<StreakData>('vocab_streak', defaultStreak);
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const words = wordsData as WordFamily[];
 
   // Apply theme class + update the theme-color meta tag dynamically
@@ -219,6 +223,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         favorites,
         toggleFavorite,
         streak: streakData,
+        isSettingsOpen,
+        setIsSettingsOpen,
       }}
     >
       <div className="min-h-screen">
