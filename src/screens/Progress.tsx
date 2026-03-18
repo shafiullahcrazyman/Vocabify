@@ -184,12 +184,9 @@ export const Progress: React.FC = () => {
                       : `${streak.current} days in a row 🔥`}
                 </p>
               </div>
-              <div className="shrink-0 flex items-center gap-2">
-                <p className="text-[32px] leading-none font-semibold tracking-tight text-primary">
-                  {streak.current}
-                </p>
-                <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
-              </div>
+              <p className="shrink-0 text-[48px] leading-none font-normal tracking-tight text-primary">
+                {streak.current}
+              </p>
             </div>
 
             {/* Longest Streak */}
@@ -201,15 +198,12 @@ export const Progress: React.FC = () => {
                     ? 'No record yet'
                     : streak.longest === streak.current
                       ? 'This is your best!'
-                      : `Your personal best`}
+                      : 'Your personal best'}
                 </p>
               </div>
-              <div className="shrink-0 flex items-center gap-2">
-                <p className="text-[32px] leading-none font-semibold tracking-tight text-on-surface">
-                  {streak.longest}
-                </p>
-                <Award className="w-6 h-6 text-on-surface-variant" />
-              </div>
+              <p className="shrink-0 text-[48px] leading-none font-normal tracking-tight text-on-surface">
+                {streak.longest}
+              </p>
             </div>
 
           </SectionGroup>
