@@ -124,7 +124,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, transition: anim ? slowEffects : { duration: 0.1 } }}
         exit={{ opacity: 0, transition: anim ? exitCurveSlow : { duration: 0.1 } }}
-        className="absolute inset-0 bg-on-surface/40"
+        className="absolute inset-0 bg-on-surface/40 backdrop-blur-sm"
         onClick={handleClose}
       />
 
@@ -233,7 +233,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
 
           <div className="space-y-6 pb-4">
             {/* Word Forms */}
-            <div className="rounded-3xl p-5">
+            <div className="bg-surface-container rounded-3xl p-5">
               <h4 className="m3-title-medium text-on-surface mb-4">Word Forms</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
