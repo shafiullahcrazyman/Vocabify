@@ -102,9 +102,9 @@ export const Progress: React.FC = () => {
           <SectionGroup containerBg="bg-primary text-on-primary">
             <div className="w-full">
               <div className="flex items-center gap-3 mb-5">
-                <div className="p-2 bg-on-primary/10 rounded-full">
-                  {/* ADDED: fill-current to match the solid flame look */}
-                  <Award className="w-6 h-6 text-on-primary fill-current" />
+                {/* UPDATED: Beautiful Gold/Amber filled Award Icon for Mastery */}
+                <div className="p-2 bg-amber-400/20 dark:bg-amber-600/20 rounded-full">
+                  <Award className="w-6 h-6 text-amber-400 dark:text-amber-600 fill-current" />
                 </div>
                 <h2 className="m3-title-medium text-on-primary">Total Mastery</h2>
               </div>
@@ -129,14 +129,13 @@ export const Progress: React.FC = () => {
           </SectionGroup>
 
           {/* Today's Goal Card */}
-          {/* UPDATED: Changed containerBg to match Total Mastery */}
           <SectionGroup containerBg="bg-primary text-on-primary">
             <div className="w-full">
               <div className="flex justify-between items-center mb-5">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-on-primary/10 rounded-full">
-                    {/* UPDATED: Changed from orange to on-primary to match the theme */}
-                    <Flame className="w-6 h-6 text-on-primary fill-current" />
+                  {/* UPDATED: Vibrant Orange filled Flame Icon restored */}
+                  <div className="p-2 bg-orange-400/20 dark:bg-orange-600/20 rounded-full">
+                    <Flame className="w-6 h-6 text-orange-400 dark:text-orange-600 fill-current" />
                   </div>
                   <h2 className="m3-title-medium text-on-primary">Today's Goal</h2>
                 </div>
@@ -144,7 +143,6 @@ export const Progress: React.FC = () => {
                   <motion.div 
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    /* UPDATED: Reversed colors for high contrast against the primary background */
                     className="bg-on-primary text-primary px-3 py-1 rounded-lg m3-label-small flex items-center gap-1 font-bold"
                   >
                     <Sparkles size={14} className="fill-current" />
@@ -154,14 +152,12 @@ export const Progress: React.FC = () => {
               </div>
 
               <div className="mb-5">
-                {/* UPDATED: Removed text-on-surface to inherit the primary contrast color */}
                 <p className="text-[48px] leading-none font-normal tracking-tight mb-1">
                   {wordsLearnedToday}
                 </p>
                 <p className="m3-body-medium opacity-80">Words today</p>
               </div>
 
-              {/* UPDATED: Track and fill colors matched to Total Mastery style */}
               <div className="w-full bg-on-primary/20 rounded-full h-2 mb-2 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
