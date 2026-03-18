@@ -77,7 +77,19 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
 
   useEffect(() => { if (!isPlaying) setActiveSpeech(null); }, [isPlaying]);
 
+  // For icon buttons — always plays (no toggle)
   const handleSpeak = (text: string) => { setActiveSpeech(text); speak(text); };
+
+  // For text-click (Bengali meaning & example) — toggles on/off
+  const handleTextToggle = (text: string) => {
+    if (isPlaying && activeSpeech === text) {
+      window.speechSynthesis.cancel();
+      setActiveSpeech(null);
+    } else {
+      setActiveSpeech(text);
+      speak(text);
+    }
+  };
   const isValid = (val?: string) => val && val.toLowerCase() !== 'x' && val.toLowerCase() !== 'none';
   const mainWord = getValidWord(word.noun, word.verb, word.adjective, word.adverb);
 
@@ -144,24 +156,18 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
         className="relative bg-surface-container-high w-full max-w-2xl max-h-[92dvh] sm:max-h-[85vh] rounded-[32px] flex flex-col overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 h-[88px] border-b border-outline/10 shrink-0">
+        <div className="flex items-center justify-between px-4 h-[88px] bg-surface-container-highest shrink-0">
           <motion.button
             onClick={handleClose}
             whileTap={anim ? { scale: 0.88 } : undefined}
             transition={fastSpatial}
             style={{ WebkitTapHighlightColor: 'transparent' }}
-            className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-container-highest text-on-surface-variant"
-          >
-            <X className="w-6 h-6" />
+            className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-on-surface/8 text-on-surface-variant"
           </motion.button>
           <div className="flex gap-1 sm:gap-2">
             <motion.button
               onClick={() => { triggerHaptic(settings.hapticsEnabled, 'toggle'); toggleFavorite(word.id); }}
               whileTap={anim ? { scale: 0.80 } : undefined}
-              animate={isFavorite
-                ? { scale: [1, 1.25, 1], transition: { ...fastSpatial, times: [0, 0.4, 1] } }
-                : { scale: 1 }
-              }
               transition={fastSpatial}
               style={{ WebkitTapHighlightColor: 'transparent' }}
               className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-rose-50/50"
@@ -173,7 +179,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
               whileTap={anim ? { scale: 0.88 } : undefined}
               transition={fastSpatial}
               style={{ WebkitTapHighlightColor: 'transparent' }}
-              className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-container-highest text-on-surface-variant"
+              className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-on-surface/8 text-on-surface-variant"
               aria-label="Grammar Tips"
             >
               <Info className="w-6 h-6" />
@@ -195,15 +201,23 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                 style={{ WebkitTapHighlightColor: 'transparent' }}
                 className={`p-3 rounded-full flex-shrink-0 transition-colors ${
                   isPlaying && activeSpeech === mainWord
-                    ? 'bg-primary text-on-primary scale-110'
+                    ? 'bg-primary text-on-primary'
                     : 'hover:bg-primary/20 text-primary bg-primary-container/50'
                 }`}
                 aria-label="Pronounce word"
               >
-                <Volume2 className={`w-7 h-7 ${isPlaying && activeSpeech === mainWord ? 'animate-pulse' : ''}`} />
+                <Volume2 className="w-7 h-7" />
               </motion.button>
             </div>
-            <p className="m3-headline-small text-primary mt-2">{word.meaning_bn}</p>
+            <p
+              onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); handleTextToggle(word.meaning_bn); }}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+              className={`m3-headline-small mt-2 cursor-pointer select-none transition-opacity duration-150 ${
+                isPlaying && activeSpeech === word.meaning_bn ? 'text-primary opacity-70' : 'text-primary'
+              }`}
+            >
+              {word.meaning_bn}
+            </p>
           </div>
 
           <div className="space-y-6 pb-4">
@@ -239,7 +253,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                             style={{ WebkitTapHighlightColor: 'transparent' }}
                             className={`p-2 rounded-full transition-colors flex-shrink-0 ${isPlaying && activeSpeech === val ? c.active : c.btn}`}
                           >
-                            <Volume2 className={`w-5 h-5 ${isPlaying && activeSpeech === val ? 'animate-pulse' : ''}`} />
+                            <Volume2 className="w-5 h-5" />
                           </motion.button>
                         )}
                       </div>
@@ -251,7 +265,15 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
 
             <div className="bg-primary-container/30 rounded-3xl p-5">
               <h4 className="m3-title-medium text-on-surface mb-2">Example</h4>
-              <p className="m3-body-large text-on-surface italic leading-relaxed">"{word.example}"</p>
+              <p
+                onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); handleTextToggle(word.example); }}
+                style={{ WebkitTapHighlightColor: 'transparent' }}
+                className={`m3-body-large italic leading-relaxed cursor-pointer select-none transition-opacity duration-150 ${
+                  isPlaying && activeSpeech === word.example ? 'text-on-surface opacity-60' : 'text-on-surface'
+                }`}
+              >
+                "{word.example}"
+              </p>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -272,14 +294,14 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
         </div>
 
         {/* Footer controls */}
-        <div className="px-4 h-[88px] border-t border-outline/10 flex justify-between items-center gap-3 bg-surface-container-high shrink-0 z-10">
+        <div className="px-4 h-[88px] flex justify-between items-center gap-3 bg-surface-container-highest shrink-0 z-10">
           <motion.button
             onClick={handlePrev}
             disabled={!hasPrev}
             whileTap={anim && hasPrev ? { scale: 0.88 } : undefined}
             transition={fastSpatial}
             style={{ WebkitTapHighlightColor: 'transparent' }}
-            className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container-highest disabled:opacity-30 text-on-surface"
+            className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container disabled:opacity-30 text-on-surface"
           >
             <ChevronLeft className="w-7 h-7" />
           </motion.button>
@@ -288,14 +310,10 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
           <motion.button
             onClick={handleMarkLearned}
             whileTap={anim ? { scale: 0.96 } : undefined}
-            animate={isLearned
-              ? { scale: [1, 1.04, 1], transition: { ...fastSpatial, times: [0, 0.4, 1] } }
-              : { scale: 1 }
-            }
             transition={fastSpatial}
             style={{ WebkitTapHighlightColor: 'transparent' }}
             className={`flex-1 h-14 flex items-center justify-center rounded-full font-bold tracking-wide ${
-              isLearned ? 'bg-emerald-500/15 text-emerald-700' : 'bg-surface-container-highest text-on-surface'
+              isLearned ? 'bg-emerald-500/15 text-emerald-700' : 'bg-surface-container text-on-surface'
             }`}
           >
             <CheckCircle2 className={`w-6 h-6 mr-2 ${isLearned ? 'text-emerald-600' : 'text-on-surface-variant'}`} />
@@ -308,7 +326,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
               whileTap={anim ? { scale: 0.88 } : undefined}
               transition={fastSpatial}
               style={{ WebkitTapHighlightColor: 'transparent' }}
-              className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container-highest text-on-surface"
+              className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container text-on-surface"
             >
               <ChevronRight className="w-7 h-7" />
             </motion.button>
