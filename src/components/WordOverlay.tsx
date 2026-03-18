@@ -29,11 +29,15 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
   word, onClose, onNext, onPrev, hasNext, hasPrev,
 }) => {
   const { progress, markLearned, settings, favorites, toggleFavorite } = useAppContext();
-  const { speak, isPlaying } = useTTS();
+  const { speak, toggle, isPlaying, playingText } = useTTS();
   const isLearned = progress.learned.includes(word.id);
   const isFavorite = favorites.includes(word.id);
   const [isTipsOpen, setIsTipsOpen] = useState(false);
-  const [activeSpeech, setActiveSpeech] = useState<string | null>(null);
+
+  // Derived playing states
+  const isBnPlaying      = isPlaying && playingText === word.meaning_bn;
+  const isExamplePlaying = isPlaying && playingText === word.example;
+  const mainWord = getValidWord(word.noun, word.verb, word.adjective, word.adverb);
 
   // Universal back button — always mounted while open
   useBackButton(true, onClose);
@@ -53,6 +57,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose, onNext, onPrev, hasNext, hasPrev]);
 
+  // Auto-pronounce English word forms only (not Bengali meaning or example)
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     if (settings.autoPronounce) {
@@ -72,14 +77,13 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
         }, 400);
       }
     }
-    return () => { if (timer) clearTimeout(timer); window.speechSynthesis.cancel(); };
+    return () => {
+      if (timer) clearTimeout(timer);
+      window.speechSynthesis.cancel();
+    };
   }, [word, settings.autoPronounce]);
 
-  useEffect(() => { if (!isPlaying) setActiveSpeech(null); }, [isPlaying]);
-
-  const handleSpeak = (text: string) => { setActiveSpeech(text); speak(text); };
   const isValid = (val?: string) => val && val.toLowerCase() !== 'x' && val.toLowerCase() !== 'none';
-  const mainWord = getValidWord(word.noun, word.verb, word.adjective, word.adverb);
 
   const getOverlayTitleSize = (text: string) => {
     const len = text.length;
@@ -91,7 +95,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
   const handleClose = () => { triggerHaptic(settings.hapticsEnabled, 'tap'); onClose(); };
 
   const handleMarkLearned = () => {
-    // Post-action haptic: success pattern fires AFTER the state changes
     triggerHaptic(settings.hapticsEnabled, isLearned ? 'tap' : 'success');
     markLearned(word.id);
   };
@@ -108,7 +111,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
     if (info.offset.x < -swipeThreshold && hasNext) handleNext();
     else if (info.offset.x > swipeThreshold && hasPrev) handlePrev();
     else {
-      // Fling-back snap — impact haptic for the "snap back to center" feel
       if (Math.abs(info.offset.x) > 20) triggerHaptic(settings.hapticsEnabled, 'impact');
     }
   };
@@ -117,7 +119,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-      {/* Backdrop — SlowEffects (opacity should never overshoot) */}
+      {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, transition: anim ? slowEffects : { duration: 0.1 } }}
@@ -126,7 +128,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
         onClick={handleClose}
       />
 
-      {/* Content card — SlowSpatial (full-screen-ish, large movement) */}
+      {/* Content card */}
       <motion.div
         initial={{ opacity: 0, scale: 0.94, y: 24 }}
         animate={{
@@ -158,9 +160,10 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             <motion.button
               onClick={() => { triggerHaptic(settings.hapticsEnabled, 'toggle'); toggleFavorite(word.id); }}
               whileTap={anim ? { scale: 0.80 } : undefined}
-              animate={isFavorite
-                ? { scale: [1, 1.25, 1], transition: { ...fastSpatial, times: [0, 0.4, 1] } }
-                : { scale: 1 }
+              animate={
+                isFavorite
+                  ? { scale: [1, 1.25, 1], transition: { ...fastSpatial, times: [0, 0.4, 1] } }
+                  : { scale: 1 }
               }
               transition={fastSpatial}
               style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -184,29 +187,52 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto p-6 pointer-events-auto touch-pan-y">
           <div className="text-center mb-10 mt-2">
+            {/* Main word with speaker icon — spring animation only, no animate-pulse */}
             <div className="flex items-center justify-center gap-3 mb-2 px-2">
               <h2 className={`${getOverlayTitleSize(mainWord)} font-bold tracking-tight text-on-surface leading-none capitalize break-words`}>
                 {mainWord}
               </h2>
               <motion.button
-                onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); handleSpeak(mainWord); }}
+                onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); speak(mainWord); }}
                 whileTap={anim ? { scale: 0.88 } : undefined}
                 transition={fastSpatial}
                 style={{ WebkitTapHighlightColor: 'transparent' }}
                 className={`p-3 rounded-full flex-shrink-0 transition-colors ${
-                  isPlaying && activeSpeech === mainWord
+                  isPlaying && playingText === mainWord
                     ? 'bg-primary text-on-primary scale-110'
                     : 'hover:bg-primary/20 text-primary bg-primary-container/50'
                 }`}
                 aria-label="Pronounce word"
               >
-                <Volume2 className={`w-7 h-7 ${isPlaying && activeSpeech === mainWord ? 'animate-pulse' : ''}`} />
+                <Volume2 className="w-7 h-7" />
               </motion.button>
             </div>
-            <p className="m3-headline-small text-primary mt-2">{word.meaning_bn}</p>
+
+            {/*
+              Bengali meaning — click to toggle Bengali audio (no speaker icon).
+              Underline appears when playing; hover underline otherwise.
+            */}
+            <motion.p
+              onClick={() => {
+                triggerHaptic(settings.hapticsEnabled, 'selection');
+                toggle(word.meaning_bn, 'bn');
+              }}
+              whileTap={anim ? { scale: 0.97 } : undefined}
+              transition={fastSpatial}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+              className={`m3-headline-small text-primary mt-2 cursor-pointer select-none transition-all duration-200 ${
+                isBnPlaying
+                  ? 'underline underline-offset-4 decoration-primary/60 opacity-80'
+                  : 'hover:underline hover:underline-offset-4 hover:decoration-primary/40'
+              }`}
+              title={isBnPlaying ? 'Click to stop Bengali audio' : 'Click to hear Bengali pronunciation'}
+            >
+              {word.meaning_bn}
+            </motion.p>
           </div>
 
           <div className="space-y-6 pb-4">
+            {/* Word Forms */}
             <div className="bg-surface-container rounded-3xl p-5">
               <h4 className="m3-title-medium text-on-surface mb-4">Word Forms</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -218,12 +244,13 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                 ].map(({ label, val, color }) => {
                   const valid = isValid(val);
                   const colorMap: Record<string, { bg: string; text: string; btn: string; active: string }> = {
-                    blue:    { bg: 'bg-blue-500/10',    text: 'text-blue-700 dark:text-blue-300',       btn: 'hover:bg-blue-500/20 text-blue-700 dark:text-blue-300',    active: 'bg-blue-500 text-white' },
+                    blue:    { bg: 'bg-blue-500/10',    text: 'text-blue-700 dark:text-blue-300',       btn: 'hover:bg-blue-500/20 text-blue-700 dark:text-blue-300',       active: 'bg-blue-500 text-white' },
                     emerald: { bg: 'bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-300', btn: 'hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300', active: 'bg-emerald-500 text-white' },
-                    amber:   { bg: 'bg-amber-500/10',   text: 'text-amber-700 dark:text-amber-300',     btn: 'hover:bg-amber-500/20 text-amber-700 dark:text-amber-300',  active: 'bg-amber-500 text-white' },
-                    purple:  { bg: 'bg-purple-500/10',  text: 'text-purple-700 dark:text-purple-300',   btn: 'hover:bg-purple-500/20 text-purple-700 dark:text-purple-300', active: 'bg-purple-500 text-white' },
+                    amber:   { bg: 'bg-amber-500/10',   text: 'text-amber-700 dark:text-amber-300',     btn: 'hover:bg-amber-500/20 text-amber-700 dark:text-amber-300',     active: 'bg-amber-500 text-white' },
+                    purple:  { bg: 'bg-purple-500/10',  text: 'text-purple-700 dark:text-purple-300',   btn: 'hover:bg-purple-500/20 text-purple-700 dark:text-purple-300',  active: 'bg-purple-500 text-white' },
                   };
                   const c = colorMap[color];
+                  const isFormPlaying = isPlaying && playingText === val;
                   return (
                     <div key={label} className={`flex flex-col p-4 rounded-2xl ${valid ? c.bg : 'bg-surface-container-highest/60'}`}>
                       <span className={`text-[13px] font-bold uppercase tracking-widest mb-1 ${valid ? c.text : 'text-on-surface-variant/50'}`}>{label}</span>
@@ -231,15 +258,16 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                         <span className={`text-[20px] font-semibold capitalize ${valid ? 'text-on-surface' : 'text-on-surface-variant/50'}`}>
                           {valid ? val : 'None'}
                         </span>
+                        {/* Speaker icon buttons — spring animation only, no animate-pulse */}
                         {valid && (
                           <motion.button
-                            onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); handleSpeak(val!); }}
+                            onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); speak(val!); }}
                             whileTap={anim ? { scale: 0.85 } : undefined}
                             transition={fastSpatial}
                             style={{ WebkitTapHighlightColor: 'transparent' }}
-                            className={`p-2 rounded-full transition-colors flex-shrink-0 ${isPlaying && activeSpeech === val ? c.active : c.btn}`}
+                            className={`p-2 rounded-full transition-colors flex-shrink-0 ${isFormPlaying ? c.active : c.btn}`}
                           >
-                            <Volume2 className={`w-5 h-5 ${isPlaying && activeSpeech === val ? 'animate-pulse' : ''}`} />
+                            <Volume2 className="w-5 h-5" />
                           </motion.button>
                         )}
                       </div>
@@ -249,9 +277,29 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
               </div>
             </div>
 
+            {/*
+              Example sentence — click to toggle audio (no speaker icon).
+              Visual feedback: underline + dimming when playing.
+            */}
             <div className="bg-primary-container/30 rounded-3xl p-5">
               <h4 className="m3-title-medium text-on-surface mb-2">Example</h4>
-              <p className="m3-body-large text-on-surface italic leading-relaxed">"{word.example}"</p>
+              <motion.p
+                onClick={() => {
+                  triggerHaptic(settings.hapticsEnabled, 'selection');
+                  toggle(word.example, 'en');
+                }}
+                whileTap={anim ? { scale: 0.98 } : undefined}
+                transition={fastSpatial}
+                style={{ WebkitTapHighlightColor: 'transparent' }}
+                className={`m3-body-large text-on-surface italic leading-relaxed cursor-pointer select-none transition-all duration-200 ${
+                  isExamplePlaying
+                    ? 'underline underline-offset-4 decoration-on-surface/40 opacity-75'
+                    : 'hover:underline hover:underline-offset-4 hover:decoration-on-surface/25'
+                }`}
+                title={isExamplePlaying ? 'Click to stop example audio' : 'Click to hear example'}
+              >
+                "{word.example}"
+              </motion.p>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -284,13 +332,14 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             <ChevronLeft className="w-7 h-7" />
           </motion.button>
 
-          {/* Mark Learned — M3 Expressive: success haptic fires AFTER state change */}
+          {/* Mark Learned — M3 Expressive spring */}
           <motion.button
             onClick={handleMarkLearned}
             whileTap={anim ? { scale: 0.96 } : undefined}
-            animate={isLearned
-              ? { scale: [1, 1.04, 1], transition: { ...fastSpatial, times: [0, 0.4, 1] } }
-              : { scale: 1 }
+            animate={
+              isLearned
+                ? { scale: [1, 1.04, 1], transition: { ...fastSpatial, times: [0, 0.4, 1] } }
+                : { scale: 1 }
             }
             transition={fastSpatial}
             style={{ WebkitTapHighlightColor: 'transparent' }}
