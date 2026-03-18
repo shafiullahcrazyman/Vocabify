@@ -142,9 +142,9 @@ export const Progress: React.FC = () => {
                   <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="bg-on-primary text-primary px-3 py-1 rounded-lg m3-label-small flex items-center gap-1 font-bold"
+                    className="bg-orange-500/10 text-orange-500 dark:text-orange-500 px-3 py-1 rounded-lg m3-label-small flex items-center gap-1 font-bold"
                   >
-                    <Sparkles size={14} className="fill-current" />
+                    <Sparkles size={14} className="fill-orange-500 dark:fill-orange-500" />
                     {streakBadgeLabel}
                   </motion.div>
                 )}
