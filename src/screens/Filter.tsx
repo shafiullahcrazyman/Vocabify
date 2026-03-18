@@ -74,8 +74,6 @@ export const Filter: React.FC = () => {
       <TopAppBar title="Filters" />
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0, transition: settings.animationsEnabled ? slowSpatial : { duration: 0.15 } }}
         exit={{ opacity: 0, y: -8, transition: settings.animationsEnabled ? exitCurve : { duration: 0.1 } }}
         className="pb-24 max-w-3xl mx-auto pt-4"
