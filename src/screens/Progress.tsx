@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { useAppContext, getLocalDateString } from '../context/AppContext';
-import { Target, RotateCcw, Award, Copy, Check, Download, X, Flame, Sparkles, ChevronDown } from 'lucide-react';
+import { Target, RotateCcw, Award, Copy, Check, Download, X, Flame, Sparkles, ChevronDown, Zap } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import { TopAppBar } from '../components/TopAppBar';
 
@@ -33,8 +33,8 @@ const SectionGroup: React.FC<SectionGroupProps> = ({ title, icon, children, cont
       )}
       <div className="flex flex-col rounded-[28px] overflow-hidden">
         {validChildren.map((child, index) => (
-          <div 
-            key={index} 
+          <div
+            key={index}
             className={`${containerBg} p-5 sm:p-6 transition-colors duration-200 ${
               index !== total - 1 ? 'border-b border-outline/10' : ''
             } ${getCornerClass(index)}`}
@@ -48,11 +48,10 @@ const SectionGroup: React.FC<SectionGroupProps> = ({ title, icon, children, cont
 };
 
 export const Progress: React.FC = () => {
-  const { settings, updateSettings, progress, resetTotalProgress, resetDailyProgress, words } = useAppContext();
-  
+  const { settings, updateSettings, progress, resetTotalProgress, resetDailyProgress, words, streak } = useAppContext();
+
   const [confirmDaily, setConfirmDaily] = useState(false);
   const [confirmTotal, setConfirmTotal] = useState(false);
-  
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportCount, setExportCount] = useState<number>(-1);
   const [copied, setCopied] = useState(false);
@@ -74,6 +73,12 @@ export const Progress: React.FC = () => {
     return { wordsLearnedToday: count, dailyPercentage: pct, isGoalReached: count >= goal };
   }, [progress.learnedDates, settings.dailyGoal]);
 
+  const streakBadgeLabel = useMemo(() => {
+    if (!isGoalReached) return null;
+    if (streak.current <= 1) return 'Day 1!';
+    return `${streak.current}-day streak!`;
+  }, [isGoalReached, streak.current]);
+
   const handleCopyJSON = () => {
     triggerHaptic(settings.hapticsEnabled);
     const dataToExport = exportCount === -1 ? learnedWordsData : learnedWordsData.slice(0, exportCount);
@@ -89,39 +94,34 @@ export const Progress: React.FC = () => {
   return (
     <>
       <TopAppBar title="Your Progress" />
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
-        transition={settings.animationsEnabled ? { duration: 0.25, ease: [0.2, 0, 0, 1] } : { duration: 0.15, ease: "easeOut" }}
+        transition={settings.animationsEnabled ? { duration: 0.25, ease: [0.2, 0, 0, 1] } : { duration: 0.15, ease: 'easeOut' }}
         className="pb-24 max-w-3xl mx-auto pt-4"
       >
         <div className="px-4 space-y-6">
-          
-          {/* Overview Card */}
+
+          {/* Total Mastery Card */}
           <SectionGroup containerBg="bg-primary text-on-primary">
             <div className="w-full">
               <div className="flex items-center gap-3 mb-5">
-                {/* Container using on-primary with 10% opacity for tonal elevation */}
                 <div className="p-2 bg-on-primary/10 rounded-full">
                   <Award className="w-6 h-6 text-on-primary fill-on-primary" />
                 </div>
                 <h2 className="m3-title-medium text-on-primary">Total Mastery</h2>
               </div>
-              
               <div className="mb-5">
-                <p className="text-[48px] leading-none font-normal tracking-tight mb-1">
-                  {learnedWords}
-                </p>
+                <p className="text-[48px] leading-none font-normal tracking-tight mb-1">{learnedWords}</p>
                 <p className="m3-body-medium opacity-80">Words learned</p>
               </div>
-              
               <div className="w-full bg-on-primary/20 rounded-full h-2 mb-2 overflow-hidden">
-                <motion.div 
+                <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${percentage}%` }}
-                  transition={settings.animationsEnabled ? { duration: 1, ease: [0.2, 0, 0, 1], delay: 0.2 } : { duration: 0.2, ease: "easeOut" }}
-                  className="bg-on-primary h-full rounded-full" 
+                  transition={settings.animationsEnabled ? { duration: 1, ease: [0.2, 0, 0, 1], delay: 0.2 } : { duration: 0.2, ease: 'easeOut' }}
+                  className="bg-on-primary h-full rounded-full"
                 />
               </div>
               <p className="m3-label-small opacity-80 text-right">{percentage}% of entire dictionary</p>
@@ -133,51 +133,80 @@ export const Progress: React.FC = () => {
             <div className="w-full">
               <div className="flex justify-between items-center mb-5">
                 <div className="flex items-center gap-3">
-                  {/* Icon container using the same orange-500 as the Reset button */}
                   <div className="p-2 bg-orange-500/10 rounded-full">
                     <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
                   </div>
                   <h2 className="m3-title-medium text-on-primary">Today's Goal</h2>
                 </div>
-                {isGoalReached && (
-                  <motion.div 
+                {isGoalReached && streakBadgeLabel && (
+                  <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="bg-orange-500/10 text-orange-500 dark:text-orange-500 px-3 py-1 rounded-lg m3-label-small flex items-center gap-1 font-bold"
+                    className="bg-on-primary text-primary px-3 py-1 rounded-lg m3-label-small flex items-center gap-1 font-bold"
                   >
-                    <Sparkles size={14} className="fill-orange-500 dark:fill-orange-500" />
-                    Reached!
+                    <Sparkles size={14} className="fill-current" />
+                    {streakBadgeLabel}
                   </motion.div>
                 )}
               </div>
-
               <div className="mb-5">
-                <p className="text-[48px] leading-none font-normal tracking-tight mb-1">
-                  {wordsLearnedToday}
-                </p>
+                <p className="text-[48px] leading-none font-normal tracking-tight mb-1">{wordsLearnedToday}</p>
                 <p className="m3-body-medium opacity-80">Words today</p>
               </div>
-
               <div className="w-full bg-on-primary/20 rounded-full h-2 mb-2 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${dailyPercentage}%` }}
-                  transition={settings.animationsEnabled ? { duration: 1.2, ease: "easeOut" } : { duration: 0.2 }}
+                  transition={settings.animationsEnabled ? { duration: 1.2, ease: 'easeOut' } : { duration: 0.2 }}
                   className="bg-on-primary h-full rounded-full"
                 />
               </div>
               <p className="m3-label-small opacity-80 text-right">
                 {isGoalReached
-                  ? "Streak maintained!"
+                  ? 'Keep it up!'
                   : `${settings.dailyGoal - wordsLearnedToday} more to go`}
               </p>
             </div>
           </SectionGroup>
 
-          {/* Learning Goals Settings */}
+          {/* Streak Card */}
+          <SectionGroup containerBg="bg-surface-container-low">
+            <div className="w-full">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-2 bg-orange-500/10 rounded-full">
+                  <Zap className="w-6 h-6 text-orange-500 fill-orange-500" />
+                </div>
+                <h2 className="m3-title-medium text-on-surface">Streak</h2>
+              </div>
+              <div className="flex gap-8">
+                <div>
+                  <p className="text-[48px] leading-none font-normal tracking-tight mb-1 text-on-surface">
+                    {streak.current}
+                  </p>
+                  <p className="m3-body-medium text-on-surface-variant">Current streak</p>
+                </div>
+                <div className="w-px bg-outline/10 self-stretch" />
+                <div>
+                  <p className="text-[48px] leading-none font-normal tracking-tight mb-1 text-on-surface">
+                    {streak.longest}
+                  </p>
+                  <p className="m3-body-medium text-on-surface-variant">Longest streak</p>
+                </div>
+              </div>
+              <p className="m3-label-small text-on-surface-variant mt-3">
+                {streak.current === 0
+                  ? 'Meet your daily goal to start a streak!'
+                  : streak.current === 1
+                    ? 'Great start — come back tomorrow!'
+                    : `You've hit your goal ${streak.current} days in a row 🔥`}
+              </p>
+            </div>
+          </SectionGroup>
+
+          {/* Manage Goals */}
           <SectionGroup title="Manage Goals" icon={<Target className="w-5 h-5" />}>
-            
-            {/* Target Goal Selector */}
+
+            {/* Daily Target */}
             <div className="flex justify-between items-center w-full">
               <div className="pr-4">
                 <p className="m3-body-large text-on-surface font-medium mb-0.5">Daily Target</p>
@@ -201,7 +230,7 @@ export const Progress: React.FC = () => {
               </div>
             </div>
 
-            {/* Reset Today's Goal */}
+            {/* Reset Today */}
             <div className="flex justify-between items-center w-full">
               <div className="pr-4">
                 <p className="m3-body-large text-on-surface font-medium mb-0.5">Reset Today</p>
@@ -235,7 +264,7 @@ export const Progress: React.FC = () => {
               </div>
             </div>
 
-            {/* Reset Total Mastery */}
+            {/* Reset All Progress */}
             <div className="flex justify-between items-center w-full">
               <div className="pr-4">
                 <p className="m3-body-large text-on-surface font-medium mb-0.5">Reset All Progress</p>
@@ -277,7 +306,6 @@ export const Progress: React.FC = () => {
                 <p className="m3-body-large text-on-surface font-medium mb-0.5">Export JSON</p>
                 <p className="m3-body-small text-on-surface-variant leading-tight">Copy your learned words</p>
               </div>
-              
               <button
                 onClick={handleOpenExport}
                 className="shrink-0 px-6 py-2.5 bg-primary text-on-primary rounded-full m3-label-large hover:bg-primary/90 transition-all duration-200 active:scale-95"
@@ -286,17 +314,17 @@ export const Progress: React.FC = () => {
               </button>
             </div>
           </SectionGroup>
-          
+
         </div>
 
         {/* Export Modal */}
         {showExportModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-on-surface/40 backdrop-blur-sm p-4 sm:p-6">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={settings.animationsEnabled ? { duration: 0.3, ease: [0.2, 0, 0, 1] } : { duration: 0.15, ease: "easeOut" }}
+              transition={settings.animationsEnabled ? { duration: 0.3, ease: [0.2, 0, 0, 1] } : { duration: 0.15, ease: 'easeOut' }}
               className="bg-surface-container-high w-full max-w-2xl max-h-full rounded-3xl flex flex-col overflow-hidden"
             >
               <div className="flex items-center justify-between p-4 px-6 border-b border-outline/10">
@@ -311,7 +339,6 @@ export const Progress: React.FC = () => {
                   <p className="m3-body-large text-on-surface">
                     You have learned <span className="font-bold text-primary">{learnedWordsData.length}</span> words.
                   </p>
-                  
                   <div className="relative inline-block">
                     <select
                       value={exportCount}
@@ -339,21 +366,15 @@ export const Progress: React.FC = () => {
                 <button
                   onClick={handleCopyJSON}
                   className={`flex items-center px-6 py-2.5 rounded-full transition-colors duration-200 active:scale-95 m3-label-large ${
-                    copied 
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' 
+                    copied
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
                       : 'bg-primary text-on-primary hover:bg-primary/90'
                   }`}
                 >
                   {copied ? (
-                    <>
-                      <Check className="w-4 h-4 mr-2" />
-                      Copied JSON!
-                    </>
+                    <><Check className="w-4 h-4 mr-2" />Copied JSON!</>
                   ) : (
-                    <>
-                      <Copy className="w-4 h-4 mr-2" />
-                      Copy JSON
-                    </>
+                    <><Copy className="w-4 h-4 mr-2" />Copy JSON</>
                   )}
                 </button>
               </div>
