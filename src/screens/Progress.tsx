@@ -103,7 +103,8 @@ export const Progress: React.FC = () => {
             <div className="w-full">
               <div className="flex items-center gap-3 mb-5">
                 <div className="p-2 bg-on-primary/10 rounded-full">
-                  <Award className="w-6 h-6 text-on-primary" />
+                  {/* ADDED: fill-current to match the solid flame look */}
+                  <Award className="w-6 h-6 text-on-primary fill-current" />
                 </div>
                 <h2 className="m3-title-medium text-on-primary">Total Mastery</h2>
               </div>
@@ -128,43 +129,48 @@ export const Progress: React.FC = () => {
           </SectionGroup>
 
           {/* Today's Goal Card */}
-          <SectionGroup>
+          {/* UPDATED: Changed containerBg to match Total Mastery */}
+          <SectionGroup containerBg="bg-primary text-on-primary">
             <div className="w-full">
               <div className="flex justify-between items-center mb-5">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-orange-500/10 rounded-full">
-                    <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
+                  <div className="p-2 bg-on-primary/10 rounded-full">
+                    {/* UPDATED: Changed from orange to on-primary to match the theme */}
+                    <Flame className="w-6 h-6 text-on-primary fill-current" />
                   </div>
-                  <h2 className="m3-title-medium text-on-surface">Today's Goal</h2>
+                  <h2 className="m3-title-medium text-on-primary">Today's Goal</h2>
                 </div>
                 {isGoalReached && (
                   <motion.div 
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="bg-orange-500/15 text-orange-600 dark:text-orange-400 px-3 py-1 rounded-lg m3-label-small flex items-center gap-1"
+                    /* UPDATED: Reversed colors for high contrast against the primary background */
+                    className="bg-on-primary text-primary px-3 py-1 rounded-lg m3-label-small flex items-center gap-1 font-bold"
                   >
-                    <Sparkles size={14} />
+                    <Sparkles size={14} className="fill-current" />
                     Reached!
                   </motion.div>
                 )}
               </div>
 
               <div className="mb-5">
-                <p className="text-[48px] leading-none font-normal text-on-surface tracking-tight mb-1">
+                {/* UPDATED: Removed text-on-surface to inherit the primary contrast color */}
+                <p className="text-[48px] leading-none font-normal tracking-tight mb-1">
                   {wordsLearnedToday}
                 </p>
-                <p className="m3-body-medium text-on-surface-variant">Words today</p>
+                <p className="m3-body-medium opacity-80">Words today</p>
               </div>
 
-              <div className="w-full bg-surface-container-highest rounded-full h-2 mb-2 overflow-hidden">
+              {/* UPDATED: Track and fill colors matched to Total Mastery style */}
+              <div className="w-full bg-on-primary/20 rounded-full h-2 mb-2 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${dailyPercentage}%` }}
                   transition={settings.animationsEnabled ? { duration: 1.2, ease: "easeOut" } : { duration: 0.2 }}
-                  className={`h-full rounded-full ${isGoalReached ? 'bg-orange-500' : 'bg-primary'}`}
+                  className="bg-on-primary h-full rounded-full"
                 />
               </div>
-              <p className="m3-label-small text-on-surface-variant text-right">
+              <p className="m3-label-small opacity-80 text-right">
                 {isGoalReached
                   ? "Streak maintained!"
                   : `${settings.dailyGoal - wordsLearnedToday} more to go`}
