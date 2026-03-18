@@ -83,6 +83,27 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const words = wordsData as WordFamily[];
 
+  // Auto-break streak on load if the user skipped a day.
+  // Without this, a stale streak (e.g. 7) would keep showing even after missing
+  // days — it only corrected itself the next time the goal was earned.
+  // Now: if lastGoalDate is older than yesterday, current resets to 0 immediately.
+  useEffect(() => {
+    if (!streakLoaded) return;
+    const today = getLocalDateString();
+    const yesterday = getYesterdayString();
+    const { lastGoalDate, current } = streakData;
+
+    const streakIsBroken =
+      current > 0 &&
+      lastGoalDate !== '' &&
+      lastGoalDate !== today &&
+      lastGoalDate !== yesterday;
+
+    if (streakIsBroken) {
+      setStreakData((prev) => ({ ...prev, current: 0 }));
+    }
+  }, [streakLoaded]);
+
   // Apply theme class + update the theme-color meta tag dynamically
   useEffect(() => {
     const root = window.document.documentElement;
