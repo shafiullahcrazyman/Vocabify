@@ -3,12 +3,14 @@
   <head>
     <meta charset="UTF-8">
 
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://fonts.googleapis.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <!-- Removed user-scalable=no — pinch-to-zoom must stay enabled for accessibility (WCAG 1.4.4) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vocabify</title>
     
     <!-- iOS / Safari Home Screen -->
@@ -17,8 +19,11 @@
     <!-- Favicon fallback -->
     <link rel="icon" href="/icon.png">
 
-    <!-- Theme colors -->
-    <meta name="theme-color" content="#141218">
+    <!-- theme-color: matches the active color scheme so the browser chrome stays in sync.
+         AppContext also updates this dynamically when the user manually picks a theme. -->
+    <meta name="theme-color" content="#141218" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#FEF7FF" media="(prefers-color-scheme: light)">
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Vocabify">

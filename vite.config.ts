@@ -1,23 +1,22 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig(({mode}) => {
-  const env = loadEnv(mode, '.', '');
+export default defineConfig(() => {
   return {
-    base: '/Vocabify/', 
+    base: '/Vocabify/',
     build: {
       outDir: 'dist',
     },
     plugins: [
-      react(), 
+      react(),
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        injectRegister: 'script', // More reliable injection method
-        includeAssets: ['icon.png', 'tutorial.mp4'], // These MUST be in the public/ folder
+        injectRegister: 'script',
+        includeAssets: ['icon.png', 'tutorial.mp4'],
         manifest: {
           name: 'Vocabify',
           short_name: 'Vocabify',
@@ -30,17 +29,46 @@ export default defineConfig(({mode}) => {
           icons: [
             { src: 'icon.png', sizes: '192x192', type: 'image/png' },
             { src: 'icon.png', sizes: '512x512', type: 'image/png' },
-            { src: 'icon.png', sizes: '512x512', type: 'image/png', purpose: 'any' }
-          ]
+            { src: 'icon.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+            // For true maskable support: generate icon-maskable.png at https://maskable.app
+            // then uncomment: { src: 'icon-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+          ],
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,mp4,json}']
-        }
-      })
+          // Cache all built assets
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,mp4,json,woff2,woff}'],
+          // Runtime caching for Google Fonts so they work offline after first load
+          runtimeCaching: [
+            {
+              // Cache the CSS descriptor from fonts.googleapis.com
+              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts-stylesheets',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+                },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+            {
+              // Cache the actual font files from fonts.gstatic.com
+              urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts-webfonts',
+                expiration: {
+                  maxEntries: 20,
+                  maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+                },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+          ],
+        },
+      }),
     ],
-    define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
