@@ -169,38 +169,49 @@ export const Progress: React.FC = () => {
             </div>
           </SectionGroup>
 
-          {/* Streak Card */}
-          <SectionGroup containerBg="bg-surface-container-low">
-            <div className="w-full">
-              <div className="flex items-center gap-3 mb-5">
-                <div className="p-2 bg-orange-500/10 rounded-full">
-                  <Zap className="w-6 h-6 text-orange-500 fill-orange-500" />
-                </div>
-                <h2 className="m3-title-medium text-on-surface">Streak</h2>
+          {/* Streak Section */}
+          <SectionGroup title="Streak" icon={<Zap className="w-5 h-5" />}>
+
+            {/* Current Streak */}
+            <div className="flex items-center justify-between w-full">
+              <div className="pr-4">
+                <p className="m3-body-large text-on-surface font-medium mb-0.5">Current Streak</p>
+                <p className="m3-body-small text-on-surface-variant leading-tight">
+                  {streak.current === 0
+                    ? 'Meet your daily goal to start'
+                    : streak.current === 1
+                      ? 'Great start — come back tomorrow!'
+                      : `${streak.current} days in a row 🔥`}
+                </p>
               </div>
-              <div className="flex gap-8">
-                <div>
-                  <p className="text-[48px] leading-none font-normal tracking-tight mb-1 text-on-surface">
-                    {streak.current}
-                  </p>
-                  <p className="m3-body-medium text-on-surface-variant">Current streak</p>
-                </div>
-                <div className="w-px bg-outline/10 self-stretch" />
-                <div>
-                  <p className="text-[48px] leading-none font-normal tracking-tight mb-1 text-on-surface">
-                    {streak.longest}
-                  </p>
-                  <p className="m3-body-medium text-on-surface-variant">Longest streak</p>
-                </div>
+              <div className="shrink-0 flex items-center gap-2">
+                <p className="text-[32px] leading-none font-semibold tracking-tight text-primary">
+                  {streak.current}
+                </p>
+                <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
               </div>
-              <p className="m3-label-small text-on-surface-variant mt-3">
-                {streak.current === 0
-                  ? 'Meet your daily goal to start a streak!'
-                  : streak.current === 1
-                    ? 'Great start — come back tomorrow!'
-                    : `You've hit your goal ${streak.current} days in a row 🔥`}
-              </p>
             </div>
+
+            {/* Longest Streak */}
+            <div className="flex items-center justify-between w-full">
+              <div className="pr-4">
+                <p className="m3-body-large text-on-surface font-medium mb-0.5">Longest Streak</p>
+                <p className="m3-body-small text-on-surface-variant leading-tight">
+                  {streak.longest === 0
+                    ? 'No record yet'
+                    : streak.longest === streak.current
+                      ? 'This is your best!'
+                      : `Your personal best`}
+                </p>
+              </div>
+              <div className="shrink-0 flex items-center gap-2">
+                <p className="text-[32px] leading-none font-semibold tracking-tight text-on-surface">
+                  {streak.longest}
+                </p>
+                <Award className="w-6 h-6 text-on-surface-variant" />
+              </div>
+            </div>
+
           </SectionGroup>
 
           {/* Manage Goals */}
