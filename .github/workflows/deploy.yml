@@ -14,6 +14,11 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
+# Opt into Node.js 24 now to silence Node.js 20 deprecation warnings.
+# GitHub will force this on June 2nd, 2026 anyway.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
