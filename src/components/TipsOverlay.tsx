@@ -76,7 +76,7 @@ export const TipsOverlay: React.FC<TipsOverlayProps> = ({ isOpen, onClose }) => 
               </div>
               <p className="m3-body-large text-on-surface-variant">Nouns name people, places, things, or ideas.</p>
               
-              <div className="bg-surface-variant/30 rounded-3xl p-5 space-y-4">
+              <div className="bg-surface-container-highest/80 rounded-3xl p-5 space-y-4">
                 <div>
                   <h4 className="m3-title-medium text-on-surface mb-2 flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
@@ -122,7 +122,7 @@ export const TipsOverlay: React.FC<TipsOverlayProps> = ({ isOpen, onClose }) => 
               </div>
               <p className="m3-body-large text-on-surface-variant">Verbs describe an action or a state of being.</p>
               
-              <div className="bg-surface-variant/30 rounded-3xl p-5 space-y-4">
+              <div className="bg-surface-container-highest/80 rounded-3xl p-5 space-y-4">
                 <div>
                   <h4 className="m3-title-medium text-on-surface mb-2 flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
@@ -166,7 +166,7 @@ export const TipsOverlay: React.FC<TipsOverlayProps> = ({ isOpen, onClose }) => 
               </div>
               <p className="m3-body-large text-on-surface-variant">Adjectives describe or modify a noun or pronoun.</p>
               
-              <div className="bg-surface-variant/30 rounded-3xl p-5 space-y-4">
+              <div className="bg-surface-container-highest/80 rounded-3xl p-5 space-y-4">
                 <div>
                   <h4 className="m3-title-medium text-on-surface mb-2 flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
@@ -213,7 +213,7 @@ export const TipsOverlay: React.FC<TipsOverlayProps> = ({ isOpen, onClose }) => 
               </div>
               <p className="m3-body-large text-on-surface-variant">Adverbs describe verbs, adjectives, or other adverbs.</p>
               
-              <div className="bg-surface-variant/30 rounded-3xl p-5 space-y-4">
+              <div className="bg-surface-container-highest/80 rounded-3xl p-5 space-y-4">
                 <div>
                   <h4 className="m3-title-medium text-on-surface mb-2 flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
