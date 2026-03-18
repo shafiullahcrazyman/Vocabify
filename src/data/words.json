@@ -126,7 +126,7 @@
     "example": "The car accident was caused by an accidental mistake that happened completely accidentally.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Event",
+    "theme": "Events",
     "letter": "A"
   },
   {
@@ -347,7 +347,7 @@
     "example": "My deep admiration for his work makes me admire his admirable dedication, which he displays admirably.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "A"
   },
   {
@@ -451,7 +451,7 @@
     "example": "The complicated political affair was handled quietly by the committee.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Event",
+    "theme": "Events",
     "letter": "A"
   },
   {
@@ -464,7 +464,7 @@
     "example": "Her deep affection for animals began to deeply affect her brother, who became an affectionate owner and treated his pets affectionately.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "A"
   },
   {
@@ -490,7 +490,7 @@
     "example": "The little boy was completely afraid of the loud thunder.",
     "cefr": "A1",
     "level": "easy",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "A"
   },
   {
@@ -581,7 +581,7 @@
     "example": "The secret agent successfully completed his dangerous mission.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Profession",
+    "theme": "Professions",
     "letter": "A"
   },
   {
@@ -919,7 +919,7 @@
     "example": "Her amazing talent continues to amaze the judges, leaving them in absolute amazement as she performs amazingly.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "A"
   },
   {
@@ -984,7 +984,7 @@
     "example": "His uncontrollable anger began to anger his friends, turning them into angry critics who spoke to him angrily.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "A"
   },
   {
@@ -1036,7 +1036,7 @@
     "example": "My parents celebrated their twentieth wedding anniversary with a romantic dinner.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Event",
+    "theme": "Events",
     "letter": "A"
   },
   {
@@ -1062,7 +1062,7 @@
     "example": "It is a huge annoyance when you annoy people with that annoying habit, behaving so annoyingly during meetings.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "A"
   },
   {
@@ -1101,7 +1101,7 @@
     "example": "Overwhelmed by deep anxiety, the anxious mother waited anxiously for her son's safe return.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "A"
   },
   {
@@ -1283,7 +1283,7 @@
     "example": "To show my true appreciation, I deeply appreciate your help and want to offer an appreciative smile, nodding appreciatively.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "A"
   },
   {
@@ -1361,7 +1361,7 @@
     "example": "The brilliant architect designed the building so that its architectural style was architecturally perfect.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Profession",
+    "theme": "Professions",
     "letter": "A"
   },
   {
@@ -1543,7 +1543,7 @@
     "example": "Filled with deep shame, the boy realized his actions would shame his family, so the ashamed child looked down ashamedly.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "A"
   },
   {
@@ -3987,7 +3987,7 @@
     "example": "The director will cast the perfect actor to join the movie's talented ensemble cast.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "C"
   },
   {
@@ -4260,7 +4260,7 @@
     "example": "I decided to chance it and take a huge chance by investing in the chancy startup.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "C"
   },
   {
@@ -4611,7 +4611,7 @@
     "example": "Given the unusual circumstance, the evidence was only circumstantially relevant and proved to be highly circumstantial.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "C"
   },
   {
@@ -4702,7 +4702,7 @@
     "example": "The classical musician wanted to classicize the modern piece, bringing a sense of classicism by playing it classically.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "C"
   },
   {
@@ -5066,7 +5066,7 @@
     "example": "She will colour the painting colourfully, using vibrant shades to create a colourful masterpiece full of bright colour.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "C"
   },
   {
@@ -5092,7 +5092,7 @@
     "example": "When you combine these rare ingredients, their combined flavors produce an incredible combination.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "C"
   },
   {
@@ -5183,7 +5183,7 @@
     "example": "The museum will commission an artist, paying a high fee for the newly commissioned work as part of their annual commission.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "C"
   },
   {
@@ -5209,7 +5209,7 @@
     "example": "They commonly share a common goal, and this shared commonality unites the entire group.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "C"
   },
   {
@@ -6574,7 +6574,7 @@
     "example": "The dancing performers stepped onto the stage to dance a beautiful, traditional dance.",
     "cefr": "A1",
     "level": "easy",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "D"
   },
   {
@@ -6925,7 +6925,7 @@
     "example": "The delightful performance delightfully managed to delight the audience with sheer delight.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "D"
   },
   {
@@ -7042,7 +7042,7 @@
     "example": "The depressing news will depress the entire community, bringing a depressingly dark wave of deep depression.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "D"
   },
   {
@@ -7107,7 +7107,7 @@
     "example": "His intense desire pushed him to desirably acquire the most desirable object he could ever desire.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "D"
   },
   {
@@ -7133,7 +7133,7 @@
     "example": "In sheer desperation, the desperate survivor cried out desperately for a rescue team.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "D"
   },
   {
@@ -7341,7 +7341,7 @@
     "example": "The extremely difficult task caused him a great deal of difficulty.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Problem",
+    "theme": "Problems",
     "letter": "D"
   },
   {
@@ -7419,7 +7419,7 @@
     "example": "The new rule will disadvantageously disadvantage our team, putting us at a highly disadvantageous disadvantage.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Problem",
+    "theme": "Problems",
     "letter": "D"
   },
   {
@@ -7458,7 +7458,7 @@
     "example": "The disappointingly low sales will disappoint the manager, causing a highly disappointing sense of disappointment.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "D"
   },
   {
@@ -7588,7 +7588,7 @@
     "example": "I strongly dislike the bitter medicine, and my dislike for it grows every time I taste it.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "D"
   },
   {
@@ -7900,7 +7900,7 @@
     "example": "The actors will dramatically dramatize the dramatic events of the historical drama.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "D"
   },
   {
@@ -8251,7 +8251,7 @@
     "example": "In order to effect a meaningful change, we need an effective strategy that works effectively and leaves a lasting positive effect.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Outcome",
+    "theme": "Outcomes",
     "letter": "E"
   },
   {
@@ -8706,7 +8706,7 @@
     "example": "The entertaining clown entertainingly performed to entertain the children, providing excellent entertainment.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "E"
   },
   {
@@ -9174,7 +9174,7 @@
     "example": "The exhibitionist artist decided to exhibit his controversial artwork at the new art exhibition.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "E"
   },
   {
@@ -9525,7 +9525,7 @@
     "example": "His failing grade was a clear failure, confirming that he would ultimately fail the challenging course.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Outcome",
+    "theme": "Outcomes",
     "letter": "F"
   },
   {
@@ -10084,7 +10084,7 @@
     "example": "The director decided to film the new sci-fi movie using a filmy filter to give the film a vintage look.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "F"
   },
   {
@@ -11020,7 +11020,7 @@
     "example": "We visited the art gallery to see the new exhibition.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "G"
   },
   {
@@ -11176,7 +11176,7 @@
     "example": "Science fiction is my favorite literary genre.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "G"
   },
   {
@@ -12840,7 +12840,7 @@
     "example": "To illustrate his point illustratively, he drew an illustrative diagram that served as a perfect illustration.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "I"
   },
   {
@@ -12944,7 +12944,7 @@
     "example": "Most importantly, he recognized the true importance of completing the important task on time.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Value",
+    "theme": "Values",
     "letter": "I"
   },
   {
@@ -13386,7 +13386,7 @@
     "example": "I decided to stay home and read instead.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Choices",
+    "theme": "Choice",
     "letter": "I"
   },
   {
@@ -13984,7 +13984,7 @@
     "example": "You must keep the safely kept documents in secure keeping.",
     "cefr": "A1",
     "level": "easy",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "K"
   },
   {
@@ -14959,7 +14959,7 @@
     "example": "She deeply studied classical literature and literarily analyzed various complex literary texts.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "L"
   },
   {
@@ -15336,7 +15336,7 @@
     "example": "He will maintain the well maintained building to ensure proper long-term maintenance.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "M"
   },
   {
@@ -16103,7 +16103,7 @@
     "example": "His missionary work was a difficult mission.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Goal",
+    "theme": "Goals",
     "letter": "M"
   },
   {
@@ -16519,7 +16519,7 @@
     "example": "She creates music musically because of her great musical talent.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "M"
   },
   {
@@ -16532,7 +16532,7 @@
     "example": "The mysterious stranger vanished mysteriously, leaving behind a profound mystery.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "M"
   },
   {
@@ -16714,7 +16714,7 @@
     "example": "Do not negate the negative feedback, or it will negatively affect the final negative outcome.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "N"
   },
   {
@@ -17195,7 +17195,7 @@
     "example": "The occasional visitor occasionally visits on a special occasion, which might occasion a grand feast.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Event",
+    "theme": "Events",
     "letter": "O"
   },
   {
@@ -17208,7 +17208,7 @@
     "example": "The occurrence of the rare solar eclipse will occur right at midnight.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Event",
+    "theme": "Events",
     "letter": "O"
   },
   {
@@ -17247,7 +17247,7 @@
     "example": "The oddity of the odd situation made him behave oddly.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "O"
   },
   {
@@ -17598,7 +17598,7 @@
     "example": "I gave the other book to the other.",
     "cefr": "A1",
     "level": "easy",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "O"
   },
   {
@@ -17832,7 +17832,7 @@
     "example": "The talented painter will paint a beautifully painted landscape.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "P"
   },
   {
@@ -17988,7 +17988,7 @@
     "example": "We had to part ways, but I felt partly responsible for taking a partial part in the dispute.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "P"
   },
   {
@@ -18170,7 +18170,7 @@
     "example": "To pacify the angry crowd, the leader spoke peacefully to restore peace and create a peaceful environment.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "P"
   },
   {
@@ -18287,7 +18287,7 @@
     "example": "To perform performatively ensures a highly performative and captivating stage performance.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "P"
   },
   {
@@ -18521,7 +18521,7 @@
     "example": "The picky eater took a long time to pick his favorite pick from the menu.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "P"
   },
   {
@@ -18651,7 +18651,7 @@
     "example": "You must cautiously place the fragile vase in a secure place.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Locations",
+    "theme": "Location",
     "letter": "P"
   },
   {
@@ -18859,7 +18859,7 @@
     "example": "She made a valid point and pointedly decided to point at the sharply pointed sign.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "P"
   },
   {
@@ -19041,7 +19041,7 @@
     "example": "She effortlessly struck a beautiful pose when the famous photographer asked her to pose for the camera.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "P"
   },
   {
@@ -19054,7 +19054,7 @@
     "example": "He had to precisely position his players, taking advantage of their positional strengths to secure a winning position on the field positionally.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Locations",
+    "theme": "Location",
     "letter": "P"
   },
   {
@@ -19184,7 +19184,7 @@
     "example": "During the heavy pour, she had to quickly pour the hot tea while watching the pouring rain.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "P"
   },
   {
@@ -19548,7 +19548,7 @@
     "example": "He would highly prize the gold medal because it was his most prized possession and his first major prize.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Achievements",
+    "theme": "Achievement",
     "letter": "P"
   },
   {
@@ -19678,7 +19678,7 @@
     "example": "As we progressively progress through the progressive training, our overall progress becomes much more noticeable.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Achievements",
+    "theme": "Achievement",
     "letter": "P"
   },
   {
@@ -19912,7 +19912,7 @@
     "example": "Give the heavy wooden door a strong pull, but be careful not to pull a muscle.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "P"
   },
   {
@@ -19990,7 +19990,7 @@
     "example": "She purposefully set out to purpose her life toward a clear purpose, engaging only in highly purposeful work.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "P"
   },
   {
@@ -20003,7 +20003,7 @@
     "example": "In his relentless pursuit of knowledge, he chose to bravely pursue a difficult science degree.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "P"
   },
   {
@@ -20016,7 +20016,7 @@
     "example": "The pushy salesman pushily decided to push the customer, giving a forceful push toward the expensive product.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "P"
   },
   {
@@ -20029,7 +20029,7 @@
     "example": "Please put the heavy box on the kitchen table.",
     "cefr": "A1",
     "level": "easy",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "P"
   },
   {
@@ -20159,7 +20159,7 @@
     "example": "A true quitter will easily quit when the challenge becomes far too difficult.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "Q"
   },
   {
@@ -20354,7 +20354,7 @@
     "example": "He had to reach out as far as possible, extending his long reach to grab the easily reachable apple.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "R"
   },
   {
@@ -20601,7 +20601,7 @@
     "example": "Her stubborn refusal to compromise made her outright refuse the otherwise generous offer.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "R"
   },
   {
@@ -20692,7 +20692,7 @@
     "example": "Despite the harsh rejection, he refused to feel like a rejected artist and decided he would never reject constructive criticism again.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "R"
   },
   {
@@ -20705,7 +20705,7 @@
     "example": "Understanding their familial relation allowed the detective to relate the complex clues relatively quickly, despite their relative obscurity.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Connections",
+    "theme": "Connection",
     "letter": "R"
   },
   {
@@ -20783,7 +20783,7 @@
     "example": "He religiously practices his ancient religion, strictly observing every important religious tradition.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Beliefs",
+    "theme": "Belief",
     "letter": "R"
   },
   {
@@ -20861,7 +20861,7 @@
     "example": "The safe removal of the removable computer battery requires you to carefully remove the back cover first.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "R"
   },
   {
@@ -20913,7 +20913,7 @@
     "example": "You must completely replace the easily replaceable parts immediately to avoid paying for a full system replacement.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "R"
   },
   {
@@ -21069,7 +21069,7 @@
     "example": "With great resolution, she promised to resolve the conflict and stood resolute, acting resolutely to find peace.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Problem_Solving",
+    "theme": "Problem Solving",
     "letter": "R"
   },
   {
@@ -21589,7 +21589,7 @@
     "example": "As part of my morning routine, I perform a routine inspection and routinely check the emails.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Daily_Life",
+    "theme": "Daily Life",
     "letter": "R"
   },
   {
@@ -23084,7 +23084,7 @@
     "example": "They decided to single out the best single from the album and release every single track singly.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Number",
+    "theme": "Numbers",
     "letter": "S"
   },
   {
@@ -23175,7 +23175,7 @@
     "example": "I need a group of six to carry these six heavy boxes.",
     "cefr": "A1",
     "level": "easy",
-    "theme": "Number",
+    "theme": "Numbers",
     "letter": "S"
   },
   {
@@ -23188,7 +23188,7 @@
     "example": "The sixteen teenagers will all turn sixteen this month.",
     "cefr": "A1",
     "level": "easy",
-    "theme": "Number",
+    "theme": "Numbers",
     "letter": "S"
   },
   {
@@ -23201,7 +23201,7 @@
     "example": "He drove for a full sixty minutes at exactly sixty miles per hour.",
     "cefr": "A1",
     "level": "easy",
-    "theme": "Number",
+    "theme": "Numbers",
     "letter": "S"
   },
   {
@@ -23656,7 +23656,7 @@
     "example": "To find a lasting solution, we must solve this solvable problem together.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Problem_Solving",
+    "theme": "Problem Solving",
     "letter": "S"
   },
   {
@@ -23825,7 +23825,7 @@
     "example": "We traveled south to reach the southern tip of the country, enjoying the beauty of the deep south.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Directions",
+    "theme": "Direction",
     "letter": "S"
   },
   {
@@ -23877,7 +23877,7 @@
     "example": "You must specify every specific detail in the specification document so we know exactly and specifically what you need.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Details",
+    "theme": "Detail",
     "letter": "S"
   },
   {
@@ -23981,7 +23981,7 @@
     "example": "He used a split piece of wood to repair the fence after he had to split the log to fix the wide split.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "S"
   },
   {
@@ -24033,7 +24033,7 @@
     "example": "Although he had a spotty record, he could always spot the best fishing spot near the river.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Locations",
+    "theme": "Location",
     "letter": "S"
   },
   {
@@ -24046,7 +24046,7 @@
     "example": "You can spread the soft, spreadable butter on your toast to enjoy a delicious spread.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "S"
   },
   {
@@ -24163,7 +24163,7 @@
     "example": "I will stand near the wooden stand to join the standing crowd.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "S"
   },
   {
@@ -24202,7 +24202,7 @@
     "example": "She couldn't help but stare back when she noticed his intense, uncomfortable stare.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "S"
   },
   {
@@ -24215,7 +24215,7 @@
     "example": "We need to start the race from the official starting line to ensure a fair start.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "S"
   },
   {
@@ -24358,7 +24358,7 @@
     "example": "Please step carefully over the broken concrete step at the entrance.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "S"
   },
   {
@@ -24501,7 +24501,7 @@
     "example": "He had to straighten his tie, looking straight ahead as he walked a straight line down the final straight of the track.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Directions",
+    "theme": "Direction",
     "letter": "S"
   },
   {
@@ -24735,7 +24735,7 @@
     "example": "We must not subject the participants to a subjective test where each subject is judged subjectively.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "S"
   },
   {
@@ -25138,7 +25138,7 @@
     "example": "The white dove serves as a symbol of peace; it will symbolically symbolize hope during the deeply symbolic ceremony.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "S"
   },
   {
@@ -25619,7 +25619,7 @@
     "example": "During the school term, the professor will term this unique phenomenon 'climate shift'.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "T"
   },
   {
@@ -26282,7 +26282,7 @@
     "example": "He climbed to the top of the mountain to top his previous record and become the top climber.",
     "cefr": "A2",
     "level": "easy",
-    "theme": "Locations",
+    "theme": "Location",
     "letter": "T"
   },
   {
@@ -26295,7 +26295,7 @@
     "example": "The professor discussed a topical issue topically, making it the central topic of his lecture.",
     "cefr": "A1",
     "level": "easy",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "T"
   },
   {
@@ -26386,7 +26386,7 @@
     "example": "We drove into the small rural town to buy fresh groceries.",
     "cefr": "A1",
     "level": "easy",
-    "theme": "Locations",
+    "theme": "Location",
     "letter": "T"
   },
   {
@@ -27205,7 +27205,7 @@
     "example": "He unnecessarily bought an unnecessary amount of milk for the trip.",
     "cefr": "B1",
     "level": "medium",
-    "theme": "Need",
+    "theme": "Needs",
     "letter": "U"
   },
   {
@@ -27426,7 +27426,7 @@
     "example": "The various options variously vary depending on the great variety of choices available.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "V"
   },
   {
@@ -28544,7 +28544,7 @@
     "example": "He fought worthily to prove he was a worthy opponent of great worth.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Value",
+    "theme": "Values",
     "letter": "W"
   },
   {
@@ -28765,7 +28765,7 @@
     "example": "He likes to abstract ideas from nature, thinking abstractly to turn them into an abstract painting that represents a beautiful abstraction.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "A"
   },
   {
@@ -28778,7 +28778,7 @@
     "example": "The absurdity of the situation was that he acted so absurdly while wearing an absurd costume.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "A"
   },
   {
@@ -29220,7 +29220,7 @@
     "example": "The room was decorated aesthetically to match a minimalist aesthetic, highlighting its pure aesthetic beauty.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "A"
   },
   {
@@ -29233,7 +29233,7 @@
     "example": "Knowing how her words could affect him, she smiled affectionately and showed deep affection through an affectionate hug.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "A"
   },
   {
@@ -29506,7 +29506,7 @@
     "example": "The clown managed to amuse the children amusingly with an amusing trick that brought them much amusement.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "A"
   },
   {
@@ -29584,7 +29584,7 @@
     "example": "The director helped animate the characters, speaking animatedly about the animated film's groundbreaking animation.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "A"
   },
   {
@@ -29636,7 +29636,7 @@
     "example": "Filled with overwhelming anxiety, the anxious student waited anxiously for the final exam results.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "A"
   },
   {
@@ -29701,7 +29701,7 @@
     "example": "The applauding audience stood up to applaud the performers, filling the room with thunderous applause.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "A"
   },
   {
@@ -29740,7 +29740,7 @@
     "example": "To show her appreciation, she smiled appreciatively and told them how much she would appreciate their appreciative gestures.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "A"
   },
   {
@@ -29883,7 +29883,7 @@
     "example": "The museum gallery displayed a stunning piece of modern artwork.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "A"
   },
   {
@@ -30052,7 +30052,7 @@
     "example": "It was astonishingly easy to astonish the crowd with his astonishing magic tricks, leaving them in pure astonishment.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "A"
   },
   {
@@ -30299,7 +30299,7 @@
     "example": "The awkward boy stumbled awkwardly, trying to hide his awkwardness at the party.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "A"
   },
   {
@@ -30312,7 +30312,7 @@
     "example": "The stunning mountains provided a perfect photographic backdrop for the wedding.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "B"
   },
   {
@@ -30390,7 +30390,7 @@
     "example": "The graceful dancer performed beautifully during the classical ballet.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "B"
   },
   {
@@ -30598,7 +30598,7 @@
     "example": "He gave a beautiful ring to his beloved, promising to cherish his beloved wife forever.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "B"
   },
   {
@@ -30663,7 +30663,7 @@
     "example": "He felt deeply betrayed after discovering the betrayal, and he promised never to betray another friend.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "B"
   },
   {
@@ -31183,7 +31183,7 @@
     "example": "I do not wish to burden you with this burdensome task, as I know it is a heavy burden.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "B"
   },
   {
@@ -31300,7 +31300,7 @@
     "example": "The artist bought a fresh canvas and decided to canvas the town for new landscape ideas.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "C"
   },
   {
@@ -31378,7 +31378,7 @@
     "example": "The sculptor decided to carve the block of wood, eventually creating a beautifully carved eagle carving.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "C"
   },
   {
@@ -31820,7 +31820,7 @@
     "example": "The clerk clerically handled the clerical tasks while training to clerk for the judge.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Profession",
+    "theme": "Professions",
     "letter": "C"
   },
   {
@@ -32171,7 +32171,7 @@
     "example": "My loyal companion will accompany me, and we will walk companionably in a companionable silence.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Relationship",
+    "theme": "Relationships",
     "letter": "C"
   },
   {
@@ -32444,7 +32444,7 @@
     "example": "It is conceivably possible to conceive a brilliant idea if the initial conception is highly conceivable.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Idea",
+    "theme": "Ideas",
     "letter": "C"
   },
   {
@@ -34030,7 +34030,7 @@
     "example": "The dependent patient will dependently depend on the nurse, creating an absolute dependence for daily survival.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Relationship",
+    "theme": "Relationships",
     "letter": "D"
   },
   {
@@ -34381,7 +34381,7 @@
     "example": "He faced a terrible dilemma when choosing between his career and his family.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Choices",
+    "theme": "Choice",
     "letter": "D"
   },
   {
@@ -34511,7 +34511,7 @@
     "example": "You should discard the discarded items into the proper discard pile.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "D"
   },
   {
@@ -34836,7 +34836,7 @@
     "example": "They doctrinally taught the strict doctrinal texts to indoctrinate the youth into their religious doctrine.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Beliefs",
+    "theme": "Belief",
     "letter": "D"
   },
   {
@@ -34953,7 +34953,7 @@
     "example": "She will dramatize the drama by acting dramatic and sighing dramatically.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "D"
   },
   {
@@ -35018,7 +35018,7 @@
     "example": "The dual nature of the universe represents a duality that operates dually in life.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "D"
   },
   {
@@ -35265,7 +35265,7 @@
     "example": "She will elaborate on the elaborate plan elaborately, providing a full elaboration of the details.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Details",
+    "theme": "Detail",
     "letter": "E"
   },
   {
@@ -35447,7 +35447,7 @@
     "example": "The hero will embody courage, serving as the perfect embodiment of an embodied spirit.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "E"
   },
   {
@@ -35746,7 +35746,7 @@
     "example": "The entertaining clown will entertain the kids entertainingly, providing great entertainment.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "E"
   },
   {
@@ -35941,7 +35941,7 @@
     "example": "The essential ingredient essentially captures the true essence of the dish.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "E"
   },
   {
@@ -36162,7 +36162,7 @@
     "example": "The artist will exhibit the exhibited paintings at the grand art exhibition.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "E"
   },
   {
@@ -36253,7 +36253,7 @@
     "example": "The expert technician expertly applied his expertise to fix the complex machine.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Skills",
+    "theme": "Skill",
     "letter": "E"
   },
   {
@@ -36383,7 +36383,7 @@
     "example": "The fabulously wealthy king threw a fabulous party straight out of an ancient fable.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "F"
   },
   {
@@ -36500,7 +36500,7 @@
     "example": "She would fantasize about a fantastically beautiful world, writing fantastic tales of magic and fantasy.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "F"
   },
   {
@@ -36630,7 +36630,7 @@
     "example": "The talented film-maker won an international award for his creative documentary.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "F"
   },
   {
@@ -37254,7 +37254,7 @@
     "example": "The fundamentally flawed theory missed a key fundamental that serves as the core fundamental of the subject.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Concepts",
+    "theme": "Concept",
     "letter": "F"
   },
   {
@@ -37371,7 +37371,7 @@
     "example": "With a loving gaze, she continued to gaze at the stars.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "G"
   },
   {
@@ -37501,7 +37501,7 @@
     "example": "With a quick glance at his watch, he had to glance away.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "G"
   },
   {
@@ -37514,7 +37514,7 @@
     "example": "I caught a glimpse of the rare bird and hoped to glimpse it again.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "G"
   },
   {
@@ -37605,7 +37605,7 @@
     "example": "She moved with such grace that she seemed to grace the dance floor, performing gracefully in a graceful manner.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "G"
   },
   {
@@ -37631,7 +37631,7 @@
     "example": "He tried to grasp the concept, but it remained out of his firm grasp.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "G"
   },
   {
@@ -37722,7 +37722,7 @@
     "example": "He could not help but grin, flashing a wide grin at the joke.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Expressions",
+    "theme": "Expression",
     "letter": "G"
   },
   {
@@ -37735,7 +37735,7 @@
     "example": "To escape the daily grind, he likes to grind coffee beans by hand as a relaxing hobby.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "G"
   },
   {
@@ -37748,7 +37748,7 @@
     "example": "He lost his grip on the rope, unable to grip it firmly during the gripping scene.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "G"
   },
   {
@@ -37878,7 +37878,7 @@
     "example": "After ordering a sudden halt, the troops were forced to halt, only moving forward haltingly with a halting pace.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "H"
   },
   {
@@ -38112,7 +38112,7 @@
     "example": "When he decided to hide, he went into hiding and remained hidden from everyone.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "H"
   },
   {
@@ -38398,7 +38398,7 @@
     "example": "The famous cultural icon acted iconically in that iconic film.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "I"
   },
   {
@@ -38502,7 +38502,7 @@
     "example": "To create vivid imagery, you must imagine a unique world and write imaginatively using your imaginative mind.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "I"
   },
   {
@@ -38918,7 +38918,7 @@
     "example": "To inflict such pain is a terrible infliction on the innocent victims.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "I"
   },
   {
@@ -39022,7 +39022,7 @@
     "example": "He will initially initiate the project and oversee its initial phase during the formal initiation.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "I"
   },
   {
@@ -39113,7 +39113,7 @@
     "example": "The insertion of the chip required him to carefully insert the inserted device into the motherboard.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "I"
   },
   {
@@ -39139,7 +39139,7 @@
     "example": "During the routine inspection, the official will inspect every room.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "I"
   },
   {
@@ -39308,7 +39308,7 @@
     "example": "For seamless integration, we must integrate the new software into an integrated system.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "I"
   },
   {
@@ -39347,7 +39347,7 @@
     "example": "To handle the high intensity of the project, they must intensively intensify their efforts with intensive training.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "I"
   },
   {
@@ -39399,7 +39399,7 @@
     "example": "Please do not interfere, as your interfering behavior causes unnecessary interference.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "I"
   },
   {
@@ -39477,7 +39477,7 @@
     "example": "The government decided to intervene by organizing a military intervention.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "I"
   },
   {
@@ -39568,7 +39568,7 @@
     "example": "The priest will invoke the spirits during the holy invocation.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "I"
   },
   {
@@ -39581,7 +39581,7 @@
     "example": "Her direct involvement will involve her deeply in the project, making her a highly involved team member.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "I"
   },
   {
@@ -40010,7 +40010,7 @@
     "example": "With a sudden, powerful leap, the athlete managed to leap over the high hurdle.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "L"
   },
   {
@@ -40361,7 +40361,7 @@
     "example": "She has a passion for classic literature and writes excellent literary critiques.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "L"
   },
   {
@@ -40543,7 +40543,7 @@
     "example": "The poet wrote the lyric beautifully, expressing his feelings lyrically in a lyrical style.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "L"
   },
   {
@@ -41024,7 +41024,7 @@
     "example": "The singer sang the melody melodically, showcasing her beautiful melodic voice.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "M"
   },
   {
@@ -41739,7 +41739,7 @@
     "example": "The urgent necessity of the project will necessitate that we necessarily take all necessary safety precautions.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Need",
+    "theme": "Needs",
     "letter": "N"
   },
   {
@@ -42181,7 +42181,7 @@
     "example": "Did the strange occurrence actually occur during the middle of the night?",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Event",
+    "theme": "Events",
     "letter": "O"
   },
   {
@@ -42272,7 +42272,7 @@
     "example": "The talented singer performed the opera operatically, beautifully showcasing her stunning operatic voice.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "O"
   },
   {
@@ -42324,7 +42324,7 @@
     "example": "Filled with deep optimism, she optimistically shared her incredibly optimistic views about the company's future.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "O"
   },
   {
@@ -42415,7 +42415,7 @@
     "example": "The sudden outbreak of the infectious virus caused nationwide panic.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Event",
+    "theme": "Events",
     "letter": "O"
   },
   {
@@ -42493,7 +42493,7 @@
     "example": "It is outrageously outrageous that his cruel actions could violently outrage the public and cause such an immense outrage.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "O"
   },
   {
@@ -42558,7 +42558,7 @@
     "example": "He was overly anxious about the rapidly approaching final examination.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "O"
   },
   {
@@ -42623,7 +42623,7 @@
     "example": "The crowd's support was overwhelmingly positive, and such an overwhelming response completely managed to overwhelm the young, nervous artist.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "O"
   },
   {
@@ -42701,7 +42701,7 @@
     "example": "Please do not suddenly panic, because a highly panicky reaction will only create unnecessary and dangerous panic among the crowd.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "P"
   },
   {
@@ -42857,7 +42857,7 @@
     "example": "With intense passion, she passionately delivered a very passionate speech to the massive crowd.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "P"
   },
   {
@@ -43221,7 +43221,7 @@
     "example": "It is a great pity to pitifully pity such a small, pitiful creature in its extreme distress.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Emotion",
+    "theme": "Emotions",
     "letter": "P"
   },
   {
@@ -43377,7 +43377,7 @@
     "example": "The skilled actor will brilliantly portray the famous king, undoubtedly delivering an absolutely excellent historical portrayal.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Arts",
+    "theme": "Art",
     "letter": "P"
   },
   {
@@ -43468,7 +43468,7 @@
     "example": "She guarded the incredibly precious jewels preciously in order to preserve their absolute, stunning preciousness.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Value",
+    "theme": "Values",
     "letter": "P"
   },
   {
@@ -46276,7 +46276,7 @@
     "example": "The elaborate set-up of the stage was completely flawless.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Event",
+    "theme": "Events",
     "letter": "S"
   },
   {
@@ -50306,7 +50306,7 @@
     "example": "The widespread damage affected the entire region.",
     "cefr": "B2",
     "level": "medium",
-    "theme": "Event",
+    "theme": "Events",
     "letter": "W"
   },
   {
@@ -50345,7 +50345,7 @@
     "example": "Give the table a quick wipe and wipe up the spilled milk.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "W"
   },
   {
@@ -50384,7 +50384,7 @@
     "example": "After his withdrawal from the competition, he decided to withdraw to his room and remained quiet and withdrawn.",
     "cefr": "C1",
     "level": "hard",
-    "theme": "Actions",
+    "theme": "Action",
     "letter": "W"
   },
   {
