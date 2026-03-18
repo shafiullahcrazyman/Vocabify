@@ -199,7 +199,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                 style={{ WebkitTapHighlightColor: 'transparent' }}
                 className={`p-3 rounded-full flex-shrink-0 transition-colors ${
                   isPlaying && playingText === mainWord
-                    ? 'bg-primary text-on-primary scale-110'
+                    ? 'bg-primary/20 text-primary'
                     : 'hover:bg-primary/20 text-primary bg-primary-container/50'
                 }`}
                 aria-label="Pronounce word"
@@ -265,7 +265,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                             whileTap={anim ? { scale: 0.85 } : undefined}
                             transition={fastSpatial}
                             style={{ WebkitTapHighlightColor: 'transparent' }}
-                            className={`p-2 rounded-full transition-colors flex-shrink-0 ${isFormPlaying ? c.active : c.btn}`}
+                            className={`p-2 rounded-full transition-colors flex-shrink-0 ${isFormPlaying ? `${c.btn} opacity-70` : c.btn}`}
                           >
                             <Volume2 className="w-5 h-5" />
                           </motion.button>
