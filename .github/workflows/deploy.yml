@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # upgraded from 'read' so the workflow can commit package-lock.json
+  contents: read
   pages: write
   id-token: write
 
@@ -24,50 +24,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        # actions/checkout@v4.2.2 — pin to SHA to prevent supply-chain attacks
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          # fetch-depth 0 + token needed so the bot can git push the lockfile
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        # actions/setup-node@v4.4.0
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        uses: actions/setup-node@v4
         with:
           node-version: 24
 
-      - name: Generate lockfile if missing
-        # If package-lock.json doesn't exist yet, create it and commit it back
-        # to the repo automatically. All future runs will then use 'npm ci'.
-        run: |
-          if [ ! -f package-lock.json ]; then
-            echo "No package-lock.json found — generating one now..."
-            npm install --legacy-peer-deps
-            git config user.name  "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add package-lock.json
-            git commit -m "chore: add package-lock.json [skip ci]"
-            git push
-            echo "Lockfile committed. Future runs will use npm ci."
-          else
-            echo "package-lock.json already exists — skipping generation."
-          fi
-
       - name: Install dependencies
-        # Uses the lockfile for a fast, reproducible, secure install
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       - name: Build
         run: npm run build
 
       - name: Setup Pages
-        # actions/configure-pages@v5.0.0
-        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b
+        uses: actions/configure-pages@v5
 
       - name: Upload artifact
-        # actions/upload-pages-artifact@v3.0.1
-        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa
+        uses: actions/upload-pages-artifact@v3
         with:
           path: './dist'
 
@@ -80,5 +54,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        # actions/deploy-pages@v4.0.5
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e
+        uses: actions/deploy-pages@v4
