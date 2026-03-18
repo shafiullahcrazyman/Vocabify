@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { triggerHaptic } from '../utils/haptics';
+import { useBackButton } from '../hooks/useBackButton';
 
 interface VideoTutorialModalProps {
   isOpen: boolean;
@@ -11,6 +12,9 @@ interface VideoTutorialModalProps {
 
 export const VideoTutorialModal: React.FC<VideoTutorialModalProps> = ({ isOpen, onClose }) => {
   const { settings } = useAppContext();
+
+  // Universal back button support
+  useBackButton(isOpen, onClose);
 
   // Prevent Tour from starting if this modal is open
   useEffect(() => {

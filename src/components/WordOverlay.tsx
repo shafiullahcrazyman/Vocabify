@@ -6,6 +6,7 @@ import { useAppContext } from '../context/AppContext';
 import { triggerHaptic } from '../utils/haptics';
 import { TipsOverlay } from './TipsOverlay';
 import { useTTS } from '../hooks/useTTS';
+import { useBackButton } from '../hooks/useBackButton';
 
 interface WordOverlayProps {
   word: WordFamily;
@@ -36,9 +37,10 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
   const isLearned = progress.learned.includes(word.id);
   const isFavorite = favorites.includes(word.id);
   const [isTipsOpen, setIsTipsOpen] = useState(false);
-  
-  // Track which specific word text is currently being spoken
   const [activeSpeech, setActiveSpeech] = useState<string | null>(null);
+
+  // Universal back button — WordOverlay is always "open" while mounted
+  useBackButton(true, onClose);
 
   useEffect(() => {
     document.body.classList.add('modal-open');
@@ -57,14 +59,12 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
-
     if (settings.autoPronounce) {
       const wordsToPronounce: string[] = [];
       if (isValid(word.noun)) wordsToPronounce.push(word.noun!);
       if (isValid(word.verb)) wordsToPronounce.push(word.verb!);
       if (isValid(word.adjective)) wordsToPronounce.push(word.adjective!);
       if (isValid(word.adverb)) wordsToPronounce.push(word.adverb!);
-
       if (wordsToPronounce.length > 0) {
         timer = setTimeout(() => {
           window.speechSynthesis.cancel();
@@ -76,25 +76,17 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
         }, 400);
       }
     }
-
     return () => {
       if (timer) clearTimeout(timer);
       window.speechSynthesis.cancel();
     };
   }, [word, settings.autoPronounce]);
 
-  // Reset local state when speech finishes
   useEffect(() => {
-    if (!isPlaying) {
-      setActiveSpeech(null);
-    }
+    if (!isPlaying) setActiveSpeech(null);
   }, [isPlaying]);
 
-  const handleSpeak = (text: string) => {
-    setActiveSpeech(text);
-    speak(text);
-  };
-
+  const handleSpeak = (text: string) => { setActiveSpeech(text); speak(text); };
   const isValid = (val?: string) => val && val.toLowerCase() !== 'x' && val.toLowerCase() !== 'none';
   const mainWord = getValidWord(word.noun, word.verb, word.adjective, word.adverb);
 
@@ -107,7 +99,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
 
   const handleClose = () => { triggerHaptic(settings.hapticsEnabled); onClose(); };
   const handleMarkLearned = () => { triggerHaptic(settings.hapticsEnabled); markLearned(word.id); };
-  
   const handlePrev = () => { if (hasPrev) { triggerHaptic(settings.hapticsEnabled); onPrev(); } };
   const handleNext = () => { if (hasNext) { triggerHaptic(settings.hapticsEnabled); onNext(); } };
 
@@ -146,7 +137,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             >
               <Heart className={`w-6 h-6 transition-transform ${isFavorite ? 'fill-rose-500 text-rose-500' : 'text-on-surface-variant'}`} />
             </button>
-            {/* UPDATED: Color matches Close and Heart icons */}
             <button
               onClick={() => { triggerHaptic(settings.hapticsEnabled); setIsTipsOpen(true); }}
               className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-variant text-on-surface-variant transition-all duration-200 active:scale-90"
@@ -163,7 +153,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
               <h2 className={`${getOverlayTitleSize(mainWord)} font-bold tracking-tight text-on-surface leading-none capitalize break-words`}>
                 {mainWord}
               </h2>
-              {/* UPDATED: Pulse only triggers if mainWord is active */}
               <button
                 onClick={() => handleSpeak(mainWord)}
                 className={`p-3 rounded-full transition-all duration-200 active:scale-90 flex-shrink-0 ${isPlaying && activeSpeech === mainWord ? 'bg-primary text-on-primary scale-110' : 'hover:bg-primary/20 text-primary bg-primary-container/50'}`}
@@ -179,7 +168,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             <div className="bg-surface-variant/30 rounded-3xl p-5">
               <h4 className="m3-title-medium text-on-surface mb-4">Word Forms</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Noun Section - Specific Animation */}
                 <div className={`flex flex-col p-4 rounded-2xl ${isValid(word.noun) ? 'bg-blue-500/10' : 'bg-surface-variant/20 dark:bg-surface-variant/10'}`}>
                   <span className={`text-[13px] font-bold uppercase tracking-widest mb-1 ${isValid(word.noun) ? 'text-blue-700 dark:text-blue-300' : 'text-on-surface-variant/50'}`}>Noun</span>
                   <div className="flex items-center justify-between">
@@ -191,8 +179,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                     )}
                   </div>
                 </div>
-                
-                {/* Verb Section - Specific Animation */}
                 <div className={`flex flex-col p-4 rounded-2xl ${isValid(word.verb) ? 'bg-emerald-500/10' : 'bg-surface-variant/20 dark:bg-surface-variant/10'}`}>
                   <span className={`text-[13px] font-bold uppercase tracking-widest mb-1 ${isValid(word.verb) ? 'text-emerald-700 dark:text-emerald-300' : 'text-on-surface-variant/50'}`}>Verb</span>
                   <div className="flex items-center justify-between">
@@ -204,8 +190,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                     )}
                   </div>
                 </div>
-
-                {/* Adjective Section - Specific Animation */}
                 <div className={`flex flex-col p-4 rounded-2xl ${isValid(word.adjective) ? 'bg-amber-500/10' : 'bg-surface-variant/20 dark:bg-surface-variant/10'}`}>
                   <span className={`text-[13px] font-bold uppercase tracking-widest mb-1 ${isValid(word.adjective) ? 'text-amber-700 dark:text-amber-300' : 'text-on-surface-variant/50'}`}>Adjective</span>
                   <div className="flex items-center justify-between">
@@ -217,8 +201,6 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                     )}
                   </div>
                 </div>
-
-                {/* Adverb Section - Specific Animation */}
                 <div className={`flex flex-col p-4 rounded-2xl ${isValid(word.adverb) ? 'bg-purple-500/10' : 'bg-surface-variant/20 dark:bg-surface-variant/10'}`}>
                   <span className={`text-[13px] font-bold uppercase tracking-widest mb-1 ${isValid(word.adverb) ? 'text-purple-700 dark:text-purple-300' : 'text-on-surface-variant/50'}`}>Adverb</span>
                   <div className="flex items-center justify-between">

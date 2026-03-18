@@ -4,6 +4,7 @@ import { ArrowLeft, Sun, Moon, Monitor } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { AppSettings } from '../types';
 import { triggerHaptic } from '../utils/haptics';
+import { useBackButton } from '../hooks/useBackButton';
 
 interface SettingsDrawerProps {
   isOpen: boolean;
@@ -12,6 +13,9 @@ interface SettingsDrawerProps {
 
 export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose }) => {
   const { settings, updateSettings } = useAppContext();
+
+  // Universal back button support
+  useBackButton(isOpen, onClose);
 
   useEffect(() => {
     if (isOpen) document.body.classList.add('modal-open');
