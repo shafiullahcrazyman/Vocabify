@@ -9,6 +9,12 @@ export default defineConfig(() => {
     base: '/Vocabify/',
     build: {
       outDir: 'dist',
+      // Strip all console.* calls and debugger statements from production bundle.
+      // This prevents internal storage key names and debug info leaking to DevTools.
+      minify: true,
+      esbuild: {
+        drop: ['console', 'debugger'],
+      },
     },
     plugins: [
       react(),
