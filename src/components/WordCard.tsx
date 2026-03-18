@@ -1,7 +1,9 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import { WordFamily } from '../types';
 import { Volume2, Heart } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
+import { fastSpatial } from '../utils/motion';
 import { useAppContext } from '../context/AppContext';
 import { useTTS } from '../hooks/useTTS';
 
@@ -19,19 +21,20 @@ const getValidWord = (...words: (string | undefined)[]) => {
 };
 
 export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'only' }) => {
-  const { settings, favorites, toggleFavorite } = useAppContext();
+  const { settings, favorites, toggleFavorite, progress } = useAppContext();
   const { speak, isPlaying } = useTTS();
   const isFavorite = favorites.includes(word.id);
+  const isLearned = progress.learned.includes(word.id);
 
   const mainWord = getValidWord(word.noun, word.verb, word.adjective, word.adverb);
   const isValid = (val?: string) => val && val.toLowerCase() !== 'x' && val.toLowerCase() !== 'none';
 
   const getRoundedClass = () => {
     switch (position) {
-      case 'first': return 'rounded-t-[28px] rounded-b-[4px] sm:rounded-[24px]';
+      case 'first':  return 'rounded-t-[28px] rounded-b-[4px] sm:rounded-[24px]';
       case 'middle': return 'rounded-[4px] sm:rounded-[24px]';
-      case 'last': return 'rounded-t-[4px] rounded-b-[28px] sm:rounded-[24px]';
-      case 'only': default: return 'rounded-[28px] sm:rounded-[24px]';
+      case 'last':   return 'rounded-t-[4px] rounded-b-[28px] sm:rounded-[24px]';
+      case 'only':   default: return 'rounded-[28px] sm:rounded-[24px]';
     }
   };
 
@@ -44,14 +47,35 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    triggerHaptic(settings.hapticsEnabled);
+    // Toggle haptic: satisfying click-like double pulse
+    triggerHaptic(settings.hapticsEnabled, 'toggle');
     toggleFavorite(word.id);
   };
 
+  const handleCardClick = () => {
+    // Pre-action press haptic — fires before overlay opens
+    triggerHaptic(settings.hapticsEnabled, 'press');
+    onClick();
+  };
+
   return (
-    <div
-      onClick={() => { triggerHaptic(settings.hapticsEnabled); onClick(); }}
-      className={`bg-surface-variant/40 hover:bg-surface-variant/70 ${getRoundedClass()} p-5 cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.97] flex flex-col gap-3 relative overflow-hidden border border-transparent hover:border-outline/10`}
+    // M3 FastSpatial spring for the tap press animation.
+    // whileTap replaces CSS active:scale — it's interruptible and physics-driven.
+    // style prevents blue tap highlight flash on mobile.
+    <motion.div
+      onClick={handleCardClick}
+      whileTap={settings.animationsEnabled ? { scale: 0.97 } : undefined}
+      transition={fastSpatial}
+      style={{ WebkitTapHighlightColor: 'transparent' }}
+      className={`
+        bg-surface-variant/40 hover:bg-surface-variant/70
+        ${getRoundedClass()}
+        p-5 cursor-pointer
+        transition-colors duration-200
+        flex flex-col gap-3 relative overflow-hidden
+        border border-transparent hover:border-outline/10
+        ${isLearned ? 'opacity-75' : ''}
+      `}
     >
       <div className="flex justify-between items-start">
         <div className="flex-1 pr-2 min-w-0">
@@ -60,21 +84,37 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
               {mainWord}
             </h3>
             <div className="flex items-center gap-1 flex-shrink-0">
-              <button
-                onClick={(e) => { e.stopPropagation(); speak(mainWord); }}
-                className={`p-1.5 rounded-full transition-colors ${isPlaying ? 'bg-primary/20 text-primary scale-110' : 'hover:bg-on-surface/10 text-on-surface-variant'}`}
+              {/* Volume button — selection haptic (texture feel, not full tap) */}
+              <motion.button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  triggerHaptic(settings.hapticsEnabled, 'selection');
+                  speak(mainWord);
+                }}
+                whileTap={settings.animationsEnabled ? { scale: 0.85 } : undefined}
+                transition={fastSpatial}
+                style={{ WebkitTapHighlightColor: 'transparent' }}
+                className={`p-1.5 rounded-full transition-colors ${isPlaying ? 'bg-primary/20 text-primary' : 'hover:bg-on-surface/10 text-on-surface-variant'}`}
                 aria-label="Pronounce word"
               >
                 <Volume2 className={`w-5 h-5 ${isPlaying ? 'animate-pulse' : ''}`} />
-              </button>
-              
-              <button
+              </motion.button>
+
+              {/* Favorite — spring scale on toggle for extra expressiveness */}
+              <motion.button
                 onClick={handleFavoriteClick}
+                whileTap={settings.animationsEnabled ? { scale: 0.80 } : undefined}
+                animate={isFavorite
+                  ? { scale: [1, 1.3, 1], transition: { ...fastSpatial, times: [0, 0.4, 1] } }
+                  : { scale: 1 }
+                }
+                transition={fastSpatial}
+                style={{ WebkitTapHighlightColor: 'transparent' }}
                 className="p-1.5 rounded-full hover:bg-rose-50/50 transition-colors"
                 aria-label="Favorite word"
               >
-                <Heart className={`w-5 h-5 transition-transform active:scale-75 ${isFavorite ? 'fill-rose-500 text-rose-500' : 'text-on-surface-variant'}`} />
-              </button>
+                <Heart className={`w-5 h-5 ${isFavorite ? 'fill-rose-500 text-rose-500' : 'text-on-surface-variant'}`} />
+              </motion.button>
             </div>
           </div>
           <p className="text-[16px] font-medium text-primary mt-1 truncate">{word.meaning_bn}</p>
@@ -102,32 +142,33 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
 
       <div className="mt-auto pt-2 flex items-center gap-2">
         <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center w-fit ${
-          word.level === 'easy' ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' :
+          word.level === 'easy'   ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' :
           word.level === 'medium' ? 'bg-orange-500/15 text-orange-800 dark:bg-orange-500/20 dark:text-orange-300' :
-          'bg-red-500/15 text-red-700 dark:bg-red-500/20 dark:text-red-300'
+                                    'bg-red-500/15 text-red-700 dark:bg-red-500/20 dark:text-red-300'
         }`}>
           <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
             word.level === 'easy' ? 'bg-emerald-500' :
-            word.level === 'medium' ? 'bg-orange-500' :
-            'bg-red-500'
-          }`}></span>
+            word.level === 'medium' ? 'bg-orange-500' : 'bg-red-500'
+          }`} />
           {word.level}
-          
           {word.cefr && (
             <span className={`ml-1.5 pl-1.5 border-l uppercase ${
-              word.level === 'easy' ? 'border-emerald-500/30' :
-              word.level === 'medium' ? 'border-orange-500/30' :
-              'border-red-500/30'
+              word.level === 'easy'   ? 'border-emerald-500/30' :
+              word.level === 'medium' ? 'border-orange-500/30' : 'border-red-500/30'
             }`}>
               {word.cefr}
             </span>
           )}
         </span>
-        
         <span className="text-[12px] text-on-surface-variant/70 font-medium capitalize">
           • {word.theme}
         </span>
       </div>
-    </div>
+
+      {/* Subtle learned indicator — no separate badge, just a soft overlay strip */}
+      {isLearned && (
+        <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-emerald-500/70" />
+      )}
+    </motion.div>
   );
 };

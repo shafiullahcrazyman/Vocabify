@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { triggerHaptic } from '../utils/haptics';
+import { slowSpatial, slowEffects, exitCurveSlow } from '../utils/motion';
 import { useBackButton } from '../hooks/useBackButton';
 
 interface VideoTutorialModalProps {
@@ -24,7 +25,7 @@ export const VideoTutorialModal: React.FC<VideoTutorialModalProps> = ({ isOpen, 
   }, [isOpen]);
 
   const handleClose = () => {
-    triggerHaptic(settings.hapticsEnabled);
+    triggerHaptic(settings.hapticsEnabled, 'tap');
     onClose();
   };
 
@@ -37,7 +38,8 @@ export const VideoTutorialModal: React.FC<VideoTutorialModalProps> = ({ isOpen, 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={settings.animationsEnabled ? { duration: 0.2 } : { duration: 0.1, ease: "easeOut" }}
+          animate={{ opacity: 1, transition: settings.animationsEnabled ? slowEffects : { duration: 0.1 } }}
+          exit={{ opacity: 0, transition: settings.animationsEnabled ? exitCurveSlow : { duration: 0.1 } }}
           className="absolute inset-0 bg-on-surface/40 backdrop-blur-sm"
           onClick={handleClose}
         />
@@ -45,7 +47,8 @@ export const VideoTutorialModal: React.FC<VideoTutorialModalProps> = ({ isOpen, 
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={settings.animationsEnabled ? { type: 'spring', damping: 25, stiffness: 300 } : { duration: 0.15, ease: "easeOut" }}
+          animate={{ opacity: 1, scale: 1, y: 0, transition: settings.animationsEnabled ? slowSpatial : { duration: 0.15 } }}
+          exit={{ opacity: 0, scale: 0.96, y: 16, transition: settings.animationsEnabled ? exitCurveSlow : { duration: 0.1 } }}
           className="relative bg-surface-container-high w-full max-w-4xl max-h-[90vh] rounded-[32px] flex flex-col overflow-hidden"
         >
           {/* Header */}
