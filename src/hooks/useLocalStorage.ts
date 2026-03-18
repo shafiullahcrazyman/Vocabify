@@ -17,15 +17,19 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
   });
 
   const setValue = (value: T | ((val: T) => T)) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+    // Use the functional updater form of setStoredValue so we always operate
+    // on the latest state — never a stale closure snapshot.
+    setStoredValue((prev) => {
+      const valueToStore = value instanceof Function ? value(prev) : value;
+      try {
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        }
+      } catch (error) {
+        console.error(`[Vocabify Cache] Failed to save data for "${key}":`, error);
       }
-    } catch (error) {
-      console.error(`[Vocabify Cache] Failed to save data for "${key}":`, error);
-    }
+      return valueToStore;
+    });
   };
 
   return [storedValue, setValue] as const;
