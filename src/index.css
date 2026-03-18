@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Google Fonts — loaded from network on first visit, then served from
+   Workbox's "google-fonts-cache" on all subsequent visits (including offline). */
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap');
+
 @theme {
   --color-primary: var(--md-sys-color-primary);
   --color-on-primary: var(--md-sys-color-on-primary);
@@ -28,9 +32,6 @@
 }
 
 @layer base {
-  /* Variable Font Import */
-  @import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap');
-
   * {
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -117,9 +118,4 @@
   .m3-body-large { font-size: 16px; line-height: 24px; font-weight: 400; letter-spacing: 0.5px; }
   .m3-body-medium { font-size: 14px; line-height: 20px; font-weight: 400; letter-spacing: 0.25px; }
   .m3-body-small { font-size: 12px; line-height: 16px; font-weight: 400; letter-spacing: 0.4px; }
-
-  /* Utilities */
-  .font-size-small { font-size: 90%; }
-  .font-size-medium { font-size: 100%; }
-  .font-size-large { font-size: 110%; }
 }

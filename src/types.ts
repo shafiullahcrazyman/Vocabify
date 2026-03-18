@@ -15,9 +15,7 @@ export interface WordFamily {
 
 export interface AppSettings {
   theme: 'light' | 'dark' | 'system';
-  fontSize: 'small' | 'medium' | 'large';
   dailyGoal: number;
-  offlineMode: boolean;
   hapticsEnabled: boolean;
   animationsEnabled: boolean;
   autoPronounce: boolean;
@@ -31,4 +29,10 @@ export interface FilterOptions {
   letter: string[];
   theme: string[];
   favoritesOnly: boolean;
+}
+
+export interface StreakData {
+  current: number;
+  longest: number;
+  lastGoalDate: string; // YYYY-MM-DD of the last day the daily goal was met
 }
