@@ -12,12 +12,11 @@ interface TopAppBarProps {
 }
 
 export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
-  const { searchQuery, setSearchQuery, userAvatar, setUserAvatar, settings } = useAppContext();
+  const { searchQuery, setSearchQuery, userAvatar, setUserAvatar, settings, isSettingsOpen, setIsSettingsOpen } = useAppContext();
 
   const [localSearch, setLocalSearch] = useState(searchQuery);
   const debouncedSearch = useDebounce(localSearch, 300);
 
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isTipsOpen, setIsTipsOpen] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
 
