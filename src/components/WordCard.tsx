@@ -68,11 +68,12 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
       transition={fastSpatial}
       style={{ WebkitTapHighlightColor: 'transparent' }}
       className={`
-        bg-surface-container hover:bg-surface-container-high
+        bg-surface-variant/40 hover:bg-surface-variant/70
         ${getRoundedClass()}
         p-5 cursor-pointer
         transition-colors duration-200
         flex flex-col gap-3 relative overflow-hidden
+        border border-transparent hover:border-outline/10
         ${isLearned ? 'opacity-75' : ''}
       `}
     >
@@ -96,13 +97,17 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
                 className={`p-1.5 rounded-full transition-colors ${isPlaying ? 'bg-primary/20 text-primary' : 'hover:bg-on-surface/10 text-on-surface-variant'}`}
                 aria-label="Pronounce word"
               >
-                <Volume2 className="w-5 h-5" />
+                <Volume2 className={`w-5 h-5 ${isPlaying ? 'animate-pulse' : ''}`} />
               </motion.button>
 
               {/* Favorite — spring scale on toggle for extra expressiveness */}
               <motion.button
                 onClick={handleFavoriteClick}
                 whileTap={settings.animationsEnabled ? { scale: 0.80 } : undefined}
+                animate={isFavorite
+                  ? { scale: [1, 1.3, 1], transition: { ...fastSpatial, times: [0, 0.4, 1] } }
+                  : { scale: 1 }
+                }
                 transition={fastSpatial}
                 style={{ WebkitTapHighlightColor: 'transparent' }}
                 className="p-1.5 rounded-full hover:bg-rose-50/50 transition-colors"
@@ -117,16 +122,16 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
       </div>
 
       <div className="flex flex-wrap gap-2 mt-2">
-        <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.noun) ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300' : 'bg-surface-container-highest/60 text-on-surface-variant/50'}`}>
+        <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.noun) ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300' : 'bg-surface-variant/30 text-on-surface-variant/50 dark:bg-surface-variant/10'}`}>
           n. <span className="capitalize">{isValid(word.noun) ? word.noun : 'None'}</span>
         </span>
-        <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.verb) ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-surface-container-highest/60 text-on-surface-variant/50'}`}>
+        <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.verb) ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-surface-variant/30 text-on-surface-variant/50 dark:bg-surface-variant/10'}`}>
           v. <span className="capitalize">{isValid(word.verb) ? word.verb : 'None'}</span>
         </span>
-        <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.adjective) ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300' : 'bg-surface-container-highest/60 text-on-surface-variant/50'}`}>
+        <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.adjective) ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300' : 'bg-surface-variant/30 text-on-surface-variant/50 dark:bg-surface-variant/10'}`}>
           adj. <span className="capitalize">{isValid(word.adjective) ? word.adjective : 'None'}</span>
         </span>
-        <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.adverb) ? 'bg-purple-500/10 text-purple-700 dark:text-purple-300' : 'bg-surface-container-highest/60 text-on-surface-variant/50'}`}>
+        <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.adverb) ? 'bg-purple-500/10 text-purple-700 dark:text-purple-300' : 'bg-surface-variant/30 text-on-surface-variant/50 dark:bg-surface-variant/10'}`}>
           adv. <span className="capitalize">{isValid(word.adverb) ? word.adverb : 'None'}</span>
         </span>
       </div>
