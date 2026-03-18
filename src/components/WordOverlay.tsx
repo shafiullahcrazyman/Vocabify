@@ -150,7 +150,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             whileTap={anim ? { scale: 0.88 } : undefined}
             transition={fastSpatial}
             style={{ WebkitTapHighlightColor: 'transparent' }}
-            className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-variant text-on-surface-variant"
+            className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-container-highest text-on-surface-variant"
           >
             <X className="w-6 h-6" />
           </motion.button>
@@ -173,7 +173,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
               whileTap={anim ? { scale: 0.88 } : undefined}
               transition={fastSpatial}
               style={{ WebkitTapHighlightColor: 'transparent' }}
-              className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-variant text-on-surface-variant"
+              className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-container-highest text-on-surface-variant"
               aria-label="Grammar Tips"
             >
               <Info className="w-6 h-6" />
@@ -207,7 +207,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
           </div>
 
           <div className="space-y-6 pb-4">
-            <div className="bg-surface-variant/30 rounded-3xl p-5">
+            <div className="bg-surface-container rounded-3xl p-5">
               <h4 className="m3-title-medium text-on-surface mb-4">Word Forms</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
@@ -225,7 +225,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                   };
                   const c = colorMap[color];
                   return (
-                    <div key={label} className={`flex flex-col p-4 rounded-2xl ${valid ? c.bg : 'bg-surface-variant/20 dark:bg-surface-variant/10'}`}>
+                    <div key={label} className={`flex flex-col p-4 rounded-2xl ${valid ? c.bg : 'bg-surface-container-highest/60'}`}>
                       <span className={`text-[13px] font-bold uppercase tracking-widest mb-1 ${valid ? c.text : 'text-on-surface-variant/50'}`}>{label}</span>
                       <div className="flex items-center justify-between">
                         <span className={`text-[20px] font-semibold capitalize ${valid ? 'text-on-surface' : 'text-on-surface-variant/50'}`}>
@@ -279,7 +279,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             whileTap={anim && hasPrev ? { scale: 0.88 } : undefined}
             transition={fastSpatial}
             style={{ WebkitTapHighlightColor: 'transparent' }}
-            className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-variant/50 disabled:opacity-30 text-on-surface"
+            className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container-highest disabled:opacity-30 text-on-surface"
           >
             <ChevronLeft className="w-7 h-7" />
           </motion.button>
@@ -295,7 +295,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             transition={fastSpatial}
             style={{ WebkitTapHighlightColor: 'transparent' }}
             className={`flex-1 h-14 flex items-center justify-center rounded-full font-bold tracking-wide ${
-              isLearned ? 'bg-emerald-500/15 text-emerald-700' : 'bg-surface-variant/50 text-on-surface'
+              isLearned ? 'bg-emerald-500/15 text-emerald-700' : 'bg-surface-container-highest text-on-surface'
             }`}
           >
             <CheckCircle2 className={`w-6 h-6 mr-2 ${isLearned ? 'text-emerald-600' : 'text-on-surface-variant'}`} />
@@ -308,7 +308,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
               whileTap={anim ? { scale: 0.88 } : undefined}
               transition={fastSpatial}
               style={{ WebkitTapHighlightColor: 'transparent' }}
-              className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-variant/50 text-on-surface"
+              className="w-14 h-14 flex items-center justify-center rounded-full bg-surface-container-highest text-on-surface"
             >
               <ChevronRight className="w-7 h-7" />
             </motion.button>
