@@ -4,6 +4,7 @@ import { useAppContext, getLocalDateString } from '../context/AppContext';
 import { Target, RotateCcw, Award, Copy, Check, Download, X, Flame, Sparkles, ChevronDown, Zap } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import { TopAppBar } from '../components/TopAppBar';
+import { useBackButton } from '../hooks/useBackButton';
 
 interface SectionGroupProps {
   title?: string;
@@ -90,6 +91,9 @@ export const Progress: React.FC = () => {
 
   const handleOpenExport = () => { triggerHaptic(settings.hapticsEnabled); setShowExportModal(true); };
   const handleCloseExport = () => { triggerHaptic(settings.hapticsEnabled); setShowExportModal(false); };
+
+  // Universal back button — closes export modal when open
+  useBackButton(showExportModal, handleCloseExport);
 
   return (
     <>
@@ -180,8 +184,8 @@ export const Progress: React.FC = () => {
                   {streak.current === 0
                     ? 'Meet your daily goal to start'
                     : streak.current === 1
-                      ? 'Great start — come back tomorrow!'
-                      : `${streak.current} days in a row 🔥`}
+                      ? 'Great start! Come back tomorrow!'
+                      : `${streak.current} days in a row`}
                 </p>
               </div>
               <p className="shrink-0 text-[48px] leading-none font-normal tracking-tight text-primary">
