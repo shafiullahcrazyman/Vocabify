@@ -102,8 +102,8 @@ export const Progress: React.FC = () => {
           <SectionGroup containerBg="bg-primary text-on-primary">
             <div className="w-full">
               <div className="flex items-center gap-3 mb-5">
-                {/* Container using on-primary with 15% opacity for tonal elevation */}
-                <div className="p-2 bg-on-primary/15 rounded-full">
+                {/* Container using on-primary with 10% opacity for tonal elevation */}
+                <div className="p-2 bg-on-primary/10 rounded-full">
                   <Award className="w-6 h-6 text-on-primary fill-on-primary" />
                 </div>
                 <h2 className="m3-title-medium text-on-primary">Total Mastery</h2>
