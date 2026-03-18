@@ -68,12 +68,12 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
       transition={fastSpatial}
       style={{ WebkitTapHighlightColor: 'transparent' }}
       className={`
-        bg-surface-container-low hover:bg-surface-container
+        bg-surface-variant/40 hover:bg-surface-variant/70
         ${getRoundedClass()}
         p-5 cursor-pointer
         transition-colors duration-200
         flex flex-col gap-3 relative overflow-hidden
-        border border-outline/10
+        border border-transparent hover:border-outline/10
         ${isLearned ? 'opacity-75' : ''}
       `}
     >
@@ -122,16 +122,16 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
       </div>
 
       <div className="flex flex-wrap gap-2 mt-2">
-        <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.noun) ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300' : 'bg-surface-container-highest/60 text-on-surface-variant/50'}`}>
+        <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.noun) ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300' : 'bg-surface-variant/30 text-on-surface-variant/50 dark:bg-surface-variant/10'}`}>
           n. <span className="capitalize">{isValid(word.noun) ? word.noun : 'None'}</span>
         </span>
-        <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.verb) ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-surface-container-highest/60 text-on-surface-variant/50'}`}>
+        <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.verb) ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-surface-variant/30 text-on-surface-variant/50 dark:bg-surface-variant/10'}`}>
           v. <span className="capitalize">{isValid(word.verb) ? word.verb : 'None'}</span>
         </span>
-        <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.adjective) ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300' : 'bg-surface-container-highest/60 text-on-surface-variant/50'}`}>
+        <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.adjective) ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300' : 'bg-surface-variant/30 text-on-surface-variant/50 dark:bg-surface-variant/10'}`}>
           adj. <span className="capitalize">{isValid(word.adjective) ? word.adjective : 'None'}</span>
         </span>
-        <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.adverb) ? 'bg-purple-500/10 text-purple-700 dark:text-purple-300' : 'bg-surface-container-highest/60 text-on-surface-variant/50'}`}>
+        <span className={`px-3 py-1.5 rounded-lg text-[13px] font-bold ${isValid(word.adverb) ? 'bg-purple-500/10 text-purple-700 dark:text-purple-300' : 'bg-surface-variant/30 text-on-surface-variant/50 dark:bg-surface-variant/10'}`}>
           adv. <span className="capitalize">{isValid(word.adverb) ? word.adverb : 'None'}</span>
         </span>
       </div>
