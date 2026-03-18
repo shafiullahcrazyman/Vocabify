@@ -42,8 +42,9 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
     { id: 'system', label: 'System default', icon: Monitor },
   ] as const;
 
+  // offlineMode removed (toggle had no effect — app is always offline-first via PWA)
+  // fontSize removed (no UI needed — font scale is fixed)
   const prefOptions = [
-    { id: 'offlineMode', label: 'Offline Mode', desc: 'Keep data local' },
     { id: 'hapticsEnabled', label: 'Haptic Feedback', desc: 'Vibrate on tap' },
     { id: 'animationsEnabled', label: 'Animations', desc: 'Smooth UI transitions' },
   ] as const;
@@ -57,26 +58,25 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={settings.animationsEnabled ? { duration: 0.2 } : { duration: 0.1, ease: "easeOut" }}
+            transition={settings.animationsEnabled ? { duration: 0.2 } : { duration: 0.1, ease: 'easeOut' }}
             className="absolute inset-0 bg-on-surface/20 backdrop-blur-sm"
             onClick={handleClose}
           />
-          <motion.div 
+          <motion.div
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
-            transition={settings.animationsEnabled ? { type: 'spring', damping: 25, stiffness: 200 } : { duration: 0.15, ease: "easeOut" }}
-            /* CHANGED: bg-surface-container-high is now bg-background */
+            transition={settings.animationsEnabled ? { type: 'spring', damping: 25, stiffness: 200 } : { duration: 0.15, ease: 'easeOut' }}
             className="relative bg-background w-[calc(100%-56px)] max-w-[380px] h-full flex flex-col"
           >
-            {/* Header with Arrow Navigation */}
+            {/* Header */}
             <div className="flex items-center gap-2 p-3 shrink-0">
-              <button 
-                onClick={handleClose} 
+              <button
+                onClick={handleClose}
                 className="p-3 rounded-full hover:bg-surface-variant text-on-surface transition-all duration-200 active:scale-90"
                 aria-label="Go back"
               >
@@ -84,11 +84,11 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
               </button>
               <h2 className="text-[22px] font-medium text-on-surface tracking-tight">Settings</h2>
             </div>
-            
-            {/* Content Body */}
+
+            {/* Content */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-12 space-y-8">
-              
-              {/* Appearance Group - Icons and Text are now static in color */}
+
+              {/* Appearance */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase font-bold">Appearance</h3>
                 <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden border border-outline/5">
@@ -102,15 +102,9 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                         }`}
                       >
                         <div className="flex items-center gap-4">
-                          {/* Static Icon Color */}
                           <item.icon className="w-6 h-6 text-on-surface-variant" />
-                          {/* Static Text Color */}
-                          <p className="m3-body-large text-on-surface">
-                            {item.label}
-                          </p>
+                          <p className="m3-body-large text-on-surface">{item.label}</p>
                         </div>
-                        
-                        {/* Radio Button remains the only color-changing indicator */}
                         <div className="shrink-0 relative flex items-center justify-center mr-1">
                           <input
                             type="radio"
@@ -134,7 +128,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                 </div>
               </div>
 
-              {/* Preferences Group */}
+              {/* Preferences */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase font-bold">Preferences</h3>
                 <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden border border-outline/5">
@@ -172,7 +166,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                 </div>
               </div>
 
-              {/* Learning Options Group */}
+              {/* Learning */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase font-bold">Learning</h3>
                 <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden border border-outline/5">
