@@ -7,6 +7,16 @@ import { Home } from './screens/Home';
 import { Filter } from './screens/Filter';
 import { Progress } from './screens/Progress';
 
+// Resets window scroll to the top on every route change.
+// Without this, navigating Home → Filter inherits whatever scrollY Home was at.
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+  return null;
+}
+
 function AnimatedRoutes() {
   const location = useLocation();
   
@@ -32,6 +42,7 @@ function AppContent() {
   return (
     <MotionConfig reducedMotion="user">
       <HashRouter>
+        <ScrollToTop />
         <div className="min-h-screen bg-background text-on-background selection:bg-primary/20 flex flex-col">
           <div className="flex-1 relative">
             <AnimatedRoutes />
