@@ -5,6 +5,12 @@ import { SlidersHorizontal, Heart, X } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import { TopAppBar } from '../components/TopAppBar';
 
+// Prevents the browser from scrolling the clicked button into view.
+// onMouseDown fires before onClick — calling preventDefault() here stops the
+// element from receiving focus (which is what triggers the scroll), while
+// the onClick handler still fires normally for the toggle logic.
+const noFocusScroll = (e: React.MouseEvent) => e.preventDefault();
+
 export const Filter: React.FC = () => {
   const { filters, updateFilters, words, settings } = useAppContext();
 
@@ -46,6 +52,7 @@ export const Filter: React.FC = () => {
           return (
             <button
               key={opt}
+              onMouseDown={noFocusScroll}
               onClick={() => toggleFilter(category, opt)}
               className={`px-4 py-2 rounded-lg m3-label-large transition-colors duration-200 active:scale-[0.96] ${
                 isSelected
@@ -93,6 +100,7 @@ export const Filter: React.FC = () => {
                   </div>
 
                   <button
+                    onMouseDown={noFocusScroll}
                     onClick={() => {
                       triggerHaptic(settings.hapticsEnabled);
                       updateFilters({ favoritesOnly: !filters.favoritesOnly });
@@ -124,6 +132,7 @@ export const Filter: React.FC = () => {
                     return (
                       <button
                         key={letter}
+                        onMouseDown={noFocusScroll}
                         onClick={() => toggleFilter('letter', letter)}
                         className={`w-10 h-10 rounded-full m3-label-large flex items-center justify-center transition-colors duration-200 active:scale-[0.94] ${
                           isSelected
@@ -141,6 +150,7 @@ export const Filter: React.FC = () => {
             
             {/* Bottom Section - Connected Button */}
             <button
+              onMouseDown={noFocusScroll}
               onClick={handleClearFilters}
               className="w-full py-4 bg-error text-on-error m3-title-medium hover:bg-error/90 transition-colors duration-200 active:bg-error/80 flex items-center justify-center gap-2 rounded-t-[4px] rounded-b-[28px]"
             >
