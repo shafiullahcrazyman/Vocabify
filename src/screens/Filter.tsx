@@ -151,14 +151,17 @@ export const Filter: React.FC = () => {
             </section>
             
             {/* Bottom Section - Connected Button */}
-            <button
+            <motion.button
               onMouseDown={noFocusScroll}
               onClick={handleClearFilters}
-              className="w-full py-4 bg-error text-on-error m3-title-medium hover:bg-error/90 transition-colors duration-200 active:bg-error/80 flex items-center justify-center gap-2 rounded-t-[4px] rounded-b-[28px]"
+              whileTap={{ scale: 0.97 }}
+              transition={fastSpatial}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+              className="w-full py-4 bg-error text-on-error m3-title-medium hover:bg-error/90 transition-colors duration-200 flex items-center justify-center gap-2 rounded-t-[4px] rounded-b-[28px]"
             >
               <X className="w-5 h-5" />
               Clear All Filters
-            </button>
+            </motion.button>
 
           </div>
         </div>
