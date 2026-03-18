@@ -5,6 +5,7 @@ import { TopAppBar } from '../components/TopAppBar';
 import { WordCard } from '../components/WordCard';
 import { WordOverlay } from '../components/WordOverlay';
 import { Filter as FilterIcon, Loader2 } from 'lucide-react';
+import { slowSpatial, exitCurve } from '../utils/motion';
 import { useWordFilter } from '../hooks/useWordFilter';
 
 // How many words to load into the DOM at once
@@ -82,11 +83,10 @@ export const Home: React.FC = () => {
   }, [hasMore]);
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={settings.animationsEnabled ? { duration: 0.25, ease: [0.2, 0, 0, 1] } : { duration: 0.15, ease: "easeOut" }}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0, transition: settings.animationsEnabled ? slowSpatial : { duration: 0.15 } }}
+      exit={{ opacity: 0, y: -8, transition: settings.animationsEnabled ? exitCurve : { duration: 0.1 } }}
       className="pb-32"
     >
       <TopAppBar />

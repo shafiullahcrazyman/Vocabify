@@ -5,6 +5,7 @@ import { Target, RotateCcw, Award, Copy, Check, Download, X, Flame, Sparkles, Ch
 import { triggerHaptic } from '../utils/haptics';
 import { TopAppBar } from '../components/TopAppBar';
 import { useBackButton } from '../hooks/useBackButton';
+import { slowSpatial, exitCurve, fastSpatial } from '../utils/motion';
 
 interface SectionGroupProps {
   title?: string;
@@ -124,7 +125,7 @@ export const Progress: React.FC = () => {
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${percentage}%` }}
-                  transition={settings.animationsEnabled ? { duration: 1, ease: [0.2, 0, 0, 1], delay: 0.2 } : { duration: 0.2, ease: 'easeOut' }}
+                  transition={settings.animationsEnabled ? { ...fastSpatial, delay: 0.2 } : { duration: 0.2 }}
                   className="bg-on-primary h-full rounded-full"
                 />
               </div>
@@ -161,7 +162,7 @@ export const Progress: React.FC = () => {
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${dailyPercentage}%` }}
-                  transition={settings.animationsEnabled ? { duration: 1.2, ease: 'easeOut' } : { duration: 0.2 }}
+                  transition={settings.animationsEnabled ? fastSpatial : { duration: 0.2 }}
                   className="bg-on-primary h-full rounded-full"
                 />
               </div>
@@ -255,7 +256,7 @@ export const Progress: React.FC = () => {
                       Cancel
                     </button>
                     <button
-                      onClick={() => { triggerHaptic(settings.hapticsEnabled); resetDailyProgress(); setConfirmDaily(false); }}
+                      onClick={() => { triggerHaptic(settings.hapticsEnabled, 'warning'); resetDailyProgress(); setConfirmDaily(false); }}
                       className="px-4 py-2 bg-orange-500 text-white hover:bg-orange-600 rounded-full m3-label-large transition-all duration-200 active:scale-95"
                     >
                       Confirm
@@ -263,7 +264,7 @@ export const Progress: React.FC = () => {
                   </div>
                 ) : (
                   <button
-                    onClick={() => { triggerHaptic(settings.hapticsEnabled); setConfirmDaily(true); setConfirmTotal(false); }}
+                    onClick={() => { triggerHaptic(settings.hapticsEnabled, 'tap'); setConfirmDaily(true); setConfirmTotal(false); }}
                     className="flex items-center px-4 py-2 text-orange-500 dark:text-orange-400 hover:bg-orange-500/10 rounded-full transition-all duration-200 active:scale-95 m3-label-large"
                   >
                     <RotateCcw className="w-4 h-4 mr-2" />
@@ -289,7 +290,7 @@ export const Progress: React.FC = () => {
                       Cancel
                     </button>
                     <button
-                      onClick={() => { triggerHaptic(settings.hapticsEnabled); resetTotalProgress(); setConfirmTotal(false); }}
+                      onClick={() => { triggerHaptic(settings.hapticsEnabled, 'error'); resetTotalProgress(); setConfirmTotal(false); }}
                       className="px-4 py-2 bg-error text-on-error hover:bg-error/90 rounded-full m3-label-large transition-all duration-200 active:scale-95"
                     >
                       Confirm
@@ -297,7 +298,7 @@ export const Progress: React.FC = () => {
                   </div>
                 ) : (
                   <button
-                    onClick={() => { triggerHaptic(settings.hapticsEnabled); setConfirmTotal(true); setConfirmDaily(false); }}
+                    onClick={() => { triggerHaptic(settings.hapticsEnabled, 'tap'); setConfirmTotal(true); setConfirmDaily(false); }}
                     className="flex items-center px-4 py-2 text-error hover:bg-error/10 rounded-full transition-all duration-200 active:scale-95 m3-label-large"
                   >
                     <RotateCcw className="w-4 h-4 mr-2" />

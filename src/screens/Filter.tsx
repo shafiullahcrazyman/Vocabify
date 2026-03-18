@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
 import { SlidersHorizontal, Heart, X } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
+import { slowSpatial, exitCurve, fastSpatial } from '../utils/motion';
 import { TopAppBar } from '../components/TopAppBar';
 
 // Prevents the browser from scrolling the clicked button into view.
@@ -15,7 +16,7 @@ export const Filter: React.FC = () => {
   const { filters, updateFilters, words, settings } = useAppContext();
 
   const toggleFilter = (category: keyof typeof filters, value: string) => {
-    triggerHaptic(settings.hapticsEnabled);
+    triggerHaptic(settings.hapticsEnabled, 'selection');
     if (category === 'favoritesOnly') return;
     
     const current = filters[category] as string[];
@@ -26,7 +27,7 @@ export const Filter: React.FC = () => {
   };
 
   const handleClearFilters = () => {
-    triggerHaptic(settings.hapticsEnabled);
+    triggerHaptic(settings.hapticsEnabled, 'impact');
     updateFilters({ level: [], cefr: [], pos: [], letter: [], theme: [], favoritesOnly: false });
   };
 
@@ -75,7 +76,8 @@ export const Filter: React.FC = () => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
-        transition={settings.animationsEnabled ? { duration: 0.25, ease: [0.2, 0, 0, 1] } : { duration: 0.15, ease: "easeOut" }}
+        animate={{ opacity: 1, y: 0, transition: settings.animationsEnabled ? slowSpatial : { duration: 0.15 } }}
+        exit={{ opacity: 0, y: -8, transition: settings.animationsEnabled ? exitCurve : { duration: 0.1 } }}
         className="pb-24 max-w-3xl mx-auto pt-4"
       >
         <div className="px-4 space-y-8">
@@ -102,7 +104,7 @@ export const Filter: React.FC = () => {
                   <button
                     onMouseDown={noFocusScroll}
                     onClick={() => {
-                      triggerHaptic(settings.hapticsEnabled);
+                      triggerHaptic(settings.hapticsEnabled, 'toggle');
                       updateFilters({ favoritesOnly: !filters.favoritesOnly });
                     }}
                     className={`px-4 py-2 rounded-lg m3-label-large transition-colors duration-200 active:scale-[0.96] ${
