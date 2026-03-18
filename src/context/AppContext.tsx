@@ -114,7 +114,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const today = getLocalDateString();
     
     setProgress((prev) => {
-      const prevLearned = prev.learned || [];
       const prevDates = prev.learnedDates || {};
       
       const newDates = { ...prevDates };
@@ -122,16 +121,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       // Find all word IDs that were learned specifically today
       const todayLearnedIds = Object.keys(newDates).filter(id => newDates[id] === today);
       
-      // Remove today's dates from tracking
+      // Only remove today's date entries — do NOT touch the learned array.
+      // This resets Today's Goal counter back to 0 while keeping Total Mastery intact.
       todayLearnedIds.forEach(id => {
         delete newDates[id];
       });
       
-      // Filter out today's words from the learned array, keeping all older words
-      const newLearned = prevLearned.filter(id => !todayLearnedIds.includes(id));
-      
       return {
-        learned: newLearned,
+        learned: prev.learned, // Total Mastery is unchanged
         learnedDates: newDates,
       };
     });
