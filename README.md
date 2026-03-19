@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./assets/profile.jpg" width="100" height="100" style="border-radius: 50%; object-fit: cover;" alt="Shafiullah">
+<img src="https://shafiullahcrazyman.github.io/Vocabify/og-image.png" width="720" alt="Vocabify — Offline English Vocabulary Learning App">
 
 # Vocabify
 
@@ -202,10 +202,10 @@ Vocabify was built with the conviction that learning tools should feel worth ret
 
 <br>
 
-[![GitHub](https://img.shields.io/badge/GitHub-shafiullahcrazyman-181717?style=flat&logo=github&logoColor=white&labelColor=181717)](https://github.com/shafiullahcrazyman)
-[![X](https://img.shields.io/badge/X-Shafiullah-000000?style=flat&logo=x&logoColor=white&labelColor=000000)](https://x.com/Shafiullah)
-[![Instagram](https://img.shields.io/badge/Instagram-shafiullahcrazyman-E4405F?style=flat&logo=instagram&logoColor=white&labelColor=E4405F)](https://www.instagram.com/shafiullahcrazyman)
-[![Facebook](https://img.shields.io/badge/Facebook-shafiullahcrazyman-1877F2?style=flat&logo=facebook&logoColor=white&labelColor=1877F2)](https://www.facebook.com/shafiullahcrazyman)
+[![GitHub](https://img.shields.io/badge/GitHub-Profile-181717?style=flat&logo=github&logoColor=white&labelColor=181717)](https://github.com/shafiullahcrazyman)
+[![X](https://img.shields.io/badge/X-Follow-000000?style=flat&logo=x&logoColor=white&labelColor=000000)](https://x.com/Shafiullah)
+[![Instagram](https://img.shields.io/badge/Instagram-Follow-E4405F?style=flat&logo=instagram&logoColor=white&labelColor=E4405F)](https://www.instagram.com/shafiullahcrazyman)
+[![Facebook](https://img.shields.io/badge/Facebook-Follow-1877F2?style=flat&logo=facebook&logoColor=white&labelColor=1877F2)](https://www.facebook.com/shafiullahcrazyman)
 
 </div>
 
