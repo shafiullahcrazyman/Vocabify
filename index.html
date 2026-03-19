@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
 
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -11,11 +11,84 @@
 
     <!-- Removed user-scalable=no — pinch-to-zoom must stay enabled for accessibility (WCAG 1.4.4) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vocabify</title>
-    
+
+    <!-- ═══════════════════════════════════════════════════════════
+         PRIMARY SEO
+    ════════════════════════════════════════════════════════════ -->
+    <title>Vocabify — Offline English Vocabulary Learning App</title>
+    <meta name="description" content="Learn 3,887 English vocabulary words offline. Vocabify includes Bengali meanings, CEFR levels (A1–C2), pronunciation, daily goals, and streak tracking. Free PWA — works without internet.">
+    <meta name="keywords" content="vocabulary learning app, English words Bengali meaning, CEFR vocabulary, offline English app, PWA vocabulary, learn English offline, Vocabify">
+    <meta name="author" content="Shafiullah">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://shafiullahcrazyman.github.io/Vocabify/">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         OPEN GRAPH — Facebook, WhatsApp, LinkedIn previews
+    ════════════════════════════════════════════════════════════ -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Vocabify">
+    <meta property="og:title" content="Vocabify — Offline English Vocabulary Learning App">
+    <meta property="og:description" content="Learn 3,887 English words with Bengali meanings, CEFR levels, and daily streaks. Fully offline PWA — install it on your phone for free.">
+    <meta property="og:url" content="https://shafiullahcrazyman.github.io/Vocabify/">
+    <meta property="og:image" content="https://shafiullahcrazyman.github.io/Vocabify/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Vocabify app screenshot showing vocabulary cards with Bengali meanings">
+    <meta property="og:locale" content="en_US">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         TWITTER / X CARD
+    ════════════════════════════════════════════════════════════ -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Vocabify — Offline English Vocabulary Learning App">
+    <meta name="twitter:description" content="Learn 3,887 English words with Bengali meanings, CEFR levels, and daily streaks. Free PWA.">
+    <meta name="twitter:image" content="https://shafiullahcrazyman.github.io/Vocabify/og-image.png">
+    <meta name="twitter:image:alt" content="Vocabify vocabulary learning app">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         JSON-LD STRUCTURED DATA — tells Google exactly what this is
+    ════════════════════════════════════════════════════════════ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Vocabify",
+      "url": "https://shafiullahcrazyman.github.io/Vocabify/",
+      "description": "Offline-first vocabulary learning PWA with 3,887 English words, Bengali meanings, CEFR levels (A1–C2), pronunciation, daily goals, and streak tracking.",
+      "applicationCategory": "EducationApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires a modern web browser with JavaScript enabled.",
+      "inLanguage": ["en", "bn"],
+      "isAccessibleForFree": true,
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Shafiullah"
+      },
+      "featureList": [
+        "3,887 English vocabulary words",
+        "Bengali (বাংলা) meanings",
+        "CEFR level classification (A1–C2)",
+        "Offline support — works without internet",
+        "Daily learning goals and streak tracking",
+        "Text-to-speech pronunciation (UK English + Bengali)",
+        "Filter by difficulty, theme, alphabet, and part of speech",
+        "Dark mode and light mode",
+        "Installable as a home screen app (PWA)"
+      ]
+    }
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         ICONS & PWA
+    ════════════════════════════════════════════════════════════ -->
     <!-- iOS / Safari Home Screen -->
     <link rel="apple-touch-icon" href="icon.png">
-    
+
     <!-- Favicon fallback -->
     <link rel="icon" href="icon.png">
 
