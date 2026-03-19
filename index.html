@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
 
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -14,15 +14,16 @@
     <title>Vocabify</title>
     
     <!-- iOS / Safari Home Screen -->
-    <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
     
     <!-- Favicon fallback -->
-    <link rel="icon" href="/icon.png">
+    <link rel="icon" href="icon.png">
 
-    <!-- theme-color: matches the active color scheme so the browser chrome stays in sync.
-         AppContext also updates this dynamically when the user manually picks a theme. -->
-    <meta name="theme-color" content="#141218" media="(prefers-color-scheme: dark)">
-    <meta name="theme-color" content="#FEF7FF" media="(prefers-color-scheme: light)">
+    <!-- theme-color: set to dark default on load; AppContext updates this dynamically
+         when the user switches themes or the OS preference changes at runtime.
+         A single tag is used intentionally — having two caused querySelector to only
+         ever update the first one, leaving the second stale. -->
+    <meta name="theme-color" content="#141218">
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
