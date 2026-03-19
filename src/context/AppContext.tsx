@@ -119,7 +119,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     root.classList.add(resolvedTheme);
 
     // Keep the browser chrome / status bar in sync with the active theme
-    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    const themeColorMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     if (themeColorMeta) {
       themeColorMeta.setAttribute('content', resolvedTheme === 'dark' ? '#141218' : '#FEF7FF');
     }
@@ -136,14 +136,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const markLearned = (id: string) => {
     const today = getLocalDateString();
     const yesterday = getYesterdayString();
-    const isAdding = !progress.learned.includes(id);
+    const alreadyInLearned = progress.learned.includes(id);
+    const countedToday = (progress.learnedDates || {})[id] === today;
+
+    // "isAdding" = this tap will add to today's daily count.
+    // - New word being learned for the first time → true
+    // - Word already learned globally but NOT counted today (post Reset-Today state) → true
+    // - Word already learned AND already counted today → false (this tap un-learns it)
+    const isAdding = !countedToday;
 
     setProgress((prev) => {
       const prevLearned = prev.learned || [];
       const prevDates = prev.learnedDates || {};
 
-      if (prevLearned.includes(id)) {
-        // Un-learning a word
+      if (alreadyInLearned && countedToday) {
+        // Full un-learn: word was learned and counted today — tap removes it entirely
         const newDates = { ...prevDates };
         delete newDates[id];
         return {
@@ -151,9 +158,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           learnedDates: newDates,
         };
       } else {
-        // Learning a new word
+        // Two sub-cases handled identically:
+        //   a) Fresh learn: add to both arrays
+        //   b) Post-Reset-Today re-learn: word is in learned already, just add date back
         return {
-          learned: [...prevLearned, id],
+          learned: alreadyInLearned ? prevLearned : [...prevLearned, id],
           learnedDates: { ...prevDates, [id]: today },
         };
       }
