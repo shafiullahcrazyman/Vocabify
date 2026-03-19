@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Trash2 } from 'lucide-react';
+import localforage from 'localforage';
 
 interface Props {
   children: ReactNode;
@@ -29,10 +30,11 @@ export class ErrorBoundary extends Component<Props, State> {
     window.location.reload();
   };
 
-  private handleHardReset = () => {
-    // Nuclear option: Wipes everything
+  private handleHardReset = async () => {
+    // Nuclear option: Wipes everything — localStorage AND IndexedDB (localforage)
     if (window.confirm("Are you sure? This will delete all your learned words and progress.")) {
       localStorage.clear();
+      await localforage.clear(); // clears progress, streak, favorites, avatar from IndexedDB
       window.location.reload();
     }
   };
