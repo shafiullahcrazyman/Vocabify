@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://shafiullahcrazyman.github.io/Vocabify/og-image.png" width="720" alt="Vocabify — Offline English Vocabulary Learning App">
+<img src="https://shafiullahcrazyman.github.io/Vocabify/og-image.png" width="720" alt="Vocabify: An Offline English Vocabulary Learning App">
 
 # Vocabify
 
@@ -27,7 +27,7 @@ The application is installable as a native home screen app. On any mobile browse
 
 ## <img src="https://api.iconify.design/material-symbols/info-outline.svg?color=%236750A4" height="22" align="center"> Overview
 
-Vocabify is a mobile-first Progressive Web App built for English learners — with a particular focus on students in Bangladesh. Rather than presenting isolated words, it teaches vocabulary through complete word families: every entry shows the Noun, Verb, Adjective, and Adverb forms of a word together, alongside its Bengali meaning. This approach allows learners to understand how a single root word behaves grammatically, which is far more effective than memorising words one by one.
+Vocabify is a mobile-first Progressive Web App built for English learners with a particular focus on students in Bangladesh. Rather than presenting isolated words, it teaches vocabulary through complete word families: every entry shows the Noun, Verb, Adjective, and Adverb forms of a word together, alongside its Bengali meaning. This approach allows learners to understand how a single root word behaves grammatically, which is far more effective than memorising words one by one.
 
 The application operates entirely offline after the first visit. No account is required. All progress, streaks, and favourites are stored privately on the user's device and never transmitted to any server.
 
@@ -39,9 +39,9 @@ The application operates entirely offline after the first visit. No account is r
 
 - 3,887 English word families, each with Noun, Verb, Adjective, and Adverb forms
 - Bengali (বাংলা) meanings for every word
-- CEFR level classification — A1, A2, B1, B2, C1, C2
+- CEFR level classification: A1, A2, B1, B2, C1, C2
 - Contextual example sentences for every entry
-- Difficulty rating — Easy, Medium, Hard
+- Difficulty rating: Easy, Medium, Hard
 
 ### <img src="https://api.iconify.design/material-symbols/search.svg?color=%236750A4" height="18" align="center"> Search and Filtering
 
@@ -52,7 +52,7 @@ The application operates entirely offline after the first visit. No account is r
 
 ### <img src="https://api.iconify.design/material-symbols/trending-up.svg?color=%236750A4" height="18" align="center"> Progress and Streaks
 
-- Configurable daily learning goals — 5, 10, 20, or 50 words per day
+- Configurable daily learning goals: 5, 10, 20, or 50 words per day
 - Streak tracking with timezone-safe date logic (no UTC midnight bugs)
 - Automatic streak-break detection on app load
 - Full progress overview showing total words mastered out of 3,887
@@ -61,7 +61,7 @@ The application operates entirely offline after the first visit. No account is r
 ### <img src="https://api.iconify.design/material-symbols/volume-up-outline.svg?color=%236750A4" height="18" align="center"> Pronunciation
 
 - Text-to-speech for all English word forms, with UK English voice preferred
-- Bengali text-to-speech — tap any Bengali meaning to hear it spoken
+- Bengali text-to-speech tap any Bengali meaning to hear it spoken
 - Auto-pronounce mode that reads words aloud when an entry is opened
 - iOS audio context unlock handled automatically on first user interaction
 
@@ -73,7 +73,7 @@ The application operates entirely offline after the first visit. No account is r
 - Swipe left and right anywhere in the app to navigate between tabs
 - 10 distinct haptic feedback patterns timed to animation phases
 - Respects the OS reduced-motion accessibility preference automatically
-- Scroll-aware bottom navigation — hides on scroll down, reappears on scroll up
+- Scroll-aware bottom navigation hides on scroll down, reappears on scroll up
 
 ### <img src="https://api.iconify.design/material-symbols/offline-pin-outline.svg?color=%236750A4" height="18" align="center"> PWA and Offline
 
@@ -194,16 +194,16 @@ Vocabify/
 
 ### Shafiullah
 
-Developer — Storyteller — Writer — Dreamer
+Developer • Storyteller • Writer • Dreamer
 
-I am a Business Studies student from Patuakhali, Bangladesh. I build software through a practice I call vibe coding — focusing on the feeling and flow of an application just as much as its functionality. Outside of development, I write fiction and create stories, and I believe the two disciplines share more in common than they appear to.
+I am a Business Studies student from Patuakhali, Bangladesh. I build software through a practice I call vibe coding focusing on the feeling and flow of an application just as much as its functionality. Outside of development, I write fiction and create stories, and I believe the two disciplines share more in common than they appear to.
 
-Vocabify was built with the conviction that learning tools should feel worth returning to — not because they demand it, but because they are genuinely pleasant to use.
+Vocabify was built with the conviction that learning tools should feel worth returning to not because they demand it, but because they are genuinely pleasant to use.
 
 <br>
 
 [![GitHub](https://img.shields.io/badge/GitHub-Profile-181717?style=flat&logo=github&logoColor=white&labelColor=181717)](https://github.com/shafiullahcrazyman)
-[![X](https://img.shields.io/badge/X-Follow-000000?style=flat&logo=x&logoColor=white&labelColor=000000)](https://x.com/Shafiullah)
+[![X](https://img.shields.io/badge/X-Shafiullah-000000?style=flat&logo=x&logoColor=white&labelColor=000000)](https://x.com/Shafiullah)
 [![Instagram](https://img.shields.io/badge/Instagram-Follow-E4405F?style=flat&logo=instagram&logoColor=white&labelColor=E4405F)](https://www.instagram.com/shafiullahcrazyman)
 [![Facebook](https://img.shields.io/badge/Facebook-Follow-1877F2?style=flat&logo=facebook&logoColor=white&labelColor=1877F2)](https://www.facebook.com/shafiullahcrazyman)
 
@@ -219,7 +219,7 @@ This project is open source and available under the [MIT License](LICENSE).
 
 <div align="center">
 
-Built by Shafiullah — Patuakhali, Bangladesh.
+Built by Shafiullah, Patuakhali, Bangladesh.
 
 If this project was useful to you, consider giving it a star on GitHub.
 
