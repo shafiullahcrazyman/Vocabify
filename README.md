@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://shafiullahcrazyman.github.io/Vocabify/og-image.png" width="720" alt="Vocabify: An Offline English Vocabulary Learning App">
+<img src="https://shafiullahcrazyman.github.io/Vocabify/og-image.png" width="100%" alt="Vocabify — Offline English Vocabulary Learning App">
 
 # Vocabify
 
