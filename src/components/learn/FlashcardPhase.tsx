@@ -94,7 +94,7 @@ export const FlashcardPhase: React.FC<Props> = ({
 
         {/* Large primary word */}
         <p
-          className={`${titleSize} font-bold text-on-surface leading-tight mb-5`}
+          className={`${titleSize} font-bold text-on-background leading-tight mb-5`}
           style={{ fontVariationSettings: '"wdth" 100' }}
         >
           {primaryForm}
@@ -118,7 +118,7 @@ export const FlashcardPhase: React.FC<Props> = ({
                 <span className="text-[12px] font-bold uppercase tracking-wide opacity-60">
                   {label}
                 </span>
-                <span className={`text-[15px] font-bold capitalize ${isNone ? 'italic opacity-40' : ''}`}>
+                <span className={`text-[15px] font-bold capitalize text-on-surface ${isNone ? 'italic opacity-40' : ''}`}>
                   {isNone ? 'None' : form}
                 </span>
               </div>
