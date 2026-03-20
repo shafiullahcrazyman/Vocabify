@@ -91,7 +91,7 @@ export const Learn: React.FC = () => {
   const [sessionWords] = useState<WordFamily[]>(() =>
     buildSession(words, progress.learned, settings.dailyGoal)
   );
-  const matchBatches = useMemo(() => chunkArray(sessionWords, 4), [sessionWords]);
+  const matchBatches = useMemo(() => chunkArray(sessionWords, settings.dailyGoal), [sessionWords, settings.dailyGoal]);
 
   const [view, setView]                = useState<LearnView>({ mode: 'path' });
   const [completedPhases, setCompleted] = useState<Set<string>>(new Set());
@@ -229,7 +229,7 @@ export const Learn: React.FC = () => {
           >
             <X className="w-5 h-5" />
           </button>
-          <p className="m3-label-small text-on-surface-variant tracking-wide">
+          <p className="m3-title-small text-on-surface font-semibold">
             {subLabel}
           </p>
           <span className="m3-label-small text-primary font-bold">
@@ -269,7 +269,7 @@ export const Learn: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0, x: -24 }}
               transition={{ duration: 0.22 }}
-              className="px-6 pt-10 pb-28 flex flex-col"
+              className="px-6 flex flex-col min-h-[calc(100vh-100px)] justify-evenly py-8"
             >
               {phaseNodes.map((node, i) => {
                 const side = SIDES[i];
@@ -284,7 +284,7 @@ export const Learn: React.FC = () => {
                     {/* Node row */}
                     <div
                       ref={isCurrent ? activeNodeRef : undefined}
-                      className="py-2"
+                      className=""
                     >
                       <PathNode
                         node={node}
