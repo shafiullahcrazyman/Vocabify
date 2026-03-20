@@ -101,7 +101,9 @@ export const Learn: React.FC = () => {
   const [view, setView]                = useState<LearnView>({ mode: 'path' });
   const [completedPhases, setCompleted] = useState<Set<string>>(new Set());
   const [flashQueue, setFlashQueue] = useState<number[]>(() =>
-    Array.from({ length: 5 }, (_, i) => i).slice(0, Math.max(settings.dailyGoal, 4))
+    // Must use sessionWords.length — not hardcoded 5 or dailyGoal
+    // because buildSession may return fewer words than goal (e.g. near end of dictionary)
+    Array.from({ length: sessionWords.length }, (_, i) => i)
   );
   const [flashPos, setFlashPos] = useState(0); // position in flashQueue
   const [fbIndex, setFbIndex]          = useState(0);
@@ -333,7 +335,7 @@ export const Learn: React.FC = () => {
               key={`flash-${view.wordIndex}`}
               word={sessionWords[view.wordIndex]}
               wordIndex={view.wordIndex}
-              totalInQueue={sessionWords.length}
+              totalInQueue={flashQueue.length}
               onGotIt={handleFlashGotIt}
               onSeeAgain={handleFlashSeeAgain}
             />
