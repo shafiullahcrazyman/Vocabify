@@ -13,7 +13,7 @@ interface Props {
   onComplete: () => void;
 }
 
-const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
+const shuffle = <T>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
 
 export const MatchingPhase: React.FC<Props> = ({
   batch,
@@ -98,10 +98,7 @@ export const MatchingPhase: React.FC<Props> = ({
       className="px-4 pb-8"
     >
       <div className="text-center mb-5 pt-2">
-        <span className="m3-label-medium text-on-surface-variant uppercase tracking-widest">
-          Round {batchIndex + 1} of {totalBatches}
-        </span>
-        <p className="m3-body-small text-on-surface-variant mt-1 opacity-70">
+        <p className="m3-body-small text-on-surface-variant opacity-70">
           Tap a word, then tap its Bangla meaning
         </p>
       </div>
