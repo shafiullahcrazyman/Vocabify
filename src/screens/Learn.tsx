@@ -111,7 +111,21 @@ export const Learn: React.FC = () => {
     }
   }, [view.mode, completedPhases.size]);
 
-  const overallPct = (completedPhases.size / 3) * 100;
+  // ── Dual-progress bar calculations ──────────────────────────────────────────
+  // Bar is split into 3 equal thirds, one per phase.
+  // Layer 1 bg-primary:            completed phases
+  // Layer 2 bg-primary-container:  progress inside the current active phase
+  const completedPhasePct = (completedPhases.size / 3) * 100;
+
+  const currentPhaseInternalPct: number = (() => {
+    if (view.mode === 'flashcard') return (view.wordIndex / sessionWords.length) * 100;
+    if (view.mode === 'matching')  return (view.batchIndex / matchBatches.length) * 100;
+    if (view.mode === 'fillblank') return (view.wordIndex / sessionWords.length) * 100;
+    return 0;
+  })();
+
+  // Width of lighter overlay as % of full bar
+  const currentPhaseBarWidth = (currentPhaseInternalPct / 100) * (100 / 3);
 
   // ── Build phase nodes with dynamic sublabels ───────────────────────────────
   const phaseNodes: PhaseNode[] = PHASE_DEFS.map((def, i) => ({
@@ -215,11 +229,22 @@ export const Learn: React.FC = () => {
             <X className="w-5 h-5" />
           </button>
 
-          <div className="flex-1 h-[6px] bg-surface-container-high rounded-full overflow-hidden">
+          {/* Dual-colour progress bar */}
+          <div className="flex-1 h-[8px] bg-on-surface/10 rounded-full overflow-hidden relative">
+            {/* Layer 1: completed phases — solid primary */}
             <motion.div
-              className="h-full bg-primary rounded-full"
-              animate={{ width: `${overallPct}%` }}
+              className="absolute left-0 top-0 h-full bg-primary rounded-full"
+              animate={{ width: `${completedPhasePct}%` }}
               transition={{ duration: 0.5, ease: [0.2, 0, 0, 1] }}
+            />
+            {/* Layer 2: current phase in-progress — lighter tint */}
+            <motion.div
+              className="absolute top-0 h-full bg-primary-container rounded-full"
+              animate={{
+                left: `${completedPhasePct}%`,
+                width: `${currentPhaseBarWidth}%`,
+              }}
+              transition={{ duration: 0.35, ease: [0.2, 0, 0, 1] }}
             />
           </div>
 
