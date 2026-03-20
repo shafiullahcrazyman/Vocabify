@@ -235,64 +235,52 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             {/* Word Forms */}
             <div className="bg-surface-container rounded-3xl p-5">
               <h4 className="m3-title-medium text-on-surface mb-4">Word Forms</h4>
-              {(() => {
-                const rows = [
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-[2px] sm:gap-3">
+                {[
                   { label: 'Noun',      val: word.noun,      color: 'blue' },
                   { label: 'Verb',      val: word.verb,      color: 'emerald' },
                   { label: 'Adjective', val: word.adjective, color: 'amber' },
                   { label: 'Adverb',    val: word.adverb,    color: 'purple' },
-                ];
-                const colorMap: Record<string, { bg: string; text: string; btn: string }> = {
-                  blue:    { bg: 'bg-blue-500/10',    text: 'text-blue-700 dark:text-blue-300',       btn: 'hover:bg-blue-500/20 text-blue-700 dark:text-blue-300' },
-                  emerald: { bg: 'bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-300', btn: 'hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300' },
-                  amber:   { bg: 'bg-amber-500/10',   text: 'text-amber-700 dark:text-amber-300',     btn: 'hover:bg-amber-500/20 text-amber-700 dark:text-amber-300' },
-                  purple:  { bg: 'bg-purple-500/10',  text: 'text-purple-700 dark:text-purple-300',   btn: 'hover:bg-purple-500/20 text-purple-700 dark:text-purple-300' },
-                };
-                const total = rows.length;
-                const getRounding = (i: number) => {
-                  if (total === 1) return 'rounded-[28px]';
-                  if (i === 0)          return 'rounded-t-[28px] rounded-b-[4px]';
-                  if (i === total - 1)  return 'rounded-t-[4px] rounded-b-[28px]';
-                  return 'rounded-[4px]';
-                };
-                return (
-                  <div className="flex flex-col">
-                    {rows.map(({ label, val, color }, i) => {
-                      const valid = isValid(val);
-                      const c = colorMap[color];
-                      const isFormPlaying = isPlaying && playingText === val;
-                      return (
-                        <div
-                          key={label}
-                          className={`flex items-center justify-between px-4 py-3.5 ${getRounding(i)} ${
-                            valid ? c.bg : 'bg-surface-container-highest/60'
-                          } ${i < total - 1 ? 'mb-[2px]' : ''}`}
-                        >
-                          <div className="flex flex-col">
-                            <span className={`text-[12px] font-bold uppercase tracking-widest ${valid ? c.text : 'text-on-surface-variant/40'}`}>
-                              {label}
-                            </span>
-                            <span className={`text-[19px] font-semibold capitalize mt-0.5 ${valid ? 'text-on-surface' : 'text-on-surface-variant/40 italic'}`}>
-                              {valid ? val : 'None'}
-                            </span>
-                          </div>
-                          {valid && (
-                            <motion.button
-                              onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); speak(val!); }}
-                              whileTap={anim ? { scale: 0.85 } : undefined}
-                              transition={fastSpatial}
-                              style={{ WebkitTapHighlightColor: 'transparent' }}
-                              className={`p-2 rounded-full transition-colors flex-shrink-0 ${isFormPlaying ? `${c.btn} opacity-70` : c.btn}`}
-                            >
-                              <Volume2 className="w-5 h-5" />
-                            </motion.button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })()}
+                ].map(({ label, val, color }, idx, arr) => {
+                  const total = arr.length;
+                  const rounding =
+                    total === 1            ? 'rounded-[20px]' :
+                    idx === 0              ? 'rounded-t-[20px] rounded-b-[4px]' :
+                    idx === total - 1      ? 'rounded-t-[4px] rounded-b-[20px]' :
+                                             'rounded-[4px]';
+                  const valid = isValid(val);
+                  const colorMap: Record<string, { bg: string; text: string; btn: string; active: string }> = {
+                    blue:    { bg: 'bg-blue-500/10',    text: 'text-blue-700 dark:text-blue-300',       btn: 'hover:bg-blue-500/20 text-blue-700 dark:text-blue-300',       active: 'bg-blue-500 text-white' },
+                    emerald: { bg: 'bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-300', btn: 'hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300', active: 'bg-emerald-500 text-white' },
+                    amber:   { bg: 'bg-amber-500/10',   text: 'text-amber-700 dark:text-amber-300',     btn: 'hover:bg-amber-500/20 text-amber-700 dark:text-amber-300',     active: 'bg-amber-500 text-white' },
+                    purple:  { bg: 'bg-purple-500/10',  text: 'text-purple-700 dark:text-purple-300',   btn: 'hover:bg-purple-500/20 text-purple-700 dark:text-purple-300',  active: 'bg-purple-500 text-white' },
+                  };
+                  const c = colorMap[color];
+                  const isFormPlaying = isPlaying && playingText === val;
+                  return (
+                    <div key={label} className={`flex flex-col p-4 sm:rounded-2xl ${rounding} ${valid ? c.bg : 'bg-surface-container-highest/60'}`}>
+                      <span className={`text-[13px] font-bold uppercase tracking-widest mb-1 ${valid ? c.text : 'text-on-surface-variant/50'}`}>{label}</span>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[20px] font-semibold capitalize ${valid ? 'text-on-surface' : 'text-on-surface-variant/50'}`}>
+                          {valid ? val : 'None'}
+                        </span>
+                        {/* Speaker icon buttons — spring animation only, no animate-pulse */}
+                        {valid && (
+                          <motion.button
+                            onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); speak(val!); }}
+                            whileTap={anim ? { scale: 0.85 } : undefined}
+                            transition={fastSpatial}
+                            style={{ WebkitTapHighlightColor: 'transparent' }}
+                            className={`p-2 rounded-full transition-colors flex-shrink-0 ${isFormPlaying ? `${c.btn} opacity-70` : c.btn}`}
+                          >
+                            <Volume2 className="w-5 h-5" />
+                          </motion.button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/*
