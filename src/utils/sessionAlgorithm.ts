@@ -114,10 +114,13 @@ export const buildMultiFillBlank = (
   // Build BlankItem for each match
   const blanks: BlankItem[] = filtered.map(m => {
     const distractors = shuffle(
-      pool
-        .filter(w => w.id !== word.id)
-        .map(getPrimaryForm)
-        .filter(f => f.toLowerCase() !== m.form.toLowerCase() && f !== 'Unknown')
+      // Deduplicate by lowercase to prevent duplicate option buttons (React key conflicts)
+      [...new Set(
+        pool
+          .filter(w => w.id !== word.id)
+          .map(getPrimaryForm)
+          .filter(f => f.toLowerCase() !== m.form.toLowerCase() && f !== 'Unknown')
+      )]
     ).slice(0, 3);
 
     const fallbacks = ['manage', 'provide', 'consider', 'present'];
