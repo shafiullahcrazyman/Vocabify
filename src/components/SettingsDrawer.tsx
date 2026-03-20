@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Sun, Moon, Monitor } from 'lucide-react';
+import { ArrowLeft, Sun, Moon, Monitor, Zap } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { AppSettings } from '../types';
 import { triggerHaptic } from '../utils/haptics';
 import { defaultSpatial, defaultEffects, exitCurve, fastSpatial } from '../utils/motion';
 import { useBackButton } from '../hooks/useBackButton';
+import { useNavigate } from 'react-router-dom';
 
 interface SettingsDrawerProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface SettingsDrawerProps {
 
 export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose }) => {
   const { settings, updateSettings } = useAppContext();
+  const navigate = useNavigate();
 
   useBackButton(isOpen, onClose);
 
@@ -93,6 +95,20 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-12 space-y-8">
+
+            {/* Start Learning */}
+              <button
+                onClick={() => {
+                  triggerHaptic(settings.hapticsEnabled, 'success');
+                  onClose();
+                  navigate('/learn');
+                }}
+                aria-label="Start a learning session"
+                className="w-full py-4 bg-primary text-on-primary rounded-full m3-label-large flex items-center justify-center gap-2 active:scale-95 transition-transform duration-100"
+              >
+                <Zap className="w-5 h-5" />
+                Start Learning
+              </button>
 
               {/* Appearance */}
               <div>
