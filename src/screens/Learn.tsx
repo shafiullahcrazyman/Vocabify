@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { X } from 'lucide-react';
+import { X, BookOpen, Shuffle, PenLine, Trophy } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { buildSession, chunkArray } from '../utils/sessionAlgorithm';
-import { PathNode, NodeState } from '../components/learn/PathNode';
+import { PathNode, NodeState, PhaseNode } from '../components/learn/PathNode';
 import { FlashcardPhase } from '../components/learn/FlashcardPhase';
 import { MatchingPhase } from '../components/learn/MatchingPhase';
 import { FillBlankPhase } from '../components/learn/FillBlankPhase';
@@ -12,18 +12,43 @@ import { SessionComplete } from '../components/learn/SessionComplete';
 import { WordFamily } from '../types';
 import { triggerHaptic } from '../utils/haptics';
 
-// ── Types ──────────────────────────────────────────────────────────────────────
-type LearnView =
-  | { mode: 'path' }
-  | { mode: 'word'; wordIndex: number; phase: 'flashcard' | 'fillblank' }
-  | { mode: 'matching'; batchIndex: number }
-  | { mode: 'complete' };
+// ── Phase definitions for the path ────────────────────────────────────────────
+// These are the nodes shown on the tree. Each node = one exercise type.
+const PHASE_DEFS: Omit<PhaseNode, 'sublabel'>[] = [
+  {
+    id: 'flashcards',
+    label: 'Flashcards',
+    Icon: BookOpen,
+    color: 'bg-[#6750A4]',
+    textColor: 'text-white',
+  },
+  {
+    id: 'matching',
+    label: 'Match Pairs',
+    Icon: Shuffle,
+    color: 'bg-[#B5838D]',
+    textColor: 'text-white',
+  },
+  {
+    id: 'fillblank',
+    label: 'Fill in Blank',
+    Icon: PenLine,
+    color: 'bg-[#2D6A4F]',
+    textColor: 'text-white',
+  },
+  {
+    id: 'complete',
+    label: 'Session Done',
+    Icon: Trophy,
+    color: 'bg-[#E9C46A]',
+    textColor: 'text-[#3D2C00]',
+  },
+];
 
-// ── Path layout constants ──────────────────────────────────────────────────────
-// X position as % of container: center → right → center → left (repeating wave)
+// Zigzag X positions for 4 nodes
 const X_PCTS = [50, 72, 50, 28];
-const NODE_ROW_H = 130; // px: bubble + circle + label
-const CONNECTOR_H = 56;  // px: gap between nodes
+const NODE_ROW_H = 150;  // px per node slot
+const CONNECTOR_H = 60;  // px per connector
 
 // ── Connector SVG ──────────────────────────────────────────────────────────────
 const PathConnector: React.FC<{ fromPct: number; toPct: number; done: boolean }> = ({
@@ -37,27 +62,36 @@ const PathConnector: React.FC<{ fromPct: number; toPct: number; done: boolean }>
     viewBox={`0 0 100 ${CONNECTOR_H}`}
     preserveAspectRatio="none"
   >
-    {/* Dashed grey track always visible */}
     <line
       x1={fromPct} y1={2}
       x2={toPct} y2={CONNECTOR_H - 2}
       stroke="var(--md-sys-color-outline-variant)"
       strokeWidth="3"
-      strokeDasharray="5 5"
+      strokeDasharray="6 5"
       strokeLinecap="round"
     />
-    {/* Solid primary fill when done */}
     {done && (
-      <line
+      <motion.line
         x1={fromPct} y1={2}
         x2={toPct} y2={CONNECTOR_H - 2}
         stroke="var(--md-sys-color-primary)"
         strokeWidth="4"
         strokeLinecap="round"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: 1, opacity: 1 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
       />
     )}
   </svg>
 );
+
+// ── View types ─────────────────────────────────────────────────────────────────
+type LearnView =
+  | { mode: 'path' }
+  | { mode: 'flashcard'; wordIndex: number }
+  | { mode: 'matching'; batchIndex: number }
+  | { mode: 'fillblank'; wordIndex: number }
+  | { mode: 'complete' };
 
 // ── Main component ─────────────────────────────────────────────────────────────
 export const Learn: React.FC = () => {
@@ -69,94 +103,135 @@ export const Learn: React.FC = () => {
   );
   const matchBatches = useMemo(() => chunkArray(sessionWords, 4), [sessionWords]);
 
-  const [view, setView] = useState<LearnView>({ mode: 'path' });
-  const [completedCount, setCompletedCount] = useState(0);
+  const [view, setView]               = useState<LearnView>({ mode: 'path' });
+  const [completedPhases, setCompleted] = useState<Set<string>>(new Set());
 
-  // Auto-scroll to current node when returning to path
-  const currentNodeRef = useRef<HTMLDivElement>(null);
+  // For flashcard sub-progress
+  const [flashIndex, setFlashIndex]   = useState(0);
+  const [fbIndex, setFbIndex]         = useState(0);
+  const [matchIndex, setMatchIndex]   = useState(0);
+
+  // Which phase index is current (0-3)
+  const currentPhaseIdx = completedPhases.size < 4 ? completedPhases.size : 4;
+
+  // Auto-scroll to active node
+  const activeNodeRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (view.mode === 'path') {
       const t = setTimeout(() => {
-        currentNodeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        activeNodeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 200);
       return () => clearTimeout(t);
     }
-  }, [view.mode, completedCount]);
+  }, [view.mode, completedPhases.size]);
 
-  const overallPct = Math.min((completedCount / sessionWords.length) * 100, 100);
+  // Sublabels (e.g. "10 words · tap to start")
+  const phaseNodes: PhaseNode[] = PHASE_DEFS.map((def, i) => ({
+    ...def,
+    sublabel:
+      i === 0 ? `${sessionWords.length} words` :
+      i === 1 ? `${matchBatches.length} round${matchBatches.length !== 1 ? 's' : ''}` :
+      i === 2 ? `${sessionWords.length} sentences` :
+               'Finish the session',
+  }));
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
+  const overallPct = (completedPhases.size / 3) * 100; // 3 real phases (last node is bonus)
+
+  // ── Flashcard handlers ────────────────────────────────────────────────────
+  const handleFlashNext = useCallback(() => {
+    const next = flashIndex + 1;
+    if (next >= sessionWords.length) {
+      // All flashcards done — mark phase complete, return to path
+      setCompleted(prev => new Set([...prev, 'flashcards']));
+      setView({ mode: 'path' });
+    } else {
+      setFlashIndex(next);
+      setView({ mode: 'flashcard', wordIndex: next });
+    }
+  }, [flashIndex, sessionWords.length]);
+
+  // ── Matching handlers ─────────────────────────────────────────────────────
+  const handleMatchNext = useCallback(() => {
+    const next = matchIndex + 1;
+    if (next >= matchBatches.length) {
+      setCompleted(prev => new Set([...prev, 'matching']));
+      setView({ mode: 'path' });
+      setMatchIndex(0);
+    } else {
+      setMatchIndex(next);
+      setView({ mode: 'matching', batchIndex: next });
+    }
+  }, [matchIndex, matchBatches.length]);
+
+  // ── Fill-blank handlers ───────────────────────────────────────────────────
+  const handleFbNext = useCallback(() => {
+    markLearned(sessionWords[fbIndex].id);
+    const next = fbIndex + 1;
+    if (next >= sessionWords.length) {
+      setCompleted(prev => new Set([...prev, 'fillblank']));
+      setView({ mode: 'path' });
+      setFbIndex(0);
+    } else {
+      setFbIndex(next);
+      setView({ mode: 'fillblank', wordIndex: next });
+    }
+  }, [fbIndex, sessionWords, markLearned]);
+
+  // ── Node tap ──────────────────────────────────────────────────────────────
   const handleNodeTap = useCallback(
-    (wordIndex: number) => {
+    (phaseId: string) => {
       triggerHaptic(settings.hapticsEnabled, 'tap');
-      setView({ mode: 'word', wordIndex, phase: 'flashcard' });
+      if (phaseId === 'flashcards') {
+        setFlashIndex(0);
+        setView({ mode: 'flashcard', wordIndex: 0 });
+      } else if (phaseId === 'matching') {
+        setMatchIndex(0);
+        setView({ mode: 'matching', batchIndex: 0 });
+      } else if (phaseId === 'fillblank') {
+        setFbIndex(0);
+        setView({ mode: 'fillblank', wordIndex: 0 });
+      } else if (phaseId === 'complete') {
+        setView({ mode: 'complete' });
+      }
     },
     [settings.hapticsEnabled]
   );
-
-  // Both "Got it" and "See Again" advance to fill-blank on the path model.
-  // The word is always practiced either way.
-  const handleFlashNext = useCallback(() => {
-    if (view.mode !== 'word') return;
-    setView({ mode: 'word', wordIndex: view.wordIndex, phase: 'fillblank' });
-  }, [view]);
-
-  const handleFbNext = useCallback(() => {
-    if (view.mode !== 'word') return;
-    markLearned(sessionWords[view.wordIndex].id);
-    const next = completedCount + 1;
-    setCompletedCount(next);
-
-    if (next >= sessionWords.length) {
-      setView({ mode: 'matching', batchIndex: 0 });
-    } else {
-      setView({ mode: 'path' });
-    }
-  }, [view, completedCount, sessionWords, markLearned]);
-
-  const handleMatchComplete = useCallback(() => {
-    if (view.mode !== 'matching') return;
-    const next = view.batchIndex + 1;
-    if (next >= matchBatches.length) {
-      setView({ mode: 'complete' });
-    } else {
-      setView({ mode: 'matching', batchIndex: next });
-    }
-  }, [view, matchBatches.length]);
 
   const handlePlayAgain = useCallback(() => {
     navigate('/home');
     setTimeout(() => navigate('/learn'), 60);
   }, [navigate]);
 
-  // ── Session complete ───────────────────────────────────────────────────────
+  // ── Session complete ──────────────────────────────────────────────────────
   if (view.mode === 'complete') {
     return <SessionComplete wordsCompleted={sessionWords.length} onPlayAgain={handlePlayAgain} />;
   }
 
-  // ── Sub-label for header ───────────────────────────────────────────────────
+  // ── Sub-label for header ──────────────────────────────────────────────────
   const subLabel =
     view.mode === 'path'
-      ? completedCount === 0
-        ? 'Tap a node to begin'
-        : completedCount === sessionWords.length
-        ? 'All done!'
-        : `${sessionWords.length - completedCount} word${sessionWords.length - completedCount !== 1 ? 's' : ''} to go`
+      ? completedPhases.size === 0
+        ? 'Tap Flashcards to begin'
+        : completedPhases.size === 3
+        ? 'All phases done! Tap the trophy!'
+        : `${3 - completedPhases.size} phase${3 - completedPhases.size !== 1 ? 's' : ''} remaining`
+      : view.mode === 'flashcard'
+      ? `Flashcards · ${flashIndex + 1} of ${sessionWords.length}`
       : view.mode === 'matching'
-      ? 'Phase 2 · Match pairs'
-      : view.phase === 'flashcard'
-      ? 'Phase 1 · Flashcard'
-      : 'Phase 1 · Fill in the blank';
+      ? `Match Pairs · Round ${matchIndex + 1} of ${matchBatches.length}`
+      : view.mode === 'fillblank'
+      ? `Fill in Blank · ${fbIndex + 1} of ${sessionWords.length}`
+      : '';
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
 
-      {/* ── Sticky header ──────────────────────────────────────────────── */}
+      {/* Sticky header */}
       <div className="sticky top-0 z-20 bg-background px-4 pt-3 pb-2 shrink-0">
         <div className="flex items-center gap-3 mb-2">
           <button
             onClick={() => navigate('/home')}
-            aria-label="Exit"
+            aria-label="Exit session"
             className="p-2 -ml-1 rounded-full text-on-surface-variant hover:bg-surface-container transition-colors active:scale-90"
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
@@ -171,8 +246,8 @@ export const Learn: React.FC = () => {
             />
           </div>
 
-          <span className="m3-label-small text-primary font-bold w-14 text-right shrink-0">
-            {completedCount}/{sessionWords.length}
+          <span className="m3-label-small text-primary font-bold shrink-0">
+            {completedPhases.size}/3
           </span>
         </div>
         <p className="m3-label-small text-on-surface-variant text-center tracking-wide">
@@ -180,11 +255,11 @@ export const Learn: React.FC = () => {
         </p>
       </div>
 
-      {/* ── Scrollable content ─────────────────────────────────────────── */}
+      {/* Content */}
       <div className="flex-1 overflow-y-auto">
         <AnimatePresence mode="wait">
 
-          {/* PATH VIEW */}
+          {/* ── PATH ─────────────────────────────────────────────── */}
           {view.mode === 'path' && (
             <motion.div
               key="path"
@@ -192,37 +267,37 @@ export const Learn: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0, x: -30 }}
               transition={{ duration: 0.22 }}
-              className="px-4 pt-6 pb-28"
+              className="px-4 pt-8 pb-28"
             >
-              {sessionWords.map((word, i) => {
-                const xPct = X_PCTS[i % 4];
-                const nextXPct = X_PCTS[(i + 1) % 4];
-                const isCurrent = i === completedCount;
+              {phaseNodes.map((node, i) => {
+                const xPct = X_PCTS[i];
+                const nextXPct = i < phaseNodes.length - 1 ? X_PCTS[i + 1] : 50;
+                const isCurrent = i === currentPhaseIdx;
                 const nodeState: NodeState =
-                  i < completedCount ? 'complete' :
-                  isCurrent         ? 'current'  :
-                                      'locked';
+                  completedPhases.has(node.id) ? 'complete' :
+                  isCurrent                    ? 'current'  :
+                                                 'locked';
 
                 return (
-                  <React.Fragment key={word.id}>
+                  <React.Fragment key={node.id}>
                     <div
-                      ref={isCurrent ? currentNodeRef : undefined}
+                      ref={isCurrent ? activeNodeRef : undefined}
                       className="relative"
                       style={{ height: NODE_ROW_H }}
                     >
                       <PathNode
-                        word={word}
+                        node={node}
                         state={nodeState}
                         xPct={xPct}
-                        onTap={() => handleNodeTap(i)}
+                        onTap={() => handleNodeTap(node.id)}
                       />
                     </div>
 
-                    {i < sessionWords.length - 1 && (
+                    {i < phaseNodes.length - 1 && (
                       <PathConnector
                         fromPct={xPct}
                         toPct={nextXPct}
-                        done={i < completedCount}
+                        done={completedPhases.has(node.id)}
                       />
                     )}
                   </React.Fragment>
@@ -231,40 +306,38 @@ export const Learn: React.FC = () => {
             </motion.div>
           )}
 
-          {/* FLASHCARD */}
-          {view.mode === 'word' && view.phase === 'flashcard' &&
-            sessionWords[view.wordIndex] && (
-              <FlashcardPhase
-                key={`flash-${sessionWords[view.wordIndex].id}`}
-                word={sessionWords[view.wordIndex]}
-                wordIndex={view.wordIndex}
-                totalInQueue={sessionWords.length}
-                onGotIt={handleFlashNext}
-                onSeeAgain={handleFlashNext}
-              />
-            )}
+          {/* ── FLASHCARDS ───────────────────────────────────────── */}
+          {view.mode === 'flashcard' && sessionWords[view.wordIndex] && (
+            <FlashcardPhase
+              key={`flash-${view.wordIndex}`}
+              word={sessionWords[view.wordIndex]}
+              wordIndex={view.wordIndex}
+              totalInQueue={sessionWords.length}
+              onGotIt={handleFlashNext}
+              onSeeAgain={handleFlashNext}
+            />
+          )}
 
-          {/* FILL-IN-BLANK */}
-          {view.mode === 'word' && view.phase === 'fillblank' &&
-            sessionWords[view.wordIndex] && (
-              <FillBlankPhase
-                key={`fb-${sessionWords[view.wordIndex].id}`}
-                word={sessionWords[view.wordIndex]}
-                allSessionWords={sessionWords}
-                wordIndex={view.wordIndex}
-                total={sessionWords.length}
-                onNext={handleFbNext}
-              />
-            )}
-
-          {/* MATCHING */}
+          {/* ── MATCHING ─────────────────────────────────────────── */}
           {view.mode === 'matching' && matchBatches[view.batchIndex] && (
             <MatchingPhase
               key={`match-${view.batchIndex}`}
               batch={matchBatches[view.batchIndex]}
               batchIndex={view.batchIndex}
               totalBatches={matchBatches.length}
-              onComplete={handleMatchComplete}
+              onComplete={handleMatchNext}
+            />
+          )}
+
+          {/* ── FILL-IN-BLANK ────────────────────────────────────── */}
+          {view.mode === 'fillblank' && sessionWords[view.wordIndex] && (
+            <FillBlankPhase
+              key={`fb-${view.wordIndex}`}
+              word={sessionWords[view.wordIndex]}
+              allSessionWords={sessionWords}
+              wordIndex={view.wordIndex}
+              total={sessionWords.length}
+              onNext={handleFbNext}
             />
           )}
 
