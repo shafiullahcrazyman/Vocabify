@@ -51,7 +51,15 @@ function wordToPairs(word: WordFamily): PosPair[] {
 }
 
 function buildPosSubBatches(batch: WordFamily[]): PosPair[][] {
-  return batch.map(wordToPairs).filter(p => p.length > 0);
+  return batch
+    .map(wordToPairs)
+    .filter(pairs => {
+      if (pairs.length === 0) return false;
+      // Skip words where ALL valid forms are the same string
+      // e.g. "fine" as noun/verb/adj — right tiles would be identical and unguessable
+      const uniqueForms = new Set(pairs.map(p => p.form.toLowerCase()));
+      return uniqueForms.size > 1;
+    });
 }
 
 // ── Stage banner ───────────────────────────────────────────────────────────────
@@ -146,11 +154,17 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
   // Stage 1 completion
   useEffect(() => {
     if (stage === 'meaning' && matched1.size === batch.length && batch.length > 0) {
+      // If no valid Stage 2 sub-batches exist (all words had identical forms), skip straight to complete
+      if (posSubBatches.length === 0) {
+        setCelebrate1(true);
+        const t = setTimeout(() => { setCelebrate1(false); onComplete(); }, 900);
+        return () => clearTimeout(t);
+      }
       setCelebrate1(true);
       const t = setTimeout(() => { setCelebrate1(false); setStage('pos'); }, 900);
       return () => clearTimeout(t);
     }
-  }, [matched1.size, batch.length, stage]);
+  }, [matched1.size, batch.length, stage, posSubBatches.length]);
 
   // Stage 2 sub-batch completion
   useEffect(() => {

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Check, RotateCcw, Volume2 } from 'lucide-react';
+import { Check, RotateCcw } from 'lucide-react';
 import { useTTS } from '../../hooks/useTTS';
 import { WordFamily } from '../../types';
 import { getValidForms, getPrimaryForm } from '../../utils/sessionAlgorithm';
@@ -39,7 +39,7 @@ export const FlashcardPhase: React.FC<Props> = ({
   onSeeAgain,
 }) => {
   const { settings } = useAppContext();
-  const { speak, isPlaying, playingText } = useTTS();
+  const { toggle, isPlaying, playingText } = useTTS();
   const isBnPlaying      = isPlaying && playingText === word.meaning_bn;
   const isExamplePlaying = isPlaying && playingText === word.example;
 
@@ -123,46 +123,36 @@ export const FlashcardPhase: React.FC<Props> = ({
           })}
         </div>
 
-        {/* Bengali meaning — top of bottom group */}
+        {/* Bengali meaning — tap to speak/stop */}
         <div className="bg-surface-container-high rounded-t-[20px] rounded-b-[4px] p-4 mb-[2px]">
-          <div className="flex items-center justify-between mb-1">
-            <p className="m3-label-small text-primary uppercase tracking-wide font-bold">
-              Bengali Meaning
-            </p>
-            <button
-              onClick={() => speak(word.meaning_bn)}
-              aria-label="Hear Bengali meaning"
-              className={`p-1.5 rounded-full transition-colors active:scale-90 ${
-                isBnPlaying
-                  ? 'bg-primary/20 text-primary'
-                  : 'text-on-surface-variant hover:bg-surface-variant/40'
-              }`}
-            >
-              <Volume2 className="w-4 h-4" />
-            </button>
-          </div>
-          <p className="m3-title-large text-on-surface">{word.meaning_bn}</p>
+          <p className="m3-label-small text-primary uppercase tracking-wide font-bold mb-1">
+            Bengali Meaning
+          </p>
+          <p
+            onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); toggle(word.meaning_bn, 'bn'); }}
+            className={`m3-title-large cursor-pointer select-none transition-all duration-200 ${
+              isBnPlaying
+                ? 'text-primary underline underline-offset-4 decoration-primary/60 opacity-80'
+                : 'text-on-surface'
+            }`}
+          >
+            {word.meaning_bn}
+          </p>
         </div>
 
-        {/* Example — bottom of group */}
+        {/* Example — tap to speak/stop */}
         <div className="bg-surface-container-high rounded-t-[4px] rounded-b-[20px] p-4">
-          <div className="flex items-center justify-between mb-2">
-            <p className="m3-label-small text-primary uppercase tracking-wide font-bold">
-              Example
-            </p>
-            <button
-              onClick={() => speak(word.example)}
-              aria-label="Hear example sentence"
-              className={`p-1.5 rounded-full transition-colors active:scale-90 ${
-                isExamplePlaying
-                  ? 'bg-primary/20 text-primary'
-                  : 'text-on-surface-variant hover:bg-surface-variant/40'
-              }`}
-            >
-              <Volume2 className="w-4 h-4" />
-            </button>
-          </div>
-          <p className="m3-body-medium text-on-surface-variant italic leading-relaxed">
+          <p className="m3-label-small text-primary uppercase tracking-wide font-bold mb-2">
+            Example
+          </p>
+          <p
+            onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); toggle(word.example, 'en'); }}
+            className={`m3-body-medium italic leading-relaxed cursor-pointer select-none transition-all duration-200 ${
+              isExamplePlaying
+                ? 'text-on-surface underline underline-offset-4 decoration-on-surface/40 opacity-75'
+                : 'text-on-surface-variant'
+            }`}
+          >
             {word.example}
           </p>
         </div>
