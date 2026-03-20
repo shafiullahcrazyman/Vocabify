@@ -17,10 +17,10 @@ interface Props {
 
 // POS colors matching WordCard exactly
 const POS_STYLES: Record<string, string> = {
-  Noun: 'bg-blue-500/20 text-blue-600 dark:text-blue-300',
-  Verb: 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300',
-  Adj:  'bg-amber-500/20 text-amber-600 dark:text-amber-300',
-  Adv:  'bg-purple-500/20 text-purple-600 dark:text-purple-300',
+  Noun: 'bg-blue-500/10 text-blue-700 dark:text-blue-300',
+  Verb: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+  Adj:  'bg-amber-500/10 text-amber-700 dark:text-amber-300',
+  Adv:  'bg-purple-500/10 text-purple-700 dark:text-purple-300',
 };
 
 // Rounded corners logic: first / middle / last / only
@@ -89,9 +89,14 @@ export const FlashcardPhase: React.FC<Props> = ({
       {/* Main card */}
       <div className="bg-surface-container rounded-[28px] p-6">
 
-        {/* Large primary word */}
+        {/* Large primary word — tap to speak */}
         <p
-          className={`${titleSize} font-bold text-on-background leading-tight mb-5`}
+          onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); toggle(primaryForm, 'en'); }}
+          className={`${titleSize} font-bold leading-tight mb-5 cursor-pointer select-none transition-all duration-200 ${
+            isPlaying && playingText === primaryForm
+              ? 'text-primary underline underline-offset-4 decoration-primary/60 opacity-80'
+              : 'text-on-surface'
+          }`}
           style={{ fontVariationSettings: '"wdth" 100' }}
         >
           {primaryForm}
@@ -126,7 +131,7 @@ export const FlashcardPhase: React.FC<Props> = ({
         {/* Bengali meaning — tap to speak/stop */}
         <div className="bg-surface-container-high rounded-t-[20px] rounded-b-[4px] p-4 mb-[2px]">
           <p className="m3-label-medium text-primary uppercase tracking-wider font-bold mb-1.5">
-            Bengali Meaning
+            Meaning
           </p>
           <p
             onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); toggle(word.meaning_bn, 'bn'); }}
