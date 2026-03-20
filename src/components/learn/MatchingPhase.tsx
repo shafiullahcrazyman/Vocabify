@@ -15,10 +15,10 @@ interface Props {
 
 // ── POS config ─────────────────────────────────────────────────────────────────
 const POS_CONFIG = [
-  { key: 'noun',      label: 'Noun',      dot: 'bg-blue-400'    },
-  { key: 'verb',      label: 'Verb',      dot: 'bg-emerald-400' },
-  { key: 'adjective', label: 'Adjective', dot: 'bg-amber-400'   },
-  { key: 'adverb',    label: 'Adverb',    dot: 'bg-purple-400'  },
+  { key: 'noun',      label: 'Noun'      },
+  { key: 'verb',      label: 'Verb'      },
+  { key: 'adjective', label: 'Adjective' },
+  { key: 'adverb',    label: 'Adverb'    },
 ] as const;
 
 type Stage = 'meaning' | 'pos';
@@ -27,7 +27,6 @@ interface PosPair {
   id: string;
   form: string;
   posLabel: string;
-  posDot: string;
 }
 
 const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
@@ -46,20 +45,25 @@ function wordToPairs(word: WordFamily): PosPair[] {
       id: `${word.id}__${cfg.key}`,
       form: word[cfg.key as keyof WordFamily] as string,
       posLabel: cfg.label,
-      posDot: cfg.dot,
     }));
 }
 
 function buildPosSubBatches(batch: WordFamily[]): PosPair[][] {
   return batch
-    .map(wordToPairs)
-    .filter(pairs => {
-      if (pairs.length === 0) return false;
-      // Skip words where ALL valid forms are the same string
-      // e.g. "fine" as noun/verb/adj — right tiles would be identical and unguessable
-      const uniqueForms = new Set(pairs.map(p => p.form.toLowerCase()));
-      return uniqueForms.size > 1;
-    });
+    .map(pairs => {
+      const raw = wordToPairs(pairs);
+      // Keep only first occurrence of each unique form string.
+      // "fine" noun/verb/adj → only one pair kept (Noun).
+      // "familiar/familiarize/familiar" → each unique form kept.
+      const seen = new Set<string>();
+      return raw.filter(p => {
+        const key = p.form.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    })
+    .filter(pairs => pairs.length > 1); // need at least 2 distinct pairs to be a matching exercise
 }
 
 // ── Stage banner ───────────────────────────────────────────────────────────────
@@ -335,7 +339,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
             )}
 
             <div className="grid grid-cols-2 gap-3">
-              {/* Left: POS labels — always unique per word */}
+              {/* Left: word forms (unique per word) */}
               <div className="flex flex-col gap-3">
                 {currentPosSub.map(pair => (
                   <Tile
@@ -346,15 +350,14 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
                     isWrong={wrong2L === pair.id}
                     onTap={() => handleTap2(pair.id, 'left')}
                   >
-                    <div className="flex items-center gap-2 justify-center">
-                      <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${pair.posDot}`} />
-                      <span className="text-[15px] font-bold">{pair.posLabel}</span>
-                    </div>
+                    <span className={`${tileTextSize(pair.form)} font-bold text-center leading-tight w-full`}>
+                      {pair.form}
+                    </span>
                   </Tile>
                 ))}
               </div>
 
-              {/* Right: word forms (shuffled) */}
+              {/* Right: POS labels (shuffled, no dots) */}
               <div className="flex flex-col gap-3">
                 {rightPos.map(pair => (
                   <Tile
@@ -365,8 +368,8 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
                     isWrong={wrong2R === pair.id}
                     onTap={() => handleTap2(pair.id, 'right')}
                   >
-                    <span className={`${tileTextSize(pair.form)} font-bold text-center leading-tight w-full`}>
-                      {pair.form}
+                    <span className="text-[15px] font-bold text-center w-full">
+                      {pair.posLabel}
                     </span>
                   </Tile>
                 ))}
