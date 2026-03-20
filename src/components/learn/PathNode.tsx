@@ -1,87 +1,113 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Lock, Check, Zap } from 'lucide-react';
-import { WordFamily } from '../../types';
-import { getPrimaryForm } from '../../utils/sessionAlgorithm';
+import { Lock, Check, LucideIcon } from 'lucide-react';
 
 export type NodeState = 'complete' | 'current' | 'locked';
 
+export interface PhaseNode {
+  id: string;
+  label: string;       // e.g. "Flashcards"
+  sublabel: string;    // e.g. "10 words"
+  Icon: LucideIcon;
+  color: string;       // Tailwind bg for active/complete state
+  textColor: string;   // Tailwind text for icon inside colored bg
+}
+
 interface Props {
-  word: WordFamily;
+  node: PhaseNode;
   state: NodeState;
-  xPct: number; // horizontal position as % of container width
+  xPct: number;        // horizontal % across screen
   onTap: () => void;
 }
 
-export const PathNode: React.FC<Props> = ({ word, state, xPct, onTap }) => {
-  const label = getPrimaryForm(word);
+export const PathNode: React.FC<Props> = ({ node, state, xPct, onTap }) => {
+  const { Icon, label, sublabel, color, textColor } = node;
   const isLocked = state === 'locked';
 
-  const ringClass =
+  // Outer ring / bg
+  const circleClass =
     state === 'complete'
-      ? 'bg-primary border-[3px] border-primary/30'
+      ? `${color} border-[3px] border-white/20`
       : state === 'current'
-      ? 'bg-primary border-[5px] border-on-surface/10 shadow-2xl'
-      : 'bg-surface-container-high border-[2px] border-outline/20';
+      ? `${color} border-[6px] border-white/25 shadow-2xl`
+      : 'bg-surface-container border-[2px] border-outline/20';
 
-  const labelColor =
+  const iconClass =
+    state === 'locked'
+      ? 'text-on-surface-variant/30'
+      : state === 'complete'
+      ? `${textColor}`
+      : `${textColor}`;
+
+  const labelClass =
     state === 'complete'
-      ? 'text-primary font-semibold'
+      ? 'text-on-surface font-semibold opacity-80'
       : state === 'current'
-      ? 'text-on-surface font-bold'
-      : 'text-on-surface-variant/40';
+      ? 'text-on-surface font-extrabold'
+      : 'text-on-surface-variant/35 font-medium';
+
+  const sublabelClass =
+    state === 'locked'
+      ? 'text-on-surface-variant/25'
+      : 'text-on-surface-variant/70';
 
   return (
     <div
       className="absolute flex flex-col items-center"
-      style={{ left: `${xPct}%`, transform: 'translateX(-50%)', top: 0, width: 96 }}
+      style={{ left: `${xPct}%`, transform: 'translateX(-50%)', top: 0, width: 120 }}
     >
-      {/* "START" bounce bubble for current node */}
-      <div className="h-8 flex items-end justify-center mb-1">
+      {/* Bounce label above current node */}
+      <div className="h-9 flex items-end justify-center mb-1">
         {state === 'current' && (
           <motion.div
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: [0, -5, 0] }}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: [0, -6, 0] }}
             transition={{
               opacity: { duration: 0.3 },
-              y: { repeat: Infinity, duration: 1.6, ease: 'easeInOut' },
+              y: { repeat: Infinity, duration: 1.5, ease: 'easeInOut' },
             }}
-            className="bg-on-surface text-surface px-3 py-[5px] rounded-full text-[11px] font-black tracking-wide shadow-lg whitespace-nowrap"
+            className="bg-on-surface text-surface px-3 py-1 rounded-full text-[11px] font-black tracking-wider shadow-md whitespace-nowrap"
           >
-            START
+            TAP TO START
           </motion.div>
+        )}
+        {state === 'complete' && (
+          <div className="h-9" /> // spacer to keep layout stable
         )}
       </div>
 
-      {/* Circle button */}
+      {/* Main circle */}
       <motion.button
         onClick={!isLocked ? onTap : undefined}
         disabled={isLocked}
-        animate={state === 'current' ? { scale: [1, 1.08, 1] } : { scale: 1 }}
+        animate={state === 'current' ? { scale: [1, 1.07, 1] } : { scale: 1 }}
         transition={
           state === 'current'
-            ? { repeat: Infinity, duration: 2, ease: 'easeInOut' }
-            : { duration: 0.2 }
+            ? { repeat: Infinity, duration: 2.2, ease: 'easeInOut' }
+            : { duration: 0.25 }
         }
-        whileTap={!isLocked ? { scale: 0.86 } : {}}
-        className={`w-[78px] h-[78px] rounded-full flex items-center justify-center transition-colors duration-200 ${ringClass} ${
-          isLocked ? 'opacity-35' : ''
-        }`}
-        aria-label={`Learn: ${label}`}
+        whileTap={!isLocked ? { scale: 0.84 } : {}}
+        aria-label={`${label} phase`}
         style={{ WebkitTapHighlightColor: 'transparent' }}
+        className={`w-[90px] h-[90px] rounded-full flex items-center justify-center transition-colors duration-200 ${circleClass} ${
+          isLocked ? 'opacity-30' : ''
+        }`}
       >
         {state === 'complete' ? (
-          <Check className="w-9 h-9 text-on-primary" strokeWidth={3} />
-        ) : state === 'current' ? (
-          <Zap className="w-9 h-9 text-on-primary" />
+          <Check className={`w-10 h-10 ${iconClass}`} strokeWidth={3} />
+        ) : state === 'locked' ? (
+          <Lock className="w-8 h-8 text-on-surface-variant/30" />
         ) : (
-          <Lock className="w-7 h-7 text-on-surface-variant/40" />
+          <Icon className={`w-10 h-10 ${iconClass}`} />
         )}
       </motion.button>
 
-      {/* Word label */}
-      <span className={`text-[12px] text-center leading-tight mt-2 max-w-[88px] ${labelColor}`}>
+      {/* Labels */}
+      <span className={`text-[13px] text-center leading-tight mt-2 tracking-wide ${labelClass}`}>
         {label}
+      </span>
+      <span className={`text-[11px] text-center leading-tight mt-0.5 ${sublabelClass}`}>
+        {sublabel}
       </span>
     </div>
   );
