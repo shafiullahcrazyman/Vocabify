@@ -22,7 +22,6 @@ const POS_CONFIG = [
 ] as const;
 
 type Stage = 'meaning' | 'pos';
-type SelSide = 'left' | 'right' | null;
 
 interface PosPair {
   id: string;
@@ -33,23 +32,18 @@ interface PosPair {
 
 const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
 
-// Dynamic font size based on text length
 function tileTextSize(text: string): string {
-  const len = text.length;
-  if (len <= 8)  return 'text-[16px]';
-  if (len <= 12) return 'text-[14px]';
-  if (len <= 18) return 'text-[12px]';
+  if (text.length <= 8)  return 'text-[16px]';
+  if (text.length <= 12) return 'text-[14px]';
+  if (text.length <= 18) return 'text-[12px]';
   return 'text-[11px]';
 }
 
 function wordToPairs(word: WordFamily): PosPair[] {
   return POS_CONFIG
-    .filter(cfg => {
-      const raw = word[cfg.key as keyof WordFamily] as string | undefined;
-      return raw && raw !== 'x';
-    })
+    .filter(cfg => { const v = word[cfg.key as keyof WordFamily] as string; return v && v !== 'x'; })
     .map(cfg => ({
-      id: `${word.id}-${cfg.key}`,
+      id: `${word.id}__${cfg.key}`,
       form: word[cfg.key as keyof WordFamily] as string,
       posLabel: cfg.label,
       posDot: cfg.dot,
@@ -59,22 +53,6 @@ function wordToPairs(word: WordFamily): PosPair[] {
 function buildPosSubBatches(batch: WordFamily[]): PosPair[][] {
   return batch.map(wordToPairs).filter(p => p.length > 0);
 }
-
-// ── Tile colours ───────────────────────────────────────────────────────────────
-// Distinct tonal fills per row index so every pair has a unique hue
-const ROW_COLORS = [
-  'bg-blue-500/20    text-blue-200',
-  'bg-emerald-500/20 text-emerald-200',
-  'bg-violet-500/20  text-violet-200',
-  'bg-rose-500/20    text-rose-200',
-  'bg-amber-500/20   text-amber-200',
-];
-
-// State tile overrides
-const TILE_SELECTED  = 'bg-primary/30 text-primary ring-2 ring-primary ring-inset';
-const TILE_WRONG     = 'bg-error/25 text-error';
-const TILE_MATCHED   = 'opacity-0 pointer-events-none scale-95';
-const TILE_DEFAULT   = 'bg-surface-container-highest text-on-surface';
 
 // ── Stage banner ───────────────────────────────────────────────────────────────
 const StageBanner: React.FC<{ stage: Stage }> = ({ stage }) => (
@@ -93,42 +71,75 @@ const StageBanner: React.FC<{ stage: Stage }> = ({ stage }) => (
   </motion.div>
 );
 
+// ── Tile component ─────────────────────────────────────────────────────────────
+const Tile: React.FC<{
+  id: string;
+  children: React.ReactNode;
+  isMatched: boolean;
+  isSelected: boolean;
+  isWrong: boolean;
+  onTap: () => void;
+}> = ({ id, children, isMatched, isSelected, isWrong, onTap }) => {
+  const cls = isMatched
+    ? 'opacity-0 pointer-events-none scale-90'
+    : isWrong
+    ? 'bg-error/20 text-error scale-[0.97]'
+    : isSelected
+    ? 'bg-primary text-on-primary scale-[1.02]'
+    : 'bg-surface-container-high text-on-surface active:scale-95';
+
+  return (
+    <motion.button
+      onClick={onTap}
+      animate={{
+        x: isWrong ? [-5, 5, -4, 4, 0] : 0,
+        opacity: isMatched ? 0 : 1,
+        scale: isMatched ? 0.9 : 1,
+      }}
+      transition={{ duration: 0.28 }}
+      disabled={isMatched}
+      aria-label={id}
+      style={{ WebkitTapHighlightColor: 'transparent' }}
+      className={`w-full min-h-[72px] rounded-[20px] flex items-center justify-center px-3 py-3 transition-all duration-150 ${cls}`}
+    >
+      {children}
+    </motion.button>
+  );
+};
+
 // ── Main component ─────────────────────────────────────────────────────────────
 export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches, onComplete }) => {
   const { settings } = useAppContext();
-
   const [stage, setStage] = useState<Stage>('meaning');
 
-  // ── STAGE 1 state ──────────────────────────────────────────────────────────
-  const [selId1, setSelId1]         = useState<string | null>(null);
-  const [selSide1, setSelSide1]     = useState<SelSide>(null);
-  const [matched1, setMatched1]     = useState<Set<string>>(new Set());
-  const [wrongPair1, setWrongPair1] = useState<[string, string] | null>(null);
-  const [locked1, setLocked1]       = useState(false);
+  // ── Stage 1 ────────────────────────────────────────────────────────────────
+  // sel: { id, side } — whichever tile was tapped last
+  const [sel1, setSel1]           = useState<{ id: string; side: 'left' | 'right' } | null>(null);
+  const [matched1, setMatched1]   = useState<Set<string>>(new Set());
+  const [wrong1, setWrong1]       = useState<string | null>(null); // wrong pair's shared id
+  const [locked1, setLocked1]     = useState(false);
   const [celebrate1, setCelebrate1] = useState(false);
 
   const [rightMeaning] = useState(() =>
     shuffle(batch.map(w => ({ id: w.id, text: w.meaning_bn })))
   );
 
-  // ── STAGE 2 state ──────────────────────────────────────────────────────────
+  // ── Stage 2 ────────────────────────────────────────────────────────────────
   const posSubBatches = useMemo(() => buildPosSubBatches(batch), [batch]);
-  const [posSubIdx, setPosSubIdx]   = useState(0);
-  const [selId2, setSelId2]         = useState<string | null>(null);
-  const [selSide2, setSelSide2]     = useState<SelSide>(null);
-  const [matched2, setMatched2]     = useState<Set<string>>(new Set());
-  const [wrongPair2, setWrongPair2] = useState<[string, string] | null>(null);
-  const [locked2, setLocked2]       = useState(false);
-  const [celebrate2, setCelebrate2] = useState(false);
-  const [rightPos, setRightPos]     = useState<PosPair[]>(() =>
-    shuffle(posSubBatches[0] ?? [])
-  );
+  const [posSubIdx, setPosSubIdx]     = useState(0);
+  const [sel2, setSel2]               = useState<{ id: string; side: 'left' | 'right' } | null>(null);
+  const [matched2, setMatched2]       = useState<Set<string>>(new Set());
+  const [wrong2L, setWrong2L]         = useState<string | null>(null);
+  const [wrong2R, setWrong2R]         = useState<string | null>(null);
+  const [locked2, setLocked2]         = useState(false);
+  const [celebrate2, setCelebrate2]   = useState(false);
+  const [rightPos, setRightPos]       = useState<PosPair[]>(() => shuffle(posSubBatches[0] ?? []));
   const currentPosSub = posSubBatches[posSubIdx] ?? [];
 
   useEffect(() => {
-    setSelId2(null); setSelSide2(null);
-    setMatched2(new Set());
-    setWrongPair2(null); setLocked2(false); setCelebrate2(false);
+    setSel2(null); setMatched2(new Set());
+    setWrong2L(null); setWrong2R(null);
+    setLocked2(false); setCelebrate2(false);
     setRightPos(shuffle(posSubBatches[posSubIdx] ?? []));
   }, [posSubIdx]);
 
@@ -153,89 +164,72 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
     }
   }, [matched2.size, currentPosSub.length, posSubIdx, posSubBatches.length, stage, onComplete]);
 
-  // ── Generic tile tap handler (works for both stages) ─────────────────────
-  const handleTap = (
-    tappedId: string,
-    tappedSide: 'left' | 'right',
-    matched: Set<string>,
-    locked: boolean,
-    selId: string | null,
-    selSide: SelSide,
-    setSelId: (id: string | null) => void,
-    setSelSide: (s: SelSide) => void,
-    setMatched: (fn: (prev: Set<string>) => Set<string>) => void,
-    setWrongPair: (p: [string, string] | null) => void,
-    setLocked: (b: boolean) => void,
-  ) => {
-    if (locked || matched.has(tappedId)) return;
+  // ── Stage 1 tap ─────────────────────────────────────────────────────────────
+  // Both sides use word.id — matching = same id tapped on opposite sides
+  const handleTap1 = (id: string, side: 'left' | 'right') => {
+    if (locked1 || matched1.has(id)) return;
     triggerHaptic(settings.hapticsEnabled, 'tap');
 
-    // Nothing selected yet — select this tile
-    if (selId === null) {
-      setSelId(tappedId);
-      setSelSide(tappedSide);
+    if (!sel1) {
+      setSel1({ id, side });
       return;
     }
-
-    // Same tile tapped again — deselect
-    if (selId === tappedId) {
-      setSelId(null);
-      setSelSide(null);
+    // Tap same tile → deselect
+    if (sel1.id === id && sel1.side === side) {
+      setSel1(null);
       return;
     }
-
-    // Same side tapped — switch selection to new tile
-    if (selSide === tappedSide) {
-      setSelId(tappedId);
+    // Tap same side → switch selection
+    if (sel1.side === side) {
+      setSel1({ id, side });
       return;
     }
-
-    // Opposite side tapped — attempt match (IDs must match)
-    if (selId === tappedId) {
+    // Opposite side tapped
+    if (sel1.id === id) {
+      // Correct — IDs match
       triggerHaptic(settings.hapticsEnabled, 'success');
-      setMatched(prev => new Set([...prev, tappedId]));
-      setSelId(null);
-      setSelSide(null);
+      setMatched1(prev => new Set([...prev, id]));
+      setSel1(null);
     } else {
+      // Wrong
       triggerHaptic(settings.hapticsEnabled, 'error');
-      setLocked(true);
-      const wrongL = selSide === 'left' ? selId : tappedId;
-      const wrongR = selSide === 'right' ? selId : tappedId;
-      setWrongPair([wrongL, wrongR]);
-      setTimeout(() => {
-        setWrongPair(null);
-        setSelId(null);
-        setSelSide(null);
-        setLocked(false);
-      }, 800);
+      setLocked1(true);
+      setWrong1(id); // mark the newly tapped wrong tile
+      setTimeout(() => { setWrong1(null); setSel1(null); setLocked1(false); }, 800);
     }
   };
 
-  const tap1 = (id: string, side: 'left' | 'right') =>
-    handleTap(id, side, matched1, locked1, selId1, selSide1,
-      setSelId1, setSelSide1, setMatched1, setWrongPair1, setLocked1);
+  // ── Stage 2 tap ─────────────────────────────────────────────────────────────
+  // Left = POS labels, Right = word forms — both use pair.id
+  const handleTap2 = (id: string, side: 'left' | 'right') => {
+    if (locked2 || matched2.has(id)) return;
+    triggerHaptic(settings.hapticsEnabled, 'tap');
 
-  const tap2 = (id: string, side: 'left' | 'right') =>
-    handleTap(id, side, matched2, locked2, selId2, selSide2,
-      setSelId2, setSelSide2, setMatched2, setWrongPair2, setLocked2);
-
-  // ── Tile class builder ──────────────────────────────────────────────────────
-  const tileClass = (
-    id: string,
-    side: 'left' | 'right',
-    matched: Set<string>,
-    selId: string | null,
-    wrongPair: [string, string] | null,
-    rowIdx: number,
-    useRowColor: boolean,
-  ) => {
-    const base = 'relative w-full min-h-[72px] rounded-[20px] flex items-center justify-center px-3 py-3 transition-all duration-150 active:scale-95 overflow-hidden';
-    if (matched.has(id))  return `${base} ${TILE_MATCHED}`;
-    const inWrong = wrongPair && (wrongPair[0] === id || wrongPair[1] === id);
-    if (inWrong)          return `${base} ${TILE_WRONG}`;
-    if (selId === id)     return `${base} ${TILE_SELECTED}`;
-    if (useRowColor)      return `${base} ${ROW_COLORS[rowIdx % ROW_COLORS.length]}`;
-    return `${base} ${TILE_DEFAULT}`;
+    if (!sel2) {
+      setSel2({ id, side });
+      return;
+    }
+    if (sel2.id === id && sel2.side === side) {
+      setSel2(null);
+      return;
+    }
+    if (sel2.side === side) {
+      setSel2({ id, side });
+      return;
+    }
+    // Opposite side
+    if (sel2.id === id) {
+      triggerHaptic(settings.hapticsEnabled, 'success');
+      setMatched2(prev => new Set([...prev, id]));
+      setSel2(null);
+    } else {
+      triggerHaptic(settings.hapticsEnabled, 'error');
+      setLocked2(true);
+      // Track which specific tile on each side was wrong
+      setWrong2L(sel2.side === 'left' ? sel2.id : id);
+      setWrong2R(sel2.side === 'right' ? sel2.id : id);
+      setTimeout(() => { setWrong2L(null); setWrong2R(null); setSel2(null); setLocked2(false); }, 800);
+    }
   };
 
   // ── Render ──────────────────────────────────────────────────────────────────
@@ -251,7 +245,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
 
       <AnimatePresence mode="wait">
 
-        {/* ── STAGE 1: Match the meaning ──────────────────────────── */}
+        {/* ── STAGE 1: Bengali meaning ──────────────────────────── */}
         {stage === 'meaning' && (
           <motion.div
             key="meaning"
@@ -263,58 +257,46 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
           >
             {/* Left: English words */}
             <div className="flex flex-col gap-3">
-              {batch.map((word, i) => {
+              {batch.map(word => {
                 const text = getPrimaryForm(word);
                 return (
-                  <motion.button
+                  <Tile
                     key={`L1-${word.id}`}
-                    onClick={() => tap1(word.id, 'left')}
-                    animate={{
-                      x: wrongPair1 && wrongPair1[0] === word.id ? [-5, 5, -5, 5, 0] : 0,
-                      opacity: matched1.has(word.id) ? 0 : 1,
-                      scale: matched1.has(word.id) ? 0.9 : 1,
-                    }}
-                    transition={{ duration: 0.28 }}
-                    className={tileClass(word.id, 'left', matched1, selId1, wrongPair1, i, true)}
-                    aria-label={`Word: ${text}`}
+                    id={word.id}
+                    isMatched={matched1.has(word.id)}
+                    isSelected={sel1?.id === word.id && sel1?.side === 'left'}
+                    isWrong={false}
+                    onTap={() => handleTap1(word.id, 'left')}
                   >
                     <span className={`${tileTextSize(text)} font-bold text-center leading-tight w-full`}>
                       {text}
                     </span>
-                  </motion.button>
+                  </Tile>
                 );
               })}
             </div>
 
-            {/* Right: Bengali meanings (shuffled) — same row colors */}
+            {/* Right: Bengali meanings (shuffled) */}
             <div className="flex flex-col gap-3">
-              {rightMeaning.map((tile, i) => {
-                // Find original row index to match color
-                const rowIdx = batch.findIndex(w => w.id === tile.id);
-                return (
-                  <motion.button
-                    key={`R1-${tile.id}`}
-                    onClick={() => tap1(tile.id, 'right')}
-                    animate={{
-                      x: wrongPair1 && wrongPair1[1] === tile.id ? [-5, 5, -5, 5, 0] : 0,
-                      opacity: matched1.has(tile.id) ? 0 : 1,
-                      scale: matched1.has(tile.id) ? 0.9 : 1,
-                    }}
-                    transition={{ duration: 0.28 }}
-                    className={tileClass(tile.id, 'right', matched1, selId1, wrongPair1, rowIdx >= 0 ? rowIdx : i, true)}
-                    aria-label={`Meaning: ${tile.text}`}
-                  >
-                    <span className={`${tileTextSize(tile.text)} font-semibold text-center leading-tight w-full`}>
-                      {tile.text}
-                    </span>
-                  </motion.button>
-                );
-              })}
+              {rightMeaning.map(tile => (
+                <Tile
+                  key={`R1-${tile.id}`}
+                  id={tile.id}
+                  isMatched={matched1.has(tile.id)}
+                  isSelected={sel1?.id === tile.id && sel1?.side === 'right'}
+                  isWrong={wrong1 === tile.id}
+                  onTap={() => handleTap1(tile.id, 'right')}
+                >
+                  <span className={`${tileTextSize(tile.text)} font-semibold text-center leading-tight w-full`}>
+                    {tile.text}
+                  </span>
+                </Tile>
+              ))}
             </div>
           </motion.div>
         )}
 
-        {/* ── STAGE 2: Match the part of speech ──────────────────── */}
+        {/* ── STAGE 2: POS → word form ──────────────────────────── */}
         {stage === 'pos' && (
           <motion.div
             key={`pos-${posSubIdx}`}
@@ -329,7 +311,9 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
                   <div
                     key={i}
                     className={`h-1.5 rounded-full transition-all duration-300 ${
-                      i <= posSubIdx ? 'w-5 bg-primary' : 'w-3 bg-on-surface/15'
+                      i < posSubIdx  ? 'w-5 bg-primary' :
+                      i === posSubIdx ? 'w-7 bg-primary/70' :
+                      'w-3 bg-on-surface/15'
                     }`}
                   />
                 ))}
@@ -337,48 +321,40 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
             )}
 
             <div className="grid grid-cols-2 gap-3">
-              {/* Left: POS labels — always unique per word, so no duplicates */}
+              {/* Left: POS labels — always unique per word */}
               <div className="flex flex-col gap-3">
-                {currentPosSub.map((pair, i) => (
-                  <motion.button
+                {currentPosSub.map(pair => (
+                  <Tile
                     key={`L2-${pair.id}`}
-                    onClick={() => tap2(pair.id, 'left')}
-                    animate={{
-                      x: wrongPair2 && wrongPair2[0] === pair.id ? [-5, 5, -5, 5, 0] : 0,
-                      opacity: matched2.has(pair.id) ? 0 : 1,
-                      scale: matched2.has(pair.id) ? 0.9 : 1,
-                    }}
-                    transition={{ duration: 0.28 }}
-                    className={tileClass(pair.id, 'left', matched2, selId2, wrongPair2, i, false)}
-                    aria-label={`POS: ${pair.posLabel}`}
+                    id={pair.id}
+                    isMatched={matched2.has(pair.id)}
+                    isSelected={sel2?.id === pair.id && sel2?.side === 'left'}
+                    isWrong={wrong2L === pair.id}
+                    onTap={() => handleTap2(pair.id, 'left')}
                   >
                     <div className="flex items-center gap-2 justify-center">
-                      <span className={`w-2 h-2 rounded-full shrink-0 ${pair.posDot}`} />
-                      <span className="text-[15px] font-bold text-on-surface">{pair.posLabel}</span>
+                      <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${pair.posDot}`} />
+                      <span className="text-[15px] font-bold">{pair.posLabel}</span>
                     </div>
-                  </motion.button>
+                  </Tile>
                 ))}
               </div>
 
-              {/* Right: word forms (shuffled) — may repeat but POS label guides matching */}
+              {/* Right: word forms (shuffled) */}
               <div className="flex flex-col gap-3">
-                {rightPos.map((pair, i) => (
-                  <motion.button
+                {rightPos.map(pair => (
+                  <Tile
                     key={`R2-${pair.id}`}
-                    onClick={() => tap2(pair.id, 'right')}
-                    animate={{
-                      x: wrongPair2 && wrongPair2[1] === pair.id ? [-5, 5, -5, 5, 0] : 0,
-                      opacity: matched2.has(pair.id) ? 0 : 1,
-                      scale: matched2.has(pair.id) ? 0.9 : 1,
-                    }}
-                    transition={{ duration: 0.28 }}
-                    className={tileClass(pair.id, 'right', matched2, selId2, wrongPair2, i, false)}
-                    aria-label={`Form: ${pair.form}`}
+                    id={pair.id}
+                    isMatched={matched2.has(pair.id)}
+                    isSelected={sel2?.id === pair.id && sel2?.side === 'right'}
+                    isWrong={wrong2R === pair.id}
+                    onTap={() => handleTap2(pair.id, 'right')}
                   >
                     <span className={`${tileTextSize(pair.form)} font-bold text-center leading-tight w-full`}>
                       {pair.form}
                     </span>
-                  </motion.button>
+                  </Tile>
                 ))}
               </div>
             </div>
