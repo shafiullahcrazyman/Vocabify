@@ -88,7 +88,8 @@ export const SessionComplete: React.FC<Props> = ({ wordsCompleted, onPlayAgain }
             onPlayAgain();
           }}
           aria-label="Start a new learning session"
-          className="w-full py-4 rounded-full bg-primary text-on-primary m3-label-large flex items-center justify-center gap-2 active:scale-95 transition-transform duration-100"
+          className="w-full py-5 rounded-full bg-primary text-on-primary flex items-center justify-center gap-3 active:scale-95 transition-transform duration-150 shadow-lg"
+          style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '0.02em' }}
         >
           <RotateCcw className="w-4 h-4" />
           Keep Learning
@@ -100,7 +101,8 @@ export const SessionComplete: React.FC<Props> = ({ wordsCompleted, onPlayAgain }
             navigate('/home');
           }}
           aria-label="Go to home screen"
-          className="w-full py-4 rounded-full bg-surface-container-high text-on-surface m3-label-large flex items-center justify-center gap-2 active:scale-95 transition-transform duration-100"
+          className="w-full py-5 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center gap-3 active:scale-95 transition-transform duration-150 shadow-lg"
+          style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '0.02em' }}
         >
           <Home className="w-4 h-4" />
           Go Home
