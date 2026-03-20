@@ -235,19 +235,13 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             {/* Word Forms */}
             <div className="bg-surface-container rounded-3xl p-5">
               <h4 className="m3-title-medium text-on-surface mb-4">Word Forms</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-[2px] sm:gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
                   { label: 'Noun',      val: word.noun,      color: 'blue' },
                   { label: 'Verb',      val: word.verb,      color: 'emerald' },
                   { label: 'Adjective', val: word.adjective, color: 'amber' },
                   { label: 'Adverb',    val: word.adverb,    color: 'purple' },
-                ].map(({ label, val, color }, idx, arr) => {
-                  const total = arr.length;
-                  const rounding =
-                    total === 1            ? 'rounded-[20px]' :
-                    idx === 0              ? 'rounded-t-[20px] rounded-b-[4px]' :
-                    idx === total - 1      ? 'rounded-t-[4px] rounded-b-[20px]' :
-                                             'rounded-[4px]';
+                ].map(({ label, val, color }) => {
                   const valid = isValid(val);
                   const colorMap: Record<string, { bg: string; text: string; btn: string; active: string }> = {
                     blue:    { bg: 'bg-blue-500/10',    text: 'text-blue-700 dark:text-blue-300',       btn: 'hover:bg-blue-500/20 text-blue-700 dark:text-blue-300',       active: 'bg-blue-500 text-white' },
@@ -258,7 +252,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                   const c = colorMap[color];
                   const isFormPlaying = isPlaying && playingText === val;
                   return (
-                    <div key={label} className={`flex flex-col p-4 sm:rounded-2xl ${rounding} ${valid ? c.bg : 'bg-surface-container-highest/60'}`}>
+                    <div key={label} className={`flex flex-col p-4 rounded-2xl ${valid ? c.bg : 'bg-surface-container-highest/60'}`}>
                       <span className={`text-[13px] font-bold uppercase tracking-widest mb-1 ${valid ? c.text : 'text-on-surface-variant/50'}`}>{label}</span>
                       <div className="flex items-center justify-between">
                         <span className={`text-[20px] font-semibold capitalize ${valid ? 'text-on-surface' : 'text-on-surface-variant/50'}`}>
