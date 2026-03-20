@@ -107,6 +107,7 @@ export const Learn: React.FC = () => {
   );
   const [flashPos, setFlashPos] = useState(0); // position in flashQueue
   const [fbIndex, setFbIndex]          = useState(0);
+  const [learnedCount, setLearnedCount] = useState(0); // words marked learned this session
   const [matchIndex, setMatchIndex]    = useState(0);
 
   const currentPhaseIdx = completedPhases.size; // 0, 1, 2 → done = 3
@@ -201,6 +202,7 @@ export const Learn: React.FC = () => {
 
   const handleFbNext = useCallback(() => {
     markLearned(sessionWords[fbIndex].id);
+    setLearnedCount(c => c + 1);
     const next = fbIndex + 1;
     if (next >= sessionWords.length) {
       setCompleted(prev => new Set([...prev, 'fillblank']));
@@ -219,7 +221,7 @@ export const Learn: React.FC = () => {
 
   // ── Session complete ───────────────────────────────────────────────────────
   if (view.mode === 'complete') {
-    return <SessionComplete wordsCompleted={sessionWords.length} onPlayAgain={handlePlayAgain} />;
+    return <SessionComplete wordsCompleted={learnedCount} onPlayAgain={handlePlayAgain} />;
   }
 
   // ── Header sub-label ───────────────────────────────────────────────────────
