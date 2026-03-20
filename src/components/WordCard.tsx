@@ -20,6 +20,10 @@ const getValidWord = (...words: (string | undefined)[]) => {
   return 'Unknown';
 };
 
+/** Prepare Bengali text for speech — replace ' / ' with ' বা ' so it sounds natural */
+const prepareBnSpeech = (text: string): string =>
+  text.replace(/ \/ /g, ' বা ');
+
 export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'only' }) => {
   const { settings, favorites, toggleFavorite, progress } = useAppContext();
   const { speak, toggle, isPlaying, playingText } = useTTS();
@@ -29,7 +33,8 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
   const mainWord = getValidWord(word.noun, word.verb, word.adjective, word.adverb);
   const isValid = (val?: string) => val && val.toLowerCase() !== 'x' && val.toLowerCase() !== 'none';
 
-  const isBnPlaying = isPlaying && playingText === word.meaning_bn;
+  const bnSpeechText = prepareBnSpeech(word.meaning_bn);
+  const isBnPlaying = isPlaying && playingText === bnSpeechText;
   const isExamplePlaying = isPlaying && playingText === word.example;
 
   const getRoundedClass = () => {
@@ -62,7 +67,7 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
   const handleBnClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     triggerHaptic(settings.hapticsEnabled, 'selection');
-    toggle(word.meaning_bn, 'bn');
+    toggle(bnSpeechText, 'bn');
   };
 
   const handleExampleClick = (e: React.MouseEvent) => {
