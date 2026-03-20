@@ -100,7 +100,7 @@ export const Home: React.FC = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={settings.animationsEnabled ? { duration: 0.4, delay: 0.1, ease: [0.2, 0, 0, 1] } : { duration: 0.15, ease: "easeOut" }}
-            className="flex flex-col items-center justify-center py-20 text-center px-4"
+            className="flex flex-col items-center justify-center py-24 text-center px-6"
           >
             {/* UPDATED: Changed background and icon color to match the subtle search bar look */}
             <div className="w-20 h-20 bg-surface-variant/40 rounded-full flex items-center justify-center mb-6">
@@ -118,9 +118,10 @@ export const Home: React.FC = () => {
                 navigate('/learn');
               }}
               aria-label="Start a learning session"
-              className="mt-8 w-full max-w-xs py-4 bg-primary text-on-primary rounded-full m3-label-large flex items-center justify-center gap-2 active:scale-95 transition-transform duration-100"
+              className="mt-10 w-full max-w-[280px] py-5 bg-primary text-on-primary rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform duration-150 shadow-lg"
+              style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '0.02em' }}
             >
-              <Zap className="w-5 h-5" />
+              <Zap className="w-6 h-6" />
               Start Learning
             </button>
           </motion.div>
