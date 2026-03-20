@@ -218,8 +218,9 @@ export const Learn: React.FC = () => {
     <div className="min-h-screen bg-background flex flex-col">
 
       {/* ── Sticky header ────────────────────────────────────────── */}
-      <div className="sticky top-0 z-20 bg-background px-4 pt-3 pb-2 shrink-0">
-        <div className="flex items-center gap-3 mb-2">
+      <div className="sticky top-0 z-20 bg-background px-4 pt-3 pb-3 shrink-0">
+        {/* Row 1: X button + phase counter */}
+        <div className="flex items-center justify-between mb-3">
           <button
             onClick={() => navigate('/home')}
             aria-label="Exit session"
@@ -228,33 +229,32 @@ export const Learn: React.FC = () => {
           >
             <X className="w-5 h-5" />
           </button>
-
-          {/* Dual-colour progress bar */}
-          <div className="flex-1 h-2 bg-on-surface/20 rounded-full overflow-hidden relative">
-            {/* Layer 1: completed phases — solid primary */}
-            <motion.div
-              className="absolute left-0 top-0 h-full bg-primary rounded-full"
-              animate={{ width: `${completedPhasePct}%` }}
-              transition={{ duration: 0.5, ease: [0.2, 0, 0, 1] }}
-            />
-            {/* Layer 2: current phase in-progress — lighter tint */}
-            <motion.div
-              className="absolute top-0 h-full bg-primary-container rounded-full"
-              animate={{
-                left: `${completedPhasePct}%`,
-                width: `${currentPhaseBarWidth}%`,
-              }}
-              transition={{ duration: 0.35, ease: [0.2, 0, 0, 1] }}
-            />
-          </div>
-
-          <span className="m3-label-small text-primary font-bold shrink-0">
+          <p className="m3-label-small text-on-surface-variant tracking-wide">
+            {subLabel}
+          </p>
+          <span className="m3-label-small text-primary font-bold">
             {completedPhases.size}/3
           </span>
         </div>
-        <p className="m3-label-small text-on-surface-variant text-center tracking-wide">
-          {subLabel}
-        </p>
+
+        {/* Row 2: full-width dual-colour bar — same as Total Mastery */}
+        <div className="w-full bg-on-surface/20 rounded-full h-2 overflow-hidden relative">
+          {/* Layer 1: completed phases — solid primary */}
+          <motion.div
+            className="absolute left-0 top-0 h-full bg-primary rounded-full"
+            animate={{ width: `${completedPhasePct}%` }}
+            transition={{ duration: 0.5, ease: [0.2, 0, 0, 1] }}
+          />
+          {/* Layer 2: current phase in-progress — lighter tint */}
+          <motion.div
+            className="absolute top-0 h-full bg-primary-container rounded-full"
+            animate={{
+              left: `${completedPhasePct}%`,
+              width: `${currentPhaseBarWidth}%`,
+            }}
+            transition={{ duration: 0.35, ease: [0.2, 0, 0, 1] }}
+          />
+        </div>
       </div>
 
       {/* ── Scrollable content ────────────────────────────────────── */}
