@@ -23,6 +23,10 @@ const POS_STYLES: Record<string, string> = {
   Adv:  'bg-purple-500/10 text-purple-700 dark:text-purple-300',
 };
 
+/** Prepare Bengali text for speech — replace ' / ' with ' বা ' so it sounds natural */
+const prepareBnSpeech = (text: string): string =>
+  text.replace(/ \/ /g, ' বা ');
+
 // Rounded corners logic: first / middle / last / only
 function rowRounding(index: number, total: number): string {
   if (total === 1) return 'rounded-[20px]';
@@ -40,7 +44,8 @@ export const FlashcardPhase: React.FC<Props> = ({
 }) => {
   const { settings } = useAppContext();
   const { toggle, isPlaying, playingText } = useTTS();
-  const isBnPlaying      = isPlaying && playingText === word.meaning_bn;
+  const bnSpeechText     = prepareBnSpeech(word.meaning_bn);
+  const isBnPlaying      = isPlaying && playingText === bnSpeechText;
   const isExamplePlaying = isPlaying && playingText === word.example;
 
   const forms = getValidForms(word);
@@ -134,7 +139,7 @@ export const FlashcardPhase: React.FC<Props> = ({
             Meaning
           </p>
           <p
-            onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); toggle(word.meaning_bn, 'bn'); }}
+            onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); toggle(bnSpeechText, 'bn'); }}
             className={`m3-title-large cursor-pointer select-none transition-all duration-200 ${
               isBnPlaying
                 ? 'text-primary underline underline-offset-4 decoration-primary/60 opacity-80'
