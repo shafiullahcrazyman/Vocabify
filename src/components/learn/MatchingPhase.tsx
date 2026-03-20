@@ -109,16 +109,23 @@ export const MatchingPhase: React.FC<Props> = ({
 
   const [posSubIdx, setPosSubIdx]   = useState(0);
   const [selPosId, setSelPosId]     = useState<string | null>(null);
-  const [matched2, setMatched2]     = useState<Set<string>>(new Set());
+  const [matched2, setMatched2]     = useState<Set<string>>(() => {
+    // Auto-match all None/x pairs — user shouldn't have to select non-existent forms
+    const autoMatched = new Set<string>();
+    for (const pair of allPosPairs) {
+      if (pair.isNone) autoMatched.add(pair.id);
+    }
+    return autoMatched;
+  });
   const [wrongL2, setWrongL2]       = useState<string | null>(null);
   const [wrongR2, setWrongR2]       = useState<string | null>(null);
   const [locked2, setLocked2]       = useState(false);
   const [celebrate2, setCelebrate2] = useState(false);
   const [rightPos, setRightPos]     = useState<PosPair[]>(() =>
-    shuffle(posSubBatches[0] ?? [])
+    shuffle((posSubBatches[0] ?? []).filter(p => !p.isNone))
   );
 
-  const currentPosSub = posSubBatches[posSubIdx] ?? [];
+  const currentPosSub = (posSubBatches[posSubIdx] ?? []).filter(p => !p.isNone);
 
   // Reset pos sub-batch state when sub advances
   useEffect(() => {
@@ -128,7 +135,7 @@ export const MatchingPhase: React.FC<Props> = ({
     setWrongR2(null);
     setLocked2(false);
     setCelebrate2(false);
-    setRightPos(shuffle(posSubBatches[posSubIdx] ?? []));
+    setRightPos(shuffle((posSubBatches[posSubIdx] ?? []).filter(p => !p.isNone)));
   }, [posSubIdx]);
 
   // ── Stage 1 completion ──────────────────────────────────────────────────────
@@ -227,7 +234,7 @@ export const MatchingPhase: React.FC<Props> = ({
   const rc2 = (pair: PosPair) => {
     if (matched2.has(pair.id)) return `${base} opacity-0 pointer-events-none`;
     if (wrongR2 === pair.id)   return `${base} bg-error/15 border-error`;
-    return `${base} ${pair.posTile} active:scale-95`;
+    return `${base} bg-surface-container-high border-outline/10 active:scale-95`;
   };
 
   // ── Render ───────────────────────────────────────────────────────────────────
@@ -343,9 +350,6 @@ export const MatchingPhase: React.FC<Props> = ({
                     }`}>
                       {pair.form}
                     </span>
-                    <span className="text-[11px] text-on-surface-variant/50 mt-0.5 leading-tight line-clamp-1">
-                      {pair.meaning}
-                    </span>
                   </motion.button>
                 ))}
               </div>
@@ -365,11 +369,10 @@ export const MatchingPhase: React.FC<Props> = ({
                     className={rc2(pair)}
                     aria-label={`POS: ${pair.posLabel}`}
                   >
-                    <div className="flex items-center gap-1.5">
-                      <span className={`w-2 h-2 rounded-full shrink-0 ${pair.posDot}`} />
-                      <span className="text-[15px] font-bold leading-tight">{pair.posLabel}</span>
-                    </div>
-                    <span className="text-[11px] opacity-50 mt-0.5 ml-3.5">{pair.posShort}</span>
+                    <span className="text-[15px] font-bold text-on-surface leading-tight">
+                      {pair.posLabel}
+                    </span>
+                    <span className="text-[11px] text-on-surface-variant/50 mt-0.5">{pair.posShort}</span>
                   </motion.button>
                 ))}
               </div>
