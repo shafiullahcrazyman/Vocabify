@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { WordFamily } from '../../types';
-import { buildFillBlank, FillBlankData, getPrimaryForm } from '../../utils/sessionAlgorithm';
+import { buildMultiFillBlank, MultiFillBlankData, getPrimaryForm } from '../../utils/sessionAlgorithm';
 import { useAppContext } from '../../context/AppContext';
 import { triggerHaptic } from '../../utils/haptics';
 
@@ -14,6 +14,51 @@ interface Props {
   onNext: () => void;
 }
 
+// POS label colors — same palette as rest of app
+const POS_COLOR: Record<string, string> = {
+  Noun: 'text-blue-400',
+  Verb: 'text-emerald-400',
+  Adj:  'text-amber-400',
+  Adv:  'text-purple-400',
+};
+
+// ── Sentence renderer ──────────────────────────────────────────────────────────
+// Splits the sentence on '______' and renders each blank slot with state styling.
+const SentenceDisplay: React.FC<{
+  sentence: string;
+  blanks: MultiFillBlankData['blanks'];
+  answers: (string | null)[];  // per-blank answered value (null = not yet)
+  currentIdx: number;
+}> = ({ sentence, blanks, answers, currentIdx }) => {
+  const parts = sentence.split('______');
+
+  return (
+    <p className="m3-body-large text-on-surface leading-relaxed">
+      {parts.map((part, i) => (
+        <React.Fragment key={i}>
+          {part}
+          {i < blanks.length && (
+            <span
+              className={`inline-flex items-center mx-1 px-2 py-0.5 rounded-lg border-b-2 font-bold transition-all duration-300 ${
+                answers[i] !== null
+                  ? answers[i] === blanks[i].answer
+                    ? 'border-primary bg-primary/20 text-primary'
+                    : 'border-error bg-error/20 text-error'
+                  : i === currentIdx
+                  ? 'border-primary text-primary bg-primary/5 animate-pulse'
+                  : 'border-outline/30 text-on-surface-variant/40 bg-surface-container'
+              }`}
+            >
+              {answers[i] !== null ? blanks[i].answer : '______'}
+            </span>
+          )}
+        </React.Fragment>
+      ))}
+    </p>
+  );
+};
+
+// ── Main component ─────────────────────────────────────────────────────────────
 export const FillBlankPhase: React.FC<Props> = ({
   word,
   allSessionWords,
@@ -23,20 +68,24 @@ export const FillBlankPhase: React.FC<Props> = ({
 }) => {
   const { settings } = useAppContext();
 
-  // Build once on mount for this word
-  const [fillData] = useState<FillBlankData | null>(() =>
-    buildFillBlank(word, allSessionWords)
+  const [fillData] = useState<MultiFillBlankData | null>(() =>
+    buildMultiFillBlank(word, allSessionWords)
   );
 
-  const [selected, setSelected] = useState<string | null>(null);
-  const isCorrect = selected !== null ? selected === fillData?.blank : null;
+  // Which blank the user is currently answering
+  const [currentBlank, setCurrentBlank] = useState(0);
+  // Per-blank answers: null = unanswered
+  const [answers, setAnswers] = useState<(string | null)[]>(() =>
+    fillData ? fillData.blanks.map(() => null) : []
+  );
+  // Currently selected wrong option (for brief red flash)
+  const [wrongOption, setWrongOption] = useState<string | null>(null);
 
-  // Keep a ref to the auto-advance timer so we can clean it up
   const advanceTimer = useRef<ReturnType<typeof setTimeout>>();
   React.useEffect(() => () => clearTimeout(advanceTimer.current), []);
 
-  // ── Fallback when no blank can be created ──────────────────────────────────
-  if (!fillData) {
+  // ── Fallback ────────────────────────────────────────────────────────────────
+  if (!fillData || fillData.blanks.length === 0) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -45,12 +94,6 @@ export const FillBlankPhase: React.FC<Props> = ({
         transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
         className="px-4 pb-8 flex flex-col items-center gap-5 pt-4"
       >
-        <div className="text-center">
-          <span className="m3-label-medium text-on-surface-variant uppercase tracking-widest">
-            Word Review · {wordIndex + 1} of {total}
-          </span>
-        </div>
-
         <div className="bg-surface-container rounded-[28px] p-6 w-full">
           <p className="m3-label-small text-primary uppercase tracking-wide font-bold mb-3">
             Review
@@ -58,10 +101,8 @@ export const FillBlankPhase: React.FC<Props> = ({
           <p className="m3-headline-small text-on-surface mb-2">{getPrimaryForm(word)}</p>
           <p className="m3-body-large text-on-surface-variant">{word.meaning_bn}</p>
         </div>
-
         <button
           onClick={onNext}
-          aria-label="Continue to next word"
           className="w-full py-4 bg-primary text-on-primary rounded-full m3-label-large active:scale-95 transition-transform duration-100"
         >
           Continue
@@ -70,27 +111,49 @@ export const FillBlankPhase: React.FC<Props> = ({
     );
   }
 
+  const blank = fillData.blanks[currentBlank];
+  const isLastBlank = currentBlank === fillData.blanks.length - 1;
+  const currentAnswer = answers[currentBlank];
+  const isAnswered = currentAnswer !== null;
+  const isCorrect  = isAnswered ? currentAnswer === blank.answer : null;
+
   const handleSelect = (option: string) => {
-    if (selected !== null) return;
-    triggerHaptic(settings.hapticsEnabled, option === fillData.blank ? 'success' : 'error');
-    setSelected(option);
-    const delay = option === fillData.blank ? 1300 : 1900;
-    advanceTimer.current = setTimeout(onNext, delay);
+    if (isAnswered) return;
+
+    const correct = option === blank.answer;
+    triggerHaptic(settings.hapticsEnabled, correct ? 'success' : 'error');
+
+    if (correct) {
+      // Mark this blank answered
+      setAnswers(prev => prev.map((a, i) => i === currentBlank ? option : a));
+      const delay = isLastBlank ? 1400 : 900;
+      advanceTimer.current = setTimeout(() => {
+        if (isLastBlank) {
+          onNext();
+        } else {
+          setCurrentBlank(b => b + 1);
+        }
+      }, delay);
+    } else {
+      // Flash wrong briefly then clear
+      setWrongOption(option);
+      setTimeout(() => setWrongOption(null), 800);
+    }
   };
 
-  // Split sentence around the blank marker
-  const parts = fillData.sentence.split('______');
-
   const optionClass = (option: string): string => {
-    const base =
-      'p-4 rounded-[16px] border-2 text-center m3-body-medium font-medium min-h-[56px] flex items-center justify-center transition-colors duration-150';
-    if (selected === null)
-      return `${base} bg-surface-container-high border-outline/10 text-on-surface active:scale-95`;
-    if (option === fillData.blank)
-      return `${base} bg-primary/20 border-primary text-primary`;
-    if (option === selected)
-      return `${base} bg-error/20 border-error text-error`;
-    return `${base} bg-surface-container-high border-outline/10 text-on-surface opacity-40`;
+    const base = 'py-4 px-3 rounded-[18px] text-center font-semibold min-h-[60px] flex items-center justify-center transition-all duration-150 active:scale-95 text-[14px] leading-tight';
+
+    // After correct answer is given
+    if (isAnswered) {
+      if (option === blank.answer) return `${base} bg-primary/20 text-primary`;
+      return `${base} bg-surface-container text-on-surface/30`;
+    }
+
+    // Wrong flash
+    if (wrongOption === option) return `${base} bg-error/20 text-error`;
+
+    return `${base} bg-surface-container-high text-on-surface`;
   };
 
   return (
@@ -101,76 +164,99 @@ export const FillBlankPhase: React.FC<Props> = ({
       transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
       className="px-4 pb-8"
     >
-      <div className="text-center mb-5 pt-2">
-        <span className="m3-label-medium text-on-surface-variant uppercase tracking-widest">
-          Fill in · {wordIndex + 1} of {total}
-        </span>
-      </div>
+      {/* Blank progress dots */}
+      {fillData.blanks.length > 1 && (
+        <div className="flex justify-center gap-2 pt-3 mb-4">
+          {fillData.blanks.map((b, i) => (
+            <div
+              key={i}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                answers[i] !== null ? 'w-5 bg-primary' :
+                i === currentBlank    ? 'w-7 bg-primary/60' :
+                                        'w-3 bg-on-surface/15'
+              }`}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Sentence card */}
-      <div className="bg-surface-container rounded-[28px] p-6 mb-5">
-        <p className="m3-label-small text-primary uppercase tracking-wide font-bold mb-3">
-          Complete the sentence
-        </p>
-
-        <p className="m3-body-large text-on-surface leading-relaxed">
-          {parts[0]}
-          <span
-            className={`inline-block mx-1 px-2 py-0.5 rounded-lg border-b-2 font-bold transition-colors duration-300 ${
-              isCorrect === null
-                ? 'border-primary text-primary bg-primary/5'
-                : isCorrect
-                ? 'border-primary bg-primary/20 text-primary'
-                : 'border-error bg-error/20 text-error'
-            }`}
-          >
-            {selected !== null ? fillData.blank : '______'}
+      <div className="bg-surface-container rounded-[28px] p-6 mb-4">
+        {/* Header: label + current POS */}
+        <div className="flex items-center justify-between mb-3">
+          <p className="m3-label-small text-primary uppercase tracking-wide font-bold">
+            Complete the sentence
+          </p>
+          <span className={`m3-label-small font-bold ${POS_COLOR[blank.pos] ?? 'text-on-surface-variant'}`}>
+            {blank.pos} {fillData.blanks.length > 1 ? `· ${currentBlank + 1}/${fillData.blanks.length}` : ''}
           </span>
-          {parts[1]}
-        </p>
+        </div>
 
+        {/* Sentence with all blanks */}
+        <SentenceDisplay
+          sentence={fillData.sentence}
+          blanks={fillData.blanks}
+          answers={answers}
+          currentIdx={currentBlank}
+        />
+
+        {/* Feedback for current blank */}
         <AnimatePresence>
-          {selected !== null && (
+          {isAnswered && (
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className={`mt-4 flex items-center gap-2 ${isCorrect ? 'text-primary' : 'text-error'}`}
+              className="mt-3 flex items-center gap-2 text-primary"
             >
-              {isCorrect ? (
-                <>
-                  <CheckCircle2 className="w-5 h-5 shrink-0" />
-                  <span className="m3-body-medium font-medium">Correct! Well done!</span>
-                </>
-              ) : (
-                <>
-                  <XCircle className="w-5 h-5 shrink-0" />
-                  <span className="m3-body-medium font-medium">
-                    Answer: <strong>{fillData.blank}</strong>
-                  </span>
-                </>
-              )}
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <span className="m3-body-small font-medium">
+                {isLastBlank ? 'All blanks filled!' : 'Correct! Next blank →'}
+              </span>
+            </motion.div>
+          )}
+          {wrongOption && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="mt-3 flex items-center gap-2 text-error"
+            >
+              <XCircle className="w-4 h-4 shrink-0" />
+              <span className="m3-body-small font-medium">
+                Try again — the answer is the {blank.pos.toLowerCase()} form
+              </span>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* 2×2 option grid */}
-      <div className="grid grid-cols-2 gap-3">
-        {fillData.options.map(option => (
-          <motion.button
-            key={option}
-            onClick={() => handleSelect(option)}
-            whileTap={selected === null ? { scale: 0.96 } : {}}
-            disabled={selected !== null}
-            className={optionClass(option)}
-            aria-label={`Answer option: ${option}`}
-          >
-            {option}
-          </motion.button>
-        ))}
-      </div>
+      {/* 2×2 options for current blank */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentBlank}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.18 }}
+          className="grid grid-cols-2 gap-3"
+        >
+          {blank.options.map(option => (
+            <motion.button
+              key={option}
+              onClick={() => handleSelect(option)}
+              whileTap={!isAnswered ? { scale: 0.95 } : {}}
+              disabled={isAnswered}
+              className={optionClass(option)}
+              aria-label={`Answer: ${option}`}
+            >
+              {option}
+            </motion.button>
+          ))}
+        </motion.div>
+      </AnimatePresence>
     </motion.div>
   );
 };

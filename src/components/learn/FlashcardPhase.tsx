@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Check, RotateCcw } from 'lucide-react';
+import { Check, RotateCcw, Volume2 } from 'lucide-react';
+import { useTTS } from '../../hooks/useTTS';
 import { WordFamily } from '../../types';
 import { getValidForms, getPrimaryForm } from '../../utils/sessionAlgorithm';
 import { useAppContext } from '../../context/AppContext';
@@ -38,16 +39,19 @@ export const FlashcardPhase: React.FC<Props> = ({
   onSeeAgain,
 }) => {
   const { settings } = useAppContext();
+  const { speak, isPlaying, playingText } = useTTS();
+  const isBnPlaying      = isPlaying && playingText === word.meaning_bn;
+  const isExamplePlaying = isPlaying && playingText === word.example;
 
   const forms = getValidForms(word);
   const primaryForm = getPrimaryForm(word);
 
   const titleSize =
-    primaryForm.length <= 9
-      ? 'text-[40px]'
-      : primaryForm.length <= 14
-      ? 'text-[32px]'
-      : 'text-[26px]';
+    primaryForm.length <= 7  ? 'text-[44px]' :
+    primaryForm.length <= 10 ? 'text-[38px]' :
+    primaryForm.length <= 14 ? 'text-[30px]' :
+    primaryForm.length <= 18 ? 'text-[24px]' :
+                               'text-[20px]';
 
   useEffect(() => {
     if (settings.autoPronounce && forms.length > 0) {
@@ -82,13 +86,6 @@ export const FlashcardPhase: React.FC<Props> = ({
       transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
       className="px-4 pb-8 flex flex-col gap-4"
     >
-      {/* Counter */}
-      <div className="text-center pt-2">
-        <span className="m3-label-medium text-on-surface-variant uppercase tracking-widest">
-          Flashcard · {wordIndex + 1} of {totalInQueue}
-        </span>
-      </div>
-
       {/* Main card */}
       <div className="bg-surface-container rounded-[28px] p-6">
 
@@ -128,17 +125,43 @@ export const FlashcardPhase: React.FC<Props> = ({
 
         {/* Bengali meaning — top of bottom group */}
         <div className="bg-surface-container-high rounded-t-[20px] rounded-b-[4px] p-4 mb-[2px]">
-          <p className="m3-label-small text-primary uppercase tracking-wide font-bold mb-1">
-            Bengali Meaning
-          </p>
+          <div className="flex items-center justify-between mb-1">
+            <p className="m3-label-small text-primary uppercase tracking-wide font-bold">
+              Bengali Meaning
+            </p>
+            <button
+              onClick={() => speak(word.meaning_bn)}
+              aria-label="Hear Bengali meaning"
+              className={`p-1.5 rounded-full transition-colors active:scale-90 ${
+                isBnPlaying
+                  ? 'bg-primary/20 text-primary'
+                  : 'text-on-surface-variant hover:bg-surface-variant/40'
+              }`}
+            >
+              <Volume2 className="w-4 h-4" />
+            </button>
+          </div>
           <p className="m3-title-large text-on-surface">{word.meaning_bn}</p>
         </div>
 
-        {/* Example — bottom of group, no speech button */}
+        {/* Example — bottom of group */}
         <div className="bg-surface-container-high rounded-t-[4px] rounded-b-[20px] p-4">
-          <p className="m3-label-small text-primary uppercase tracking-wide font-bold mb-2">
-            Example
-          </p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="m3-label-small text-primary uppercase tracking-wide font-bold">
+              Example
+            </p>
+            <button
+              onClick={() => speak(word.example)}
+              aria-label="Hear example sentence"
+              className={`p-1.5 rounded-full transition-colors active:scale-90 ${
+                isExamplePlaying
+                  ? 'bg-primary/20 text-primary'
+                  : 'text-on-surface-variant hover:bg-surface-variant/40'
+              }`}
+            >
+              <Volume2 className="w-4 h-4" />
+            </button>
+          </div>
           <p className="m3-body-medium text-on-surface-variant italic leading-relaxed">
             {word.example}
           </p>
