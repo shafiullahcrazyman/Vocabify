@@ -103,7 +103,7 @@ export const MatchingPhase: React.FC<Props> = ({
   const allPosPairs = useMemo(() => expandToPairs(batch), [batch]);
   const posSubBatches = useMemo(() => {
     const out: PosPair[][] = [];
-    for (let i = 0; i < allPosPairs.length; i += 4) out.push(allPosPairs.slice(i, i + 4));
+    for (let i = 0; i < allPosPairs.length; i += 5) out.push(allPosPairs.slice(i, i + 5));
     return out;
   }, [allPosPairs]);
 
@@ -372,7 +372,6 @@ export const MatchingPhase: React.FC<Props> = ({
                     <span className="text-[15px] font-bold text-on-surface leading-tight">
                       {pair.posLabel}
                     </span>
-                    <span className="text-[11px] text-on-surface-variant/50 mt-0.5">{pair.posShort}</span>
                   </motion.button>
                 ))}
               </div>

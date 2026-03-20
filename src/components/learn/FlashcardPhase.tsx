@@ -66,13 +66,13 @@ export const FlashcardPhase: React.FC<Props> = ({
     }
   }, [word.id]);
 
-  // Build POS rows in fixed order: Noun → Verb → Adj → Adv
-  const posRows = [
-    word.noun      && word.noun      !== 'x' ? { pos: 'Noun', form: word.noun }      : null,
-    word.verb      && word.verb      !== 'x' ? { pos: 'Verb', form: word.verb }      : null,
-    word.adjective && word.adjective !== 'x' ? { pos: 'Adj',  form: word.adjective } : null,
-    word.adverb    && word.adverb    !== 'x' ? { pos: 'Adv',  form: word.adverb }    : null,
-  ].filter(Boolean) as { pos: string; form: string }[];
+  // Always show all 4 POS rows — None/x shown in gray
+  const posRows: { pos: string; label: string; form: string | null }[] = [
+    { pos: 'Noun', label: 'Noun',      form: (word.noun      && word.noun      !== 'x') ? word.noun      : null },
+    { pos: 'Verb', label: 'Verb',      form: (word.verb      && word.verb      !== 'x') ? word.verb      : null },
+    { pos: 'Adj',  label: 'Adjective', form: (word.adjective && word.adjective !== 'x') ? word.adjective : null },
+    { pos: 'Adv',  label: 'Adverb',    form: (word.adverb    && word.adverb    !== 'x') ? word.adverb    : null },
+  ];
 
   return (
     <motion.div
@@ -102,19 +102,28 @@ export const FlashcardPhase: React.FC<Props> = ({
 
         {/* POS rows — grouped list with rounding logic */}
         <div className="flex flex-col mb-5">
-          {posRows.map(({ pos, form }, i) => (
-            <div
-              key={pos}
-              className={`flex items-center justify-between px-4 py-3 ${POS_STYLES[pos]} ${rowRounding(i, posRows.length)} ${
-                i < posRows.length - 1 ? 'mb-[2px]' : ''
-              }`}
-            >
-              <span className="text-[12px] font-bold uppercase tracking-wide opacity-60">
-                {pos === 'Adj' ? 'Adjective' : pos === 'Adv' ? 'Adverb' : pos}
-              </span>
-              <span className="text-[15px] font-bold capitalize">{form}</span>
-            </div>
-          ))}
+          {posRows.map(({ pos, label, form }, i) => {
+            const isNone = form === null;
+            return (
+              <div
+                key={pos}
+                className={`flex items-center justify-between px-4 py-3 ${
+                  isNone
+                    ? 'bg-surface-container-highest/40 text-on-surface-variant/30'
+                    : POS_STYLES[pos]
+                } ${rowRounding(i, posRows.length)} ${
+                  i < posRows.length - 1 ? 'mb-[2px]' : ''
+                }`}
+              >
+                <span className="text-[12px] font-bold uppercase tracking-wide opacity-60">
+                  {label}
+                </span>
+                <span className={`text-[15px] font-bold capitalize ${isNone ? 'italic opacity-40' : ''}`}>
+                  {isNone ? 'None' : form}
+                </span>
+              </div>
+            );
+          })}
         </div>
 
         {/* Bengali meaning — top of bottom group */}
