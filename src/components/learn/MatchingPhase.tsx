@@ -37,25 +37,31 @@ interface PosPair {
 
 const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
 
-function expandToPairs(batch: WordFamily[]): PosPair[] {
+/** Returns valid (non-None) POS pairs for a single word */
+function wordToPairs(word: WordFamily): PosPair[] {
   const pairs: PosPair[] = [];
-  for (const word of batch) {
-    for (const cfg of POS_CONFIG) {
-      const raw = word[cfg.key as keyof WordFamily] as string | undefined;
-      const isNone = !raw || raw === 'x';
-      pairs.push({
-        id: `${word.id}-${cfg.key}`,
-        form: isNone ? '—' : raw,
-        isNone,
-        posLabel: cfg.label,
-        posShort: cfg.short,
-        posDot: cfg.dot,
-        posTile: cfg.tile,
-        meaning: word.meaning_bn,
-      });
-    }
+  for (const cfg of POS_CONFIG) {
+    const raw = word[cfg.key as keyof WordFamily] as string | undefined;
+    if (!raw || raw === 'x') continue; // skip None — auto-matched already
+    pairs.push({
+      id: `${word.id}-${cfg.key}`,
+      form: raw,
+      isNone: false,
+      posLabel: cfg.label,
+      posShort: cfg.short,
+      posDot: cfg.dot,
+      posTile: cfg.tile,
+      meaning: word.meaning_bn,
+    });
   }
   return pairs;
+}
+
+/** One sub-batch per word containing only its valid POS pairs */
+function buildPosSubBatches(batch: WordFamily[]): PosPair[][] {
+  return batch
+    .map(wordToPairs)
+    .filter(pairs => pairs.length > 0); // skip words with zero valid forms
 }
 
 // ── Stage transition banner ────────────────────────────────────────────────────
@@ -100,32 +106,21 @@ export const MatchingPhase: React.FC<Props> = ({
   );
 
   // Stage 2 state
-  const allPosPairs = useMemo(() => expandToPairs(batch), [batch]);
-  const posSubBatches = useMemo(() => {
-    const out: PosPair[][] = [];
-    for (let i = 0; i < allPosPairs.length; i += 5) out.push(allPosPairs.slice(i, i + 5));
-    return out;
-  }, [allPosPairs]);
+  // One sub-batch per word — only valid (non-None) POS forms
+  const posSubBatches = useMemo(() => buildPosSubBatches(batch), [batch]);
 
   const [posSubIdx, setPosSubIdx]   = useState(0);
   const [selPosId, setSelPosId]     = useState<string | null>(null);
-  const [matched2, setMatched2]     = useState<Set<string>>(() => {
-    // Auto-match all None/x pairs — user shouldn't have to select non-existent forms
-    const autoMatched = new Set<string>();
-    for (const pair of allPosPairs) {
-      if (pair.isNone) autoMatched.add(pair.id);
-    }
-    return autoMatched;
-  });
+  const [matched2, setMatched2]     = useState<Set<string>>(new Set());
   const [wrongL2, setWrongL2]       = useState<string | null>(null);
   const [wrongR2, setWrongR2]       = useState<string | null>(null);
   const [locked2, setLocked2]       = useState(false);
   const [celebrate2, setCelebrate2] = useState(false);
   const [rightPos, setRightPos]     = useState<PosPair[]>(() =>
-    shuffle((posSubBatches[0] ?? []).filter(p => !p.isNone))
+    shuffle(posSubBatches[0] ?? [])
   );
 
-  const currentPosSub = (posSubBatches[posSubIdx] ?? []).filter(p => !p.isNone);
+  const currentPosSub = posSubBatches[posSubIdx] ?? [];
 
   // Reset pos sub-batch state when sub advances
   useEffect(() => {
@@ -135,7 +130,7 @@ export const MatchingPhase: React.FC<Props> = ({
     setWrongR2(null);
     setLocked2(false);
     setCelebrate2(false);
-    setRightPos(shuffle((posSubBatches[posSubIdx] ?? []).filter(p => !p.isNone)));
+    setRightPos(shuffle(posSubBatches[posSubIdx] ?? []));
   }, [posSubIdx]);
 
   // ── Stage 1 completion ──────────────────────────────────────────────────────
