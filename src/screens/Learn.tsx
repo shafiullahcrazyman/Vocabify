@@ -230,7 +230,7 @@ export const Learn: React.FC = () => {
           </button>
 
           {/* Dual-colour progress bar */}
-          <div className="flex-1 h-[8px] bg-on-surface/10 rounded-full overflow-hidden relative">
+          <div className="flex-1 h-2 bg-on-surface/20 rounded-full overflow-hidden relative">
             {/* Layer 1: completed phases — solid primary */}
             <motion.div
               className="absolute left-0 top-0 h-full bg-primary rounded-full"
