@@ -25,6 +25,10 @@ const getValidWord = (...words: (string | undefined)[]) => {
   return 'Unknown';
 };
 
+/** Prepare Bengali text for speech — replace ' / ' with ' বা ' so it sounds natural */
+const prepareBnSpeech = (text: string): string =>
+  text.replace(/ \/ /g, ' বা ');
+
 export const WordOverlay: React.FC<WordOverlayProps> = ({
   word, onClose, onNext, onPrev, hasNext, hasPrev,
 }) => {
@@ -35,7 +39,8 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
   const [isTipsOpen, setIsTipsOpen] = useState(false);
 
   // Derived playing states
-  const isBnPlaying      = isPlaying && playingText === word.meaning_bn;
+  const bnSpeechText     = prepareBnSpeech(word.meaning_bn);
+  const isBnPlaying      = isPlaying && playingText === bnSpeechText;
   const isExamplePlaying = isPlaying && playingText === word.example;
   const mainWord = getValidWord(word.noun, word.verb, word.adjective, word.adverb);
 
@@ -215,7 +220,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             <motion.p
               onClick={() => {
                 triggerHaptic(settings.hapticsEnabled, 'selection');
-                toggle(word.meaning_bn, 'bn');
+                toggle(bnSpeechText, 'bn');
               }}
               whileTap={anim ? { scale: 0.97 } : undefined}
               transition={fastSpatial}
