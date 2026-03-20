@@ -17,10 +17,10 @@ interface Props {
 
 // POS colors matching WordCard exactly
 const POS_STYLES: Record<string, string> = {
-  Noun: 'bg-blue-500/10 text-blue-700 dark:text-blue-300',
-  Verb: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-  Adj:  'bg-amber-500/10 text-amber-700 dark:text-amber-300',
-  Adv:  'bg-purple-500/10 text-purple-700 dark:text-purple-300',
+  Noun: 'bg-blue-500/20 text-blue-600 dark:text-blue-300',
+  Verb: 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300',
+  Adj:  'bg-amber-500/20 text-amber-600 dark:text-amber-300',
+  Adv:  'bg-purple-500/20 text-purple-600 dark:text-purple-300',
 };
 
 // Rounded corners logic: first / middle / last / only
@@ -84,7 +84,7 @@ export const FlashcardPhase: React.FC<Props> = ({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -40 }}
       transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
-      className="px-4 pb-8 flex flex-col gap-4"
+      className="px-4 pt-4 pb-8 flex flex-col gap-5"
     >
       {/* Main card */}
       <div className="bg-surface-container rounded-[28px] p-6">
@@ -104,7 +104,7 @@ export const FlashcardPhase: React.FC<Props> = ({
             return (
               <div
                 key={pos}
-                className={`flex items-center justify-between px-4 py-3 ${
+                className={`flex items-center justify-between px-4 py-3.5 ${
                   isNone
                     ? 'bg-surface-container-highest/40 text-on-surface-variant/30'
                     : POS_STYLES[pos]
@@ -112,10 +112,10 @@ export const FlashcardPhase: React.FC<Props> = ({
                   i < posRows.length - 1 ? 'mb-[2px]' : ''
                 }`}
               >
-                <span className="text-[12px] font-bold uppercase tracking-wide opacity-60">
+                <span className="text-[13px] font-semibold uppercase tracking-wider opacity-70">
                   {label}
                 </span>
-                <span className={`text-[15px] font-bold capitalize text-on-surface ${isNone ? 'italic opacity-40' : ''}`}>
+                <span className={`text-[17px] font-bold capitalize text-on-surface ${isNone ? 'italic opacity-40' : ''}`}>
                   {isNone ? 'None' : form}
                 </span>
               </div>
@@ -125,7 +125,7 @@ export const FlashcardPhase: React.FC<Props> = ({
 
         {/* Bengali meaning — tap to speak/stop */}
         <div className="bg-surface-container-high rounded-t-[20px] rounded-b-[4px] p-4 mb-[2px]">
-          <p className="m3-label-small text-primary uppercase tracking-wide font-bold mb-1">
+          <p className="m3-label-medium text-primary uppercase tracking-wider font-bold mb-1.5">
             Bengali Meaning
           </p>
           <p
@@ -142,12 +142,12 @@ export const FlashcardPhase: React.FC<Props> = ({
 
         {/* Example — tap to speak/stop */}
         <div className="bg-surface-container-high rounded-t-[4px] rounded-b-[20px] p-4">
-          <p className="m3-label-small text-primary uppercase tracking-wide font-bold mb-2">
+          <p className="m3-label-medium text-primary uppercase tracking-wider font-bold mb-1.5">
             Example
           </p>
           <p
             onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); toggle(word.example, 'en'); }}
-            className={`m3-body-medium italic leading-relaxed cursor-pointer select-none transition-all duration-200 ${
+            className={`m3-body-large italic leading-relaxed cursor-pointer select-none transition-all duration-200 ${
               isExamplePlaying
                 ? 'text-on-surface underline underline-offset-4 decoration-on-surface/40 opacity-75'
                 : 'text-on-surface-variant'
@@ -159,14 +159,14 @@ export const FlashcardPhase: React.FC<Props> = ({
       </div>
 
       {/* Action buttons */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         <button
           onClick={() => {
             triggerHaptic(settings.hapticsEnabled, 'tap');
             onSeeAgain();
           }}
           aria-label="Show this word again later"
-          className="flex items-center justify-center gap-2 py-4 rounded-full bg-surface-container-high text-on-surface m3-label-large active:scale-95 transition-transform duration-100"
+          className="flex items-center justify-center gap-2 py-5 rounded-full bg-surface-container-high text-on-surface m3-title-small active:scale-95 transition-transform duration-100"
         >
           <RotateCcw className="w-4 h-4" />
           See Again
@@ -177,7 +177,7 @@ export const FlashcardPhase: React.FC<Props> = ({
             onGotIt();
           }}
           aria-label="I know this word"
-          className="flex items-center justify-center gap-2 py-4 rounded-full bg-primary text-on-primary m3-label-large active:scale-95 transition-transform duration-100"
+          className="flex items-center justify-center gap-2 py-5 rounded-full bg-primary text-on-primary m3-title-small active:scale-95 transition-transform duration-100"
         >
           <Check className="w-4 h-4" />
           Got it!

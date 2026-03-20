@@ -32,10 +32,10 @@ interface PosPair {
 const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
 
 function tileTextSize(text: string): string {
-  if (text.length <= 8)  return 'text-[16px]';
-  if (text.length <= 12) return 'text-[14px]';
-  if (text.length <= 18) return 'text-[12px]';
-  return 'text-[11px]';
+  if (text.length <= 8)  return 'text-[17px]';
+  if (text.length <= 12) return 'text-[15px]';
+  if (text.length <= 18) return 'text-[13px]';
+  return 'text-[13px]';
 }
 
 function wordToPairs(word: WordFamily): PosPair[] {
@@ -75,9 +75,9 @@ const StageBanner: React.FC<{ stage: Stage }> = ({ stage }) => (
     transition={{ duration: 0.22 }}
     className="flex items-center justify-center gap-2 mb-5"
   >
-    <div className={`w-2 h-2 rounded-full transition-colors ${stage === 'meaning' ? 'bg-primary' : 'bg-on-surface/20'}`} />
-    <div className={`w-2 h-2 rounded-full transition-colors ${stage === 'pos'     ? 'bg-primary' : 'bg-on-surface/20'}`} />
-    <span className="ml-1 m3-label-small text-on-surface-variant tracking-wide">
+    <div className={`w-2.5 h-2.5 rounded-full transition-colors ${stage === 'meaning' ? 'bg-primary' : 'bg-on-surface/20'}`} />
+    <div className={`w-2.5 h-2.5 rounded-full transition-colors ${stage === 'pos'     ? 'bg-primary' : 'bg-on-surface/20'}`} />
+    <span className="ml-1 m3-body-small text-on-surface-variant font-medium">
       {stage === 'meaning' ? 'Stage 1 · Match the meaning' : 'Stage 2 · Match POS to its word form'}
     </span>
   </motion.div>
@@ -112,7 +112,7 @@ const Tile: React.FC<{
       disabled={isMatched}
       aria-label={id}
       style={{ WebkitTapHighlightColor: 'transparent' }}
-      className={`w-full min-h-[72px] rounded-[20px] flex items-center justify-center px-3 py-3 transition-all duration-150 ${cls}`}
+      className={`w-full min-h-[76px] rounded-[20px] flex items-center justify-center px-4 py-4 transition-all duration-150 ${cls}`}
     >
       {children}
     </motion.button>
@@ -128,7 +128,8 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
   // sel: { id, side } — whichever tile was tapped last
   const [sel1, setSel1]           = useState<{ id: string; side: 'left' | 'right' } | null>(null);
   const [matched1, setMatched1]   = useState<Set<string>>(new Set());
-  const [wrong1, setWrong1]       = useState<string | null>(null); // wrong pair's shared id
+  const [wrongL1, setWrongL1]     = useState<string | null>(null);
+  const [wrongR1, setWrongR1]     = useState<string | null>(null);
   const [locked1, setLocked1]     = useState(false);
   const [celebrate1, setCelebrate1] = useState(false);
 
@@ -209,11 +210,13 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
       setMatched1(prev => new Set([...prev, id]));
       setSel1(null);
     } else {
-      // Wrong
+      // Wrong — flash BOTH the selected tile and the tapped tile
       triggerHaptic(settings.hapticsEnabled, 'error');
       setLocked1(true);
-      setWrong1(id); // mark the newly tapped wrong tile
-      setTimeout(() => { setWrong1(null); setSel1(null); setLocked1(false); }, 800);
+      // sel1.side tells us which side the originally selected tile is on
+      setWrongL1(sel1.side === 'left' ? sel1.id : id);
+      setWrongR1(sel1.side === 'right' ? sel1.id : id);
+      setTimeout(() => { setWrongL1(null); setWrongR1(null); setSel1(null); setLocked1(false); }, 800);
     }
   };
 
@@ -257,7 +260,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
-      className="px-4 pb-8 pt-2"
+      className="px-4 pb-8 pt-4"
     >
       <StageBanner stage={stage} />
 
@@ -283,7 +286,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
                     id={word.id}
                     isMatched={matched1.has(word.id)}
                     isSelected={sel1?.id === word.id && sel1?.side === 'left'}
-                    isWrong={false}
+                    isWrong={wrongL1 === word.id}
                     onTap={() => handleTap1(word.id, 'left')}
                   >
                     <span className={`${tileTextSize(text)} font-bold text-center leading-tight w-full`}>
@@ -302,7 +305,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
                   id={tile.id}
                   isMatched={matched1.has(tile.id)}
                   isSelected={sel1?.id === tile.id && sel1?.side === 'right'}
-                  isWrong={wrong1 === tile.id}
+                  isWrong={wrongR1 === tile.id}
                   onTap={() => handleTap1(tile.id, 'right')}
                 >
                   <span className={`${tileTextSize(tile.text)} font-semibold text-center leading-tight w-full`}>
@@ -368,7 +371,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
                     isWrong={wrong2R === pair.id}
                     onTap={() => handleTap2(pair.id, 'right')}
                   >
-                    <span className="text-[15px] font-bold text-center w-full">
+                    <span className="text-[17px] font-bold text-center w-full">
                       {pair.posLabel}
                     </span>
                   </Tile>
@@ -391,7 +394,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
             className="mt-6 flex flex-col items-center gap-1.5"
           >
             <CheckCircle2 className="w-9 h-9 text-primary" />
-            <p className="m3-title-small text-primary font-bold">
+            <p className="m3-title-medium text-primary font-bold">
               {celebrate1 ? 'Nice! Now match the parts of speech' : 'Round complete!'}
             </p>
           </motion.div>

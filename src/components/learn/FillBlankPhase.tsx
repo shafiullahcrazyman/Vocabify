@@ -16,10 +16,10 @@ interface Props {
 
 // POS label colors — same palette as rest of app
 const POS_COLOR: Record<string, string> = {
-  Noun: 'text-blue-400',
-  Verb: 'text-emerald-400',
-  Adj:  'text-amber-400',
-  Adv:  'text-purple-400',
+  Noun: 'text-blue-500 dark:text-blue-300',
+  Verb: 'text-emerald-500 dark:text-emerald-300',
+  Adj:  'text-amber-500 dark:text-amber-300',
+  Adv:  'text-purple-500 dark:text-purple-300',
 };
 
 // ── Sentence renderer ──────────────────────────────────────────────────────────
@@ -41,9 +41,7 @@ const SentenceDisplay: React.FC<{
             <span
               className={`inline-flex items-center mx-1 px-2 py-0.5 rounded-lg border-b-2 font-bold transition-all duration-300 ${
                 answers[i] !== null
-                  ? answers[i] === blanks[i].answer
-                    ? 'border-primary bg-primary/20 text-primary'
-                    : 'border-error bg-error/20 text-error'
+                  ? 'border-primary bg-primary/20 text-primary'
                   : i === currentIdx
                   ? 'border-primary text-primary bg-primary/5 animate-pulse'
                   : 'border-outline/30 text-on-surface-variant/40 bg-surface-container'
@@ -95,7 +93,7 @@ export const FillBlankPhase: React.FC<Props> = ({
         className="px-4 pb-8 flex flex-col items-center gap-5 pt-4"
       >
         <div className="bg-surface-container rounded-[28px] p-6 w-full">
-          <p className="m3-label-small text-primary uppercase tracking-wide font-bold mb-3">
+          <p className="m3-label-medium text-primary uppercase tracking-wider font-bold mb-3">
             Review
           </p>
           <p className="m3-headline-small text-on-surface mb-2">{getPrimaryForm(word)}</p>
@@ -115,7 +113,6 @@ export const FillBlankPhase: React.FC<Props> = ({
   const isLastBlank = currentBlank === fillData.blanks.length - 1;
   const currentAnswer = answers[currentBlank];
   const isAnswered = currentAnswer !== null;
-  const isCorrect  = isAnswered ? currentAnswer === blank.answer : null;
 
   const handleSelect = (option: string) => {
     if (isAnswered) return;
@@ -142,7 +139,7 @@ export const FillBlankPhase: React.FC<Props> = ({
   };
 
   const optionClass = (option: string): string => {
-    const base = 'py-4 px-3 rounded-[18px] text-center font-semibold min-h-[60px] flex items-center justify-center transition-all duration-150 active:scale-95 text-[14px] leading-tight';
+    const base = 'py-4 px-3 rounded-[18px] text-center font-semibold min-h-[68px] flex items-center justify-center transition-all duration-150 active:scale-95 text-[16px] leading-tight';
 
     // After correct answer is given
     if (isAnswered) {
@@ -162,7 +159,7 @@ export const FillBlankPhase: React.FC<Props> = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -24 }}
       transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
-      className="px-4 pb-8"
+      className="px-4 pt-4 pb-8"
     >
       {/* Blank progress dots */}
       {fillData.blanks.length > 1 && (
@@ -181,13 +178,13 @@ export const FillBlankPhase: React.FC<Props> = ({
       )}
 
       {/* Sentence card */}
-      <div className="bg-surface-container rounded-[28px] p-6 mb-4">
+      <div className="bg-surface-container rounded-[28px] p-5 mb-4">
         {/* Header: label + current POS */}
         <div className="flex items-center justify-between mb-3">
-          <p className="m3-label-small text-primary uppercase tracking-wide font-bold">
+          <p className="m3-label-medium text-primary uppercase tracking-wider font-bold">
             Complete the sentence
           </p>
-          <span className={`m3-label-small font-bold ${POS_COLOR[blank.pos] ?? 'text-on-surface-variant'}`}>
+          <span className={`m3-label-medium font-bold ${POS_COLOR[blank.pos] ?? 'text-on-surface-variant'}`}>
             {blank.pos} {fillData.blanks.length > 1 ? `· ${currentBlank + 1}/${fillData.blanks.length}` : ''}
           </span>
         </div>
@@ -211,7 +208,7 @@ export const FillBlankPhase: React.FC<Props> = ({
               className="mt-3 flex items-center gap-2 text-primary"
             >
               <CheckCircle2 className="w-4 h-4 shrink-0" />
-              <span className="m3-body-small font-medium">
+              <span className="m3-body-medium font-medium">
                 {isLastBlank ? 'All blanks filled!' : 'Correct! Next blank →'}
               </span>
             </motion.div>
@@ -225,7 +222,7 @@ export const FillBlankPhase: React.FC<Props> = ({
               className="mt-3 flex items-center gap-2 text-error"
             >
               <XCircle className="w-4 h-4 shrink-0" />
-              <span className="m3-body-small font-medium">
+              <span className="m3-body-medium font-medium">
                 Try again — the answer is the {blank.pos.toLowerCase()} form
               </span>
             </motion.div>
@@ -241,7 +238,7 @@ export const FillBlankPhase: React.FC<Props> = ({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.18 }}
-          className="grid grid-cols-2 gap-3"
+          className="grid grid-cols-2 gap-4"
         >
           {blank.options.map(option => (
             <motion.button
