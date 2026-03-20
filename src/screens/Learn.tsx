@@ -91,11 +91,14 @@ export const Learn: React.FC = () => {
   const [sessionWords] = useState<WordFamily[]>(() =>
     buildSession(words, progress.learned, settings.dailyGoal)
   );
-  const matchBatches = useMemo(() => chunkArray(sessionWords, settings.dailyGoal), [sessionWords, settings.dailyGoal]);
+  const matchBatches = useMemo(() => chunkArray(sessionWords, 5), [sessionWords]);
 
   const [view, setView]                = useState<LearnView>({ mode: 'path' });
   const [completedPhases, setCompleted] = useState<Set<string>>(new Set());
-  const [flashIndex, setFlashIndex]    = useState(0);
+  const [flashQueue, setFlashQueue] = useState<number[]>(() =>
+    Array.from({ length: 5 }, (_, i) => i).slice(0, Math.max(settings.dailyGoal, 4))
+  );
+  const [flashPos, setFlashPos] = useState(0); // position in flashQueue
   const [fbIndex, setFbIndex]          = useState(0);
   const [matchIndex, setMatchIndex]    = useState(0);
 
@@ -118,7 +121,7 @@ export const Learn: React.FC = () => {
   const completedPhasePct = (completedPhases.size / 3) * 100;
 
   const currentPhaseInternalPct: number = (() => {
-    if (view.mode === 'flashcard') return (view.wordIndex / sessionWords.length) * 100;
+    if (view.mode === 'flashcard') return (flashPos / flashQueue.length) * 100;
     if (view.mode === 'matching')  return (view.batchIndex / matchBatches.length) * 100;
     if (view.mode === 'fillblank') return (view.wordIndex / sessionWords.length) * 100;
     return 0;
@@ -141,7 +144,9 @@ export const Learn: React.FC = () => {
     (phaseId: string) => {
       triggerHaptic(settings.hapticsEnabled, 'tap');
       if (phaseId === 'flashcards') {
-        setFlashIndex(0);
+        const initialQueue = Array.from({ length: sessionWords.length }, (_, i) => i);
+        setFlashQueue(initialQueue);
+        setFlashPos(0);
         setView({ mode: 'flashcard', wordIndex: 0 });
       } else if (phaseId === 'matching') {
         setMatchIndex(0);
@@ -154,16 +159,26 @@ export const Learn: React.FC = () => {
     [settings.hapticsEnabled]
   );
 
-  const handleFlashNext = useCallback(() => {
-    const next = flashIndex + 1;
-    if (next >= sessionWords.length) {
+  const handleFlashGotIt = useCallback(() => {
+    const nextPos = flashPos + 1;
+    if (nextPos >= flashQueue.length) {
       setCompleted(prev => new Set([...prev, 'flashcards']));
       setView({ mode: 'path' });
     } else {
-      setFlashIndex(next);
-      setView({ mode: 'flashcard', wordIndex: next });
+      setFlashPos(nextPos);
+      setView({ mode: 'flashcard', wordIndex: flashQueue[nextPos] });
     }
-  }, [flashIndex, sessionWords.length]);
+  }, [flashPos, flashQueue]);
+
+  const handleFlashSeeAgain = useCallback(() => {
+    // Re-append current word index to end of queue
+    const currentWordIdx = flashQueue[flashPos];
+    const newQueue = [...flashQueue, currentWordIdx];
+    setFlashQueue(newQueue);
+    const nextPos = flashPos + 1;
+    setFlashPos(nextPos);
+    setView({ mode: 'flashcard', wordIndex: newQueue[nextPos] });
+  }, [flashPos, flashQueue]);
 
   const handleMatchNext = useCallback(() => {
     const next = matchIndex + 1;
@@ -209,7 +224,7 @@ export const Learn: React.FC = () => {
         ? 'All done!'
         : `${3 - completedPhases.size} phase${3 - completedPhases.size !== 1 ? 's' : ''} remaining`
       : view.mode === 'flashcard'
-      ? `Flashcards · ${flashIndex + 1} of ${sessionWords.length}`
+      ? `Flashcards · ${flashPos + 1} of ${flashQueue.length}`
       : view.mode === 'matching'
       ? `Match Pairs · Round ${matchIndex + 1} of ${matchBatches.length}`
       : `Fill in Blank · ${fbIndex + 1} of ${sessionWords.length}`;
@@ -314,8 +329,8 @@ export const Learn: React.FC = () => {
               word={sessionWords[view.wordIndex]}
               wordIndex={view.wordIndex}
               totalInQueue={sessionWords.length}
-              onGotIt={handleFlashNext}
-              onSeeAgain={handleFlashNext}
+              onGotIt={handleFlashGotIt}
+              onSeeAgain={handleFlashSeeAgain}
             />
           )}
 
