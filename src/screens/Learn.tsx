@@ -91,7 +91,12 @@ export const Learn: React.FC = () => {
   const [sessionWords] = useState<WordFamily[]>(() =>
     buildSession(words, progress.learned, settings.dailyGoal)
   );
-  const matchBatches = useMemo(() => chunkArray(sessionWords, 5), [sessionWords]);
+  // Always 5 words per round — number of rounds = ceil(dailyGoal / 5), fully dynamic
+  const MATCH_BATCH_SIZE = 5;
+  const matchBatches = useMemo(
+    () => chunkArray(sessionWords, MATCH_BATCH_SIZE),
+    [sessionWords]
+  );
 
   const [view, setView]                = useState<LearnView>({ mode: 'path' });
   const [completedPhases, setCompleted] = useState<Set<string>>(new Set());
