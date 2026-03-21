@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { AppSettings, FilterOptions, WordFamily, StreakData } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useIndexedDB } from '../hooks/useIndexedDB';
@@ -85,10 +85,26 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const words = wordsData as WordFamily[];
 
+  // FIX #3 — Race-safe today-count tracker.
+  // Using a ref avoids the stale-closure problem where rapid markLearned calls
+  // all read the same snapshot of progress.learnedDates before React re-renders.
+  // The ref is updated synchronously on every markLearned call, so even if 10
+  // words are marked in quick succession the streak fires exactly once at the goal.
+  const todayCountRef = useRef(0);
+
+  // Initialise the ref once data has loaded from IndexedDB.
+  useEffect(() => {
+    if (!progressLoaded) return;
+    const today = getLocalDateString();
+    const count = Object.values(progress.learnedDates ?? {}).filter(d => d === today).length;
+    todayCountRef.current = count;
+  // Only run once on load — progress state changes are tracked synchronously via the ref.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [progressLoaded]);
+
   // Auto-break streak on load if the user skipped a day.
   // Without this, a stale streak (e.g. 7) would keep showing even after missing
   // days — it only corrected itself the next time the goal was earned.
-  // Now: if lastGoalDate is older than yesterday, current resets to 0 immediately.
   useEffect(() => {
     if (!streakLoaded) return;
     const today = getLocalDateString();
@@ -102,7 +118,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       lastGoalDate !== yesterday;
 
     if (streakIsBroken) {
-      setStreakData((prev) => ({ ...prev, current: 0 }));
+      // FIX #1 — spread prev so totalXP is never overwritten.
+      setStreakData(prev => ({ ...prev, current: 0 }));
     }
   }, [streakLoaded]);
 
@@ -120,7 +137,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     root.classList.add(resolvedTheme);
 
-    // Keep the browser chrome / status bar in sync with the active theme
     const themeColorMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     if (themeColorMeta) {
       themeColorMeta.setAttribute('content', resolvedTheme === 'dark' ? '#141218' : '#FEF7FF');
@@ -139,30 +155,25 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const today = getLocalDateString();
     const yesterday = getYesterdayString();
     const alreadyInLearned = progress.learned.includes(id);
-    const countedToday = (progress.learnedDates || {})[id] === today;
+    const countedToday = (progress.learnedDates ?? {})[id] === today;
 
-    // "isAdding" = this tap will add to today's daily count.
-    // - New word being learned for the first time → true
-    // - Word already learned globally but NOT counted today (post Reset-Today state) → true
-    // - Word already learned AND already counted today → false (this tap un-learns it)
+    // "isAdding" = this call will add to today's daily count.
     const isAdding = !countedToday;
 
-    setProgress((prev) => {
+    setProgress(prev => {
       const prevLearned = prev.learned || [];
       const prevDates = prev.learnedDates || {};
 
       if (alreadyInLearned && countedToday) {
-        // Full un-learn: word was learned and counted today — tap removes it entirely
+        // Full un-learn: word was learned and counted today — remove it entirely.
         const newDates = { ...prevDates };
         delete newDates[id];
         return {
-          learned: prevLearned.filter((learnedId) => learnedId !== id),
+          learned: prevLearned.filter(learnedId => learnedId !== id),
           learnedDates: newDates,
         };
       } else {
-        // Two sub-cases handled identically:
-        //   a) Fresh learn: add to both arrays
-        //   b) Post-Reset-Today re-learn: word is in learned already, just add date back
+        // Fresh learn OR post-Reset-Today re-learn.
         return {
           learned: alreadyInLearned ? prevLearned : [...prevLearned, id],
           learnedDates: { ...prevDates, [id]: today },
@@ -170,33 +181,45 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
     });
 
-    // Streak logic: only check when adding a word, not removing
+    // FIX #3 — Update the ref synchronously so rapid calls can't double-trigger.
     if (isAdding) {
-      const currentDates = progress.learnedDates || {};
-      // +1 because the state hasn't updated yet — we're counting what it will be
-      const todayCountAfter = Object.values(currentDates).filter(d => d === today).length + 1;
-      const goalJustReached = todayCountAfter === settings.dailyGoal && streakData.lastGoalDate !== today;
+      todayCountRef.current += 1;
+    } else {
+      // Un-learning: decrement safely.
+      todayCountRef.current = Math.max(0, todayCountRef.current - 1);
+    }
+
+    // Streak logic: only evaluate when adding a word.
+    if (isAdding) {
+      const goalJustReached =
+        todayCountRef.current === settings.dailyGoal &&
+        streakData.lastGoalDate !== today;
 
       if (goalJustReached) {
-        const newCurrent = streakData.lastGoalDate === yesterday
-          ? streakData.current + 1
-          : 1;
-        setStreakData({
+        const newCurrent =
+          streakData.lastGoalDate === yesterday
+            ? streakData.current + 1
+            : 1;
+        // FIX #1 — spread prev so totalXP (and any future fields) are never lost.
+        setStreakData(prev => ({
+          ...prev,
           current: newCurrent,
-          longest: Math.max(newCurrent, streakData.longest),
+          longest: Math.max(newCurrent, prev.longest ?? 0),
           lastGoalDate: today,
-        });
+        }));
       }
     }
   };
 
   const resetTotalProgress = () => {
     setProgress({ learned: [], learnedDates: {} });
-    // A full reset also wipes the streak
+    todayCountRef.current = 0;
+    // A full reset also wipes the streak.
     setStreakData(defaultStreak);
   };
 
-  // FIX: persist XP so it survives across sessions
+  // FIX #1 — persist XP so it survives across sessions; spread prev so other
+  // streak fields (current, longest, lastGoalDate) are never overwritten.
   const addXP = (amount: number) => {
     setStreakData(prev => ({ ...prev, totalXP: (prev.totalXP ?? 0) + amount }));
   };
@@ -205,35 +228,32 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const today = getLocalDateString();
     const yesterday = getYesterdayString();
 
-    // If the goal was already met today, roll back the streak by one day
+    // Roll back the streak by one day if the goal was already met today.
     if (streakData.lastGoalDate === today) {
-      setStreakData({
-        ...streakData,
-        current: Math.max(0, streakData.current - 1),
-        // Revert lastGoalDate so the streak can be re-earned today
+      setStreakData(prev => ({
+        ...prev,
+        current: Math.max(0, prev.current - 1),
         lastGoalDate: yesterday,
-      });
+      }));
     }
 
-    setProgress((prev) => {
+    setProgress(prev => {
       const prevDates = prev.learnedDates || {};
       const newDates = { ...prevDates };
-
-      // Only wipe today's date entries — Total Mastery (learned array) is untouched
+      // Only wipe today's date entries — Total Mastery (learned array) is untouched.
       Object.keys(newDates).forEach(wordId => {
         if (newDates[wordId] === today) delete newDates[wordId];
       });
-
-      return {
-        learned: prev.learned,
-        learnedDates: newDates,
-      };
+      return { learned: prev.learned, learnedDates: newDates };
     });
+
+    // Sync the ref back to 0.
+    todayCountRef.current = 0;
   };
 
   const toggleFavorite = (id: string) => {
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((favId) => favId !== id) : [...prev, id]
+    setFavorites(prev =>
+      prev.includes(id) ? prev.filter(favId => favId !== id) : [...prev, id]
     );
   };
 
