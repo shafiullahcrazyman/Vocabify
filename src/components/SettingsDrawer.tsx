@@ -188,8 +188,8 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
               ))}
             </div>
 
-            {/* Start Learning — sticky footer */}
-            <div className="shrink-0 p-4 sm:p-6">
+            {/* Start Learning — bottom of scroll content */}
+            <div className="p-4 sm:p-6 pt-0">
               <button
                 onClick={() => {
                   triggerHaptic(settings.hapticsEnabled, 'success');
