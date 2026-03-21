@@ -118,7 +118,7 @@ export const Home: React.FC = () => {
                 navigate('/learn');
               }}
               aria-label="Start a learning session"
-              className="mt-10 w-full max-w-[280px] py-5 bg-primary text-on-primary rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform duration-150 shadow-lg"
+              className="mt-10 w-full max-w-[280px] py-5 bg-primary text-on-primary rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform duration-150"
               style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '0.02em' }}
             >
               <Zap className="w-6 h-6" />
