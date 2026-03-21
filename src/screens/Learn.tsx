@@ -275,7 +275,7 @@ export const Learn: React.FC = () => {
             className="p-2 -ml-1 rounded-full text-on-surface-variant hover:bg-surface-container transition-colors active:scale-90"
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
-            <X className="w-5 h-5" />
+            <X className="w-6 h-6" />
           </button>
           <p className="m3-title-small text-on-surface font-semibold">
             {subLabel}
