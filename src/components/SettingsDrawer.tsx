@@ -100,11 +100,14 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
               <button
                 onClick={() => {
                   triggerHaptic(settings.hapticsEnabled, 'success');
-                  navigate('/learn');
-                  setTimeout(onClose, 120);
+                  // FIX: close the drawer first so its overlay doesn't block the Learn screen.
+                  // The exit animation is 150ms (exitCurve), so navigating after 160ms ensures
+                  // the drawer is fully gone before Learn mounts.
+                  onClose();
+                  setTimeout(() => navigate('/learn'), 160);
                 }}
                 aria-label="Start a learning session"
-                className="w-full py-5 bg-primary text-on-primary rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform duration-150 shadow-lg"
+                className="w-full py-5 bg-primary text-on-primary rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform duration-150"
                 style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '0.02em' }}
               >
                 <Zap className="w-6 h-6" />
