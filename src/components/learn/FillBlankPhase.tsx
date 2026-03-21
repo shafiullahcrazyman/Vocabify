@@ -22,6 +22,14 @@ const POS_COLOR: Record<string, string> = {
   Adv:  'text-purple-500 dark:text-purple-300',
 };
 
+/** Dynamic text size for option buttons — options can be long words. */
+function optionTextSize(text: string): string {
+  if (text.length <= 8)  return 'text-[17px]';
+  if (text.length <= 12) return 'text-[15px]';
+  if (text.length <= 18) return 'text-[13px]';
+  return 'text-[12px]';
+}
+
 // ── Sentence renderer ──────────────────────────────────────────────────────────
 // Splits the sentence on '______' and renders each blank slot with state styling.
 const SentenceDisplay: React.FC<{
@@ -39,12 +47,12 @@ const SentenceDisplay: React.FC<{
           {part}
           {i < blanks.length && (
             <span
-              className={`inline-flex items-center mx-1 px-2 py-0.5 rounded-lg border-b-2 font-bold transition-all duration-300 ${
+              className={`inline-flex items-center mx-1 px-2 py-0.5 rounded-lg font-bold transition-all duration-300 ${
                 answers[i] !== null
-                  ? 'border-primary bg-primary/20 text-primary'
+                  ? 'bg-primary/20 text-primary'
                   : i === currentIdx
-                  ? 'border-primary text-primary bg-primary/5 animate-pulse'
-                  : 'border-outline/30 text-on-surface-variant/40 bg-surface-container'
+                  ? 'bg-primary/10 text-primary animate-pulse'
+                  : 'bg-surface-container-high text-on-surface-variant/40'
               }`}
             >
               {answers[i] !== null ? blanks[i].answer : '______'}
@@ -139,7 +147,8 @@ export const FillBlankPhase: React.FC<Props> = ({
   };
 
   const optionClass = (option: string): string => {
-    const base = 'py-4 px-3 rounded-[18px] text-center font-semibold min-h-[68px] flex items-center justify-center transition-all duration-150 active:scale-95 text-[16px] leading-tight';
+    // Dynamic text size based on option length — base no longer includes a fixed font size
+    const base = 'py-4 px-3 rounded-[18px] text-center font-semibold min-h-[68px] flex items-center justify-center transition-all duration-150 active:scale-95 leading-tight';
 
     // After correct answer is given
     if (isAnswered) {
@@ -207,7 +216,7 @@ export const FillBlankPhase: React.FC<Props> = ({
               transition={{ duration: 0.2 }}
               className="mt-3 flex items-center gap-2 text-primary"
             >
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <CheckCircle2 className="w-5 h-5 shrink-0" />
               <span className="m3-body-medium font-medium">
                 {isLastBlank ? 'All blanks filled!' : 'Correct! Next blank →'}
               </span>
@@ -221,7 +230,7 @@ export const FillBlankPhase: React.FC<Props> = ({
               transition={{ duration: 0.2 }}
               className="mt-3 flex items-center gap-2 text-error"
             >
-              <XCircle className="w-4 h-4 shrink-0" />
+              <XCircle className="w-5 h-5 shrink-0" />
               <span className="m3-body-medium font-medium">
                 Try again — the answer is the {blank.pos.toLowerCase()} form
               </span>
@@ -246,7 +255,7 @@ export const FillBlankPhase: React.FC<Props> = ({
               onClick={() => handleSelect(option)}
               whileTap={!isAnswered ? { scale: 0.95 } : {}}
               disabled={isAnswered}
-              className={optionClass(option)}
+              className={`${optionClass(option)} ${optionTextSize(option)}`}
               aria-label={`Answer: ${option}`}
             >
               {option}

@@ -56,18 +56,18 @@ export const SessionComplete: React.FC<Props> = ({ wordsCompleted, totalXP, onPl
       >
         <div className="grid grid-cols-2 divide-x divide-on-primary/20">
           <div className="text-center pr-4">
-            <p className="text-[52px] leading-none font-bold">{wordsCompleted}</p>
+            <p className="text-[48px] leading-none font-normal tracking-tight">{wordsCompleted}</p>
             <p className="m3-label-small opacity-80 mt-1 uppercase tracking-wide">
               Words Learned
             </p>
           </div>
           <div className="text-center pl-4">
             {/* FIX: show session XP earned this round, with total lifetime XP below */}
-            <p className="text-[52px] leading-none font-bold">+{sessionXP}</p>
+            <p className="text-[48px] leading-none font-normal tracking-tight">+{sessionXP}</p>
             <p className="m3-label-small opacity-80 mt-1 uppercase tracking-wide">
               XP Earned
             </p>
-            <p className="text-[13px] opacity-60 mt-0.5">
+            <p className="m3-label-small opacity-60 mt-0.5">
               {totalXP} total
             </p>
           </div>
@@ -96,10 +96,10 @@ export const SessionComplete: React.FC<Props> = ({ wordsCompleted, totalXP, onPl
             onPlayAgain();
           }}
           aria-label="Start a new learning session"
-          className="w-full py-5 rounded-full bg-primary text-on-primary flex items-center justify-center gap-3 active:scale-95 transition-transform duration-150 shadow-lg"
+          className="w-full py-5 rounded-full bg-primary text-on-primary flex items-center justify-center gap-3 active:scale-95 transition-transform duration-150"
           style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '0.02em' }}
         >
-          <RotateCcw className="w-4 h-4" />
+          <RotateCcw className="w-6 h-6" />
           Keep Learning
         </button>
 
@@ -109,10 +109,10 @@ export const SessionComplete: React.FC<Props> = ({ wordsCompleted, totalXP, onPl
             navigate('/home');
           }}
           aria-label="Go to home screen"
-          className="w-full py-5 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center gap-3 active:scale-95 transition-transform duration-150 shadow-lg"
+          className="w-full py-5 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center gap-3 active:scale-95 transition-transform duration-150"
           style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '0.02em' }}
         >
-          <Home className="w-4 h-4" />
+          <Home className="w-6 h-6" />
           Go Home
         </button>
       </motion.div>

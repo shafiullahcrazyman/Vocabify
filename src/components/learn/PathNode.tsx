@@ -33,13 +33,13 @@ export const PathNode: React.FC<Props> = ({ node, state, side, onTap }) => {
 
   const circleBg =
     state === 'locked'
-      ? 'bg-surface-container-high border-[2px] border-outline/20'
-      : `${color} border-[4px] border-white/10`;
+      // Tonal elevation: surface-container-highest is one step above surface-container-high,
+      // clearly showing the locked node is inert without needing a border.
+      ? 'bg-surface-container-highest'
+      : `${color}`;
 
-  const glowRing =
-    state === 'current'
-      ? 'ring-4 ring-offset-2 ring-offset-background ring-primary/40'
-      : '';
+  // Remove ring — the repeat pulse animation already signals 'current' clearly.
+  // No decorative borders or ring effects anywhere in the app.
 
   const labelColor =
     state === 'locked'
@@ -66,7 +66,7 @@ export const PathNode: React.FC<Props> = ({ node, state, side, onTap }) => {
       whileTap={!isDisabled ? { scale: 0.84 } : {}}
       aria-label={`${label} phase`}
       style={{ WebkitTapHighlightColor: 'transparent' }}
-      className={`w-[86px] h-[86px] shrink-0 rounded-full flex items-center justify-center transition-all duration-200 ${circleBg} ${glowRing} ${
+      className={`w-[86px] h-[86px] shrink-0 rounded-full flex items-center justify-center transition-all duration-200 ${circleBg} ${
         isLocked ? 'opacity-30' : ''
       }`}
     >
@@ -98,10 +98,10 @@ export const PathNode: React.FC<Props> = ({ node, state, side, onTap }) => {
         </span>
       )}
 
-      <span className={`text-[17px] font-extrabold leading-tight ${labelColor}`}>
+      <span className={`m3-title-medium font-extrabold leading-tight ${labelColor}`}>
         {label}
       </span>
-      <span className={`text-[12px] mt-0.5 leading-tight ${sublabelColor}`}>
+      <span className={`m3-body-small mt-0.5 leading-tight ${sublabelColor}`}>
         {sublabel}
       </span>
     </div>

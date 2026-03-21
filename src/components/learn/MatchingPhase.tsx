@@ -373,7 +373,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
                     isWrong={wrong2R === pair.id}
                     onTap={() => handleTap2(pair.id, 'right')}
                   >
-                    <span className="text-[17px] font-bold text-center w-full">
+                    <span className={`${tileTextSize(pair.posLabel)} font-bold text-center w-full`}>
                       {pair.posLabel}
                     </span>
                   </Tile>
@@ -395,7 +395,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
             className="mt-6 flex flex-col items-center gap-1.5"
           >
-            <CheckCircle2 className="w-9 h-9 text-primary" />
+            <CheckCircle2 className="w-6 h-6 text-primary" />
             <p className="m3-title-medium text-primary font-bold">
               {celebrate1
                 ? 'Nice! Now match the parts of speech'

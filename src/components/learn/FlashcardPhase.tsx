@@ -124,10 +124,10 @@ export const FlashcardPhase: React.FC<Props> = ({
                   i < posRows.length - 1 ? 'mb-[2px]' : ''
                 }`}
               >
-                <span className="text-[13px] font-semibold uppercase tracking-wider opacity-70">
+                <span className="m3-label-medium uppercase tracking-wider opacity-70">
                   {label}
                 </span>
-                <span className={`text-[17px] font-bold capitalize text-on-surface ${isNone ? 'italic opacity-40' : ''}`}>
+                <span className={`text-[20px] font-bold capitalize text-on-surface ${isNone ? 'italic opacity-40' : ''}`}>
                   {isNone ? 'None' : form}
                 </span>
               </div>
@@ -180,7 +180,7 @@ export const FlashcardPhase: React.FC<Props> = ({
           aria-label="Show this word again later"
           className="flex items-center justify-center gap-2 py-5 rounded-full bg-surface-container-high text-on-surface m3-title-small active:scale-95 transition-transform duration-100"
         >
-          <RotateCcw className="w-4 h-4" />
+          <RotateCcw className="w-6 h-6" />
           See Again
         </button>
         <button
@@ -191,7 +191,7 @@ export const FlashcardPhase: React.FC<Props> = ({
           aria-label="I know this word"
           className="flex items-center justify-center gap-2 py-5 rounded-full bg-primary text-on-primary m3-title-small active:scale-95 transition-transform duration-100"
         >
-          <Check className="w-4 h-4" />
+          <Check className="w-6 h-6" />
           Got it!
         </button>
       </div>
