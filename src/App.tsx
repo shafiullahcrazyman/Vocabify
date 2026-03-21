@@ -27,7 +27,8 @@ function AnimatedRoutes() {
         <Route path="/home" element={<Home />} />
         <Route path="/filter" element={<Filter />} />
         <Route path="/progress" element={<Progress />} />
-        <Route path="/learn" element={<Learn />} />
+        {/* FIX: key by location.key so navigate('/learn') from /learn always remounts fresh */}
+        <Route path="/learn" element={<Learn key={location.key} />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </AnimatePresence>
