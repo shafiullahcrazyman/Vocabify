@@ -118,16 +118,16 @@ export const FlashcardPhase: React.FC<Props> = ({
                 key={pos}
                 className={`flex items-center justify-between px-4 py-3.5 ${
                   isNone
-                    ? 'bg-surface-container-highest/40 text-on-surface-variant/30'
+                    ? 'bg-surface-container-highest/60'
                     : POS_STYLES[pos]
                 } ${rowRounding(i, posRows.length)} ${
                   i < posRows.length - 1 ? 'mb-[2px]' : ''
                 }`}
               >
-                <span className="m3-label-medium uppercase tracking-wider opacity-70">
+                <span className={`m3-label-medium uppercase tracking-wider ${isNone ? 'text-on-surface-variant/50' : ''}`}>
                   {label}
                 </span>
-                <span className={`text-[20px] font-bold capitalize ${isNone ? 'opacity-40' : ''}`}>
+                <span className={`text-[20px] font-bold capitalize ${isNone ? 'text-on-surface-variant/50' : 'text-on-surface'}`}>
                   {isNone ? 'None' : form}
                 </span>
               </div>
