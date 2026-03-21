@@ -406,7 +406,7 @@ export const Learn: React.FC = () => {
       : `Fill in Blank · ${fbIndex + 1} of ${sessionWords.length}`;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="h-[100dvh] bg-background flex flex-col">
 
       {/* ── Sticky header ────────────────────────────────────────── */}
       <div className="sticky top-0 z-20 bg-background px-4 pt-3 pb-3 shrink-0">
@@ -500,7 +500,7 @@ export const Learn: React.FC = () => {
       </div>
 
       {/* ── Scrollable content ────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto">
+      <div className={`flex-1 ${view.mode === 'flashcard' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
         <AnimatePresence mode="wait">
 
           {/* PATH */}
