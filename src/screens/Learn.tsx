@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { X, BookOpen, Shuffle, PenLine, SlidersHorizontal, AlertTriangle } from 'lucide-react';
+import { X, ArrowLeft, BookOpen, Shuffle, PenLine, SlidersHorizontal, AlertTriangle } from 'lucide-react';
 import { useAppContext, getLocalDateString } from '../context/AppContext';
 import { buildSession, chunkArray } from '../utils/sessionAlgorithm';
 import { useWordFilter } from '../hooks/useWordFilter';
@@ -12,6 +12,7 @@ import { FillBlankPhase } from '../components/learn/FillBlankPhase';
 import { SessionComplete } from '../components/learn/SessionComplete';
 import { WordFamily } from '../types';
 import { triggerHaptic } from '../utils/haptics';
+import { useBackButton } from '../hooks/useBackButton';
 
 // ── Phase definitions ──────────────────────────────────────────────────────────
 const SIDES: ('left' | 'right')[] = ['left', 'right', 'left'];
@@ -277,6 +278,16 @@ export const Learn: React.FC = () => {
     navigate('/home');
   }, [navigate, learnedCount, addXP]);
 
+  // Back button: from any active phase -> return to path view (not exit)
+  const isInPhase = view.mode === 'flashcard' || view.mode === 'matching' || view.mode === 'fillblank';
+  const handleBackToPath = useCallback(() => {
+    triggerHaptic(settings.hapticsEnabled, 'tap');
+    setView({ mode: 'path' });
+  }, [settings.hapticsEnabled]);
+
+  // Hardware / browser back during a phase should go back to path, not navigate away
+  useBackButton(isInPhase, handleBackToPath);
+
   const handlePlayAgain = useCallback(() => {
     navigate('/learn');
   }, [navigate]);
@@ -400,15 +411,39 @@ export const Learn: React.FC = () => {
       {/* ── Sticky header ────────────────────────────────────────── */}
       <div className="sticky top-0 z-20 bg-background px-4 pt-3 pb-3 shrink-0">
 
-        {/* Row 1: X + sublabel + phase counter */}
+        {/* Row 1: back/exit + sublabel + phase counter */}
         <div className="flex items-center justify-between mb-3">
           <button
-            onClick={handleExit}
-            aria-label="Exit session"
+            onClick={isInPhase ? handleBackToPath : handleExit}
+            aria-label={isInPhase ? 'Back to learning path' : 'Exit session'}
             className="p-2 -ml-1 rounded-full text-on-surface-variant hover:bg-surface-container transition-colors active:scale-90"
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
-            <X className="w-6 h-6" />
+            <AnimatePresence mode="wait" initial={false}>
+              {isInPhase ? (
+                <motion.span
+                  key="back"
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 6 }}
+                  transition={{ duration: 0.15, ease: [0.2, 0, 0, 1] }}
+                  className="flex"
+                >
+                  <ArrowLeft className="w-6 h-6" />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="exit"
+                  initial={{ opacity: 0, x: 6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -6 }}
+                  transition={{ duration: 0.15, ease: [0.2, 0, 0, 1] }}
+                  className="flex"
+                >
+                  <X className="w-6 h-6" />
+                </motion.span>
+              )}
+            </AnimatePresence>
           </button>
           <p className="m3-title-small text-on-surface font-semibold">
             {subLabel}
