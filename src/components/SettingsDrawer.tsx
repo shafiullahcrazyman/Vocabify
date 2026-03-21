@@ -71,8 +71,8 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
             onClick={handleClose}
           />
 
-          {/* Clip wrapper — prevents the spring overshoot from revealing the background behind the drawer */}
-          <div className="relative h-full w-[calc(100%-56px)] max-w-[380px] overflow-hidden">
+          {/* Clip wrapper — bg-background fills the tiny gap the spring overshoot creates on the left edge */}
+          <div className="relative h-full w-[calc(100%-56px)] max-w-[380px] overflow-hidden bg-background">
           {/* Drawer panel — spring with defaultSpatial for the bounce feel the user loves */}
           <motion.div
             initial={{ x: '-100%' }}
@@ -97,8 +97,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-12 space-y-8">
-
-              {/* Appearance */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase font-bold">Appearance</h3>
                 <div className="bg-surface-variant/40 rounded-[28px] flex flex-col overflow-hidden border border-outline/5">
@@ -188,8 +186,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
               ))}
             </div>
 
-            {/* Start Learning — bottom of scroll content */}
-            <div className="p-4 sm:p-6 pt-0">
+              {/* Start Learning — inside scrollable content at the bottom */}
               <button
                 onClick={() => {
                   triggerHaptic(settings.hapticsEnabled, 'success');
