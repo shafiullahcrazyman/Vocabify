@@ -343,9 +343,11 @@ export const Learn: React.FC = () => {
                 });
                 navigate('/learn');
               }}
-              className="w-full py-4 bg-primary text-on-primary rounded-full m3-label-large flex items-center justify-center gap-2 active:scale-95 transition-transform duration-100"
+              aria-label="Clear all filters and start a session"
+              className="w-full py-5 bg-primary text-on-primary rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform duration-150"
+              style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '0.02em' }}
             >
-              <SlidersHorizontal className="w-5 h-5" />
+              <SlidersHorizontal className="w-6 h-6" />
               Clear Filters & Start
             </button>
 
@@ -354,8 +356,11 @@ export const Learn: React.FC = () => {
                 triggerHaptic(settings.hapticsEnabled, 'tap');
                 navigate('/filter');
               }}
-              className="w-full py-4 bg-surface-container-high text-on-surface rounded-full m3-label-large flex items-center justify-center gap-2 active:scale-95 transition-transform duration-100"
+              aria-label="Go to filters to adjust your selection"
+              className="w-full py-5 bg-surface-container-high text-on-surface rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform duration-150"
+              style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '0.02em' }}
             >
+              <PenLine className="w-6 h-6" />
               Adjust Filters
             </button>
           </div>
