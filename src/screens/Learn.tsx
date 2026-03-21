@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { X, BookOpen, Shuffle, PenLine } from 'lucide-react';
+import { X, BookOpen, Shuffle, PenLine, SlidersHorizontal, AlertTriangle } from 'lucide-react';
 import { useAppContext, getLocalDateString } from '../context/AppContext';
 import { buildSession, chunkArray } from '../utils/sessionAlgorithm';
+import { useWordFilter } from '../hooks/useWordFilter';
 import { PathNode, NodeState, PhaseNode } from '../components/learn/PathNode';
 import { FlashcardPhase } from '../components/learn/FlashcardPhase';
 import { MatchingPhase } from '../components/learn/MatchingPhase';
@@ -13,7 +14,6 @@ import { WordFamily } from '../types';
 import { triggerHaptic } from '../utils/haptics';
 
 // ── Phase definitions ──────────────────────────────────────────────────────────
-// side alternates: left, right, left
 const SIDES: ('left' | 'right')[] = ['left', 'right', 'left'];
 
 const PHASE_DEFS: Omit<PhaseNode, 'sublabel'>[] = [
@@ -40,39 +40,42 @@ const PHASE_DEFS: Omit<PhaseNode, 'sublabel'>[] = [
   },
 ];
 
+// Matching phase requires at least this many words per batch
+const MIN_POOL_SIZE = 4;
+
 // ── Diagonal connector SVG ─────────────────────────────────────────────────────
-// from: left node center (x≈43px) or right node center (x≈calc(100%-43px))
-const Connector: React.FC<{
-  fromSide: 'left' | 'right';
-  done: boolean;
-}> = ({ fromSide, done }) => {
-  // SVG uses percentage-based coords — 8% ≈ left node center, 92% ≈ right node center
+const Connector: React.FC<{ fromSide: 'left' | 'right'; done: boolean }> = ({ fromSide, done }) => {
   const x1 = fromSide === 'left' ? '14%' : '86%';
   const x2 = fromSide === 'left' ? '86%' : '14%';
-
   return (
     <svg className="w-full" height={72} viewBox="0 0 100 72" preserveAspectRatio="none">
-      {/* Dashed grey track */}
-      <line
-        x1={x1} y1={4}
-        x2={x2} y2={68}
+      <line x1={x1} y1={4} x2={x2} y2={68}
         stroke="var(--md-sys-color-outline-variant)"
-        strokeWidth="2.5"
-        strokeDasharray="5 5"
-        strokeLinecap="round"
+        strokeWidth="2.5" strokeDasharray="5 5" strokeLinecap="round"
       />
-      {/* Solid primary overlay when done */}
       {done && (
-        <line
-          x1={x1} y1={4}
-          x2={x2} y2={68}
+        <line x1={x1} y1={4} x2={x2} y2={68}
           stroke="var(--md-sys-color-primary)"
-          strokeWidth="3"
-          strokeLinecap="round"
+          strokeWidth="3" strokeLinecap="round"
         />
       )}
     </svg>
   );
+};
+
+// ── Filter summary builder ─────────────────────────────────────────────────────
+// Turns active filter state into a compact readable chip label.
+// e.g. "Hard · Business · Noun" or "Favorites · B2 +2"
+const buildFilterSummary = (filters: ReturnType<typeof useAppContext>['filters']): string => {
+  const parts: string[] = [];
+  if (filters.favoritesOnly)  parts.push('Favorites');
+  if (filters.level.length)   parts.push(...filters.level.map(l => l.charAt(0).toUpperCase() + l.slice(1)));
+  if (filters.cefr.length)    parts.push(...filters.cefr);
+  if (filters.pos.length)     parts.push(...filters.pos.map(p => p.charAt(0).toUpperCase() + p.slice(1)));
+  if (filters.theme.length)   parts.push(...filters.theme);
+  if (filters.letter.length)  parts.push(...filters.letter);
+  // Cap at 4 labels, show "+N more" if there are extra
+  return parts.slice(0, 4).join(' · ') + (parts.length > 4 ? ` +${parts.length - 4}` : '');
 };
 
 // ── View types ─────────────────────────────────────────────────────────────────
@@ -86,31 +89,76 @@ type LearnView =
 // ── Component ──────────────────────────────────────────────────────────────────
 export const Learn: React.FC = () => {
   const navigate = useNavigate();
-  const { words, progress, settings, markLearned, addXP, streak } = useAppContext();
+  const {
+    words, progress, settings, filters, favorites,
+    markLearned, addXP, streak, updateFilters,
+  } = useAppContext();
 
-  const [sessionWords] = useState<WordFamily[]>(() =>
-    buildSession(words, progress.learned, settings.dailyGoal)
+  // ── Build session pool respecting active filters ───────────────────────────
+  //
+  // We run useWordFilter here with two intentional overrides:
+  //
+  //   1. searchQuery = ''
+  //      The live search bar text is user-ephemeral — a typed search should
+  //      never silently shrink the session pool. Only persistent filter
+  //      selections (level, theme, POS, etc.) should apply.
+  //
+  //   2. settingsForPool.hideLearnedWords = false
+  //      Learned words are still needed as SRS review candidates. If we
+  //      honoured hideLearnedWords here, a user with that setting on would
+  //      never see any review words in their session — they would only ever
+  //      see brand-new words, breaking spaced repetition entirely.
+  //
+  const settingsForPool = useMemo(
+    () => ({ ...settings, hideLearnedWords: false }),
+    // Deliberately exclude hideLearnedWords from deps — see comment above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [settings.theme, settings.dailyGoal, settings.hapticsEnabled,
+     settings.animationsEnabled, settings.autoPronounce],
   );
-  // Always 5 words per round — number of rounds = ceil(dailyGoal / 5), fully dynamic
+
+  const { filteredWords, hasActiveFilters } = useWordFilter(
+    words,
+    '',
+    filters,
+    settingsForPool,
+    progress,
+    favorites,
+    null,
+  );
+
+  // Pool = filtered words when filters are on; full dictionary otherwise.
+  const sessionPool: WordFamily[] = hasActiveFilters ? filteredWords : words;
+
+  // Guard: Matching phase needs ≥ MIN_POOL_SIZE words. If the filtered pool is
+  // too small, render a dedicated warning screen instead of a broken session.
+  const tooFewWords = hasActiveFilters && filteredWords.length < MIN_POOL_SIZE;
+
+  // ── Session words — frozen at mount ───────────────────────────────────────
+  // buildSession is called once via useState initialiser so the word list never
+  // changes while a session is in progress (even if context changes).
+  const [sessionWords] = useState<WordFamily[]>(() => {
+    if (tooFewWords) return [];
+    return buildSession(sessionPool, progress.learned, settings.dailyGoal, progress.learnedDates);
+  });
+
   const MATCH_BATCH_SIZE = 5;
   const matchBatches = useMemo(
     () => chunkArray(sessionWords, MATCH_BATCH_SIZE),
-    [sessionWords]
+    [sessionWords],
   );
 
   const [view, setView]                = useState<LearnView>({ mode: 'path' });
   const [completedPhases, setCompleted] = useState<Set<string>>(new Set());
-  const [flashQueue, setFlashQueue] = useState<number[]>(() =>
-    // Must use sessionWords.length — not hardcoded 5 or dailyGoal
-    // because buildSession may return fewer words than goal (e.g. near end of dictionary)
-    Array.from({ length: sessionWords.length }, (_, i) => i)
+  const [flashQueue, setFlashQueue]    = useState<number[]>(() =>
+    Array.from({ length: sessionWords.length }, (_, i) => i),
   );
-  const [flashPos, setFlashPos] = useState(0); // position in flashQueue
+  const [flashPos, setFlashPos]        = useState(0);
   const [fbIndex, setFbIndex]          = useState(0);
-  const [learnedCount, setLearnedCount] = useState(0); // words marked learned this session
+  const [learnedCount, setLearnedCount] = useState(0);
   const [matchIndex, setMatchIndex]    = useState(0);
 
-  const currentPhaseIdx = completedPhases.size; // 0, 1, 2 → done = 3
+  const currentPhaseIdx = completedPhases.size;
 
   const activeNodeRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -122,16 +170,11 @@ export const Learn: React.FC = () => {
     }
   }, [view.mode, completedPhases.size]);
 
-  // ── Dual-progress bar calculations ──────────────────────────────────────────
-  // Bar is split into 3 equal thirds, one per phase.
-  // Layer 1 bg-primary:            completed phases
-  // Layer 2 bg-primary-container:  progress inside the current active phase
+  // ── Progress bar ───────────────────────────────────────────────────────────
   const completedPhasePct = (completedPhases.size / 3) * 100;
 
   const currentPhaseInternalPct: number = (() => {
     if (view.mode === 'flashcard') {
-      // FIX: count unique word indices already passed (not flashPos/queue.length which
-      // grows unboundedly as "See Again" appends duplicates, making the bar regress).
       const uniqueSeen = new Set(flashQueue.slice(0, flashPos)).size;
       return (uniqueSeen / sessionWords.length) * 100;
     }
@@ -140,10 +183,9 @@ export const Learn: React.FC = () => {
     return 0;
   })();
 
-  // Width of lighter overlay as % of full bar
   const currentPhaseBarWidth = (currentPhaseInternalPct / 100) * (100 / 3);
 
-  // ── Build phase nodes with dynamic sublabels ───────────────────────────────
+  // ── Phase nodes ────────────────────────────────────────────────────────────
   const phaseNodes: PhaseNode[] = PHASE_DEFS.map((def, i) => ({
     ...def,
     sublabel:
@@ -157,8 +199,7 @@ export const Learn: React.FC = () => {
     (phaseId: string) => {
       triggerHaptic(settings.hapticsEnabled, 'tap');
       if (phaseId === 'flashcards') {
-        const initialQueue = Array.from({ length: sessionWords.length }, (_, i) => i);
-        setFlashQueue(initialQueue);
+        setFlashQueue(Array.from({ length: sessionWords.length }, (_, i) => i));
         setFlashPos(0);
         setView({ mode: 'flashcard', wordIndex: 0 });
       } else if (phaseId === 'matching') {
@@ -169,7 +210,7 @@ export const Learn: React.FC = () => {
         setView({ mode: 'fillblank', wordIndex: 0 });
       }
     },
-    [settings.hapticsEnabled]
+    [settings.hapticsEnabled, sessionWords.length],
   );
 
   const handleFlashGotIt = useCallback(() => {
@@ -184,7 +225,6 @@ export const Learn: React.FC = () => {
   }, [flashPos, flashQueue]);
 
   const handleFlashSeeAgain = useCallback(() => {
-    // Re-append current word index to end of queue
     const currentWordIdx = flashQueue[flashPos];
     const newQueue = [...flashQueue, currentWordIdx];
     setFlashQueue(newQueue);
@@ -206,36 +246,123 @@ export const Learn: React.FC = () => {
   }, [matchIndex, matchBatches.length]);
 
   const handleFbNext = useCallback(() => {
-    // FIX (critical): markLearned has a toggle behaviour — calling it on a word that was
-    // already learned AND counted today will silently un-learn it. This happens on repeat
-    // sessions when the pool runs out of new words and learned words fill the queue.
-    // Guard: only call markLearned when the word has NOT been counted today.
     const today = getLocalDateString();
-    const alreadyCountedToday = (progress.learnedDates ?? {})[sessionWords[fbIndex].id] === today;
+    const alreadyCountedToday =
+      (progress.learnedDates ?? {})[sessionWords[fbIndex].id] === today;
+
     if (!alreadyCountedToday) {
       markLearned(sessionWords[fbIndex].id);
+      // Only increment for genuinely new learns to keep the complete screen accurate
+      setLearnedCount(c => c + 1);
     }
-    setLearnedCount(c => c + 1);
+
     const next = fbIndex + 1;
     if (next >= sessionWords.length) {
       setCompleted(prev => new Set([...prev, 'fillblank']));
-      // FIX: persist XP to IndexedDB via addXP — previously it was display-only.
-      // learnedCount hasn't flushed yet, so use learnedCount + 1 for the final tally.
-      addXP((learnedCount + 1) * 10);
+      setLearnedCount(c => {
+        const finalCount = alreadyCountedToday ? c : c + 1;
+        addXP(finalCount * 10);
+        return finalCount;
+      });
       setView({ mode: 'complete' });
     } else {
       setFbIndex(next);
       setView({ mode: 'fillblank', wordIndex: next });
     }
-  }, [fbIndex, sessionWords, markLearned, progress.learnedDates, addXP, learnedCount]);
+  }, [fbIndex, sessionWords, markLearned, progress.learnedDates, addXP]);
+
+  // Award partial XP when user exits mid-session after completing some fill-blank words
+  const handleExit = useCallback(() => {
+    if (learnedCount > 0) addXP(learnedCount * 10);
+    navigate('/home');
+  }, [navigate, learnedCount, addXP]);
 
   const handlePlayAgain = useCallback(() => {
-    // FIX: navigate('/learn') is enough because the Learn route is now keyed by location.key
-    // (see App.tsx). Each navigate() call creates a new history entry with a unique key,
-    // which causes React to unmount the current Learn instance and mount a fresh one.
-    // The old setTimeout(fn, 60) hack is no longer needed.
     navigate('/learn');
   }, [navigate]);
+
+  // ── Too-few-words screen ───────────────────────────────────────────────────
+  // The Matching phase requires at least MIN_POOL_SIZE words per batch.
+  // When active filters shrink the pool below that, we cannot run a session —
+  // show a clear explanation with two resolution options.
+  if (tooFewWords) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <div className="sticky top-0 z-20 bg-background px-4 pt-3 pb-3 shrink-0">
+          <div className="flex items-center justify-between mb-3">
+            <button
+              onClick={() => navigate('/home')}
+              aria-label="Go back"
+              className="p-2 -ml-1 rounded-full text-on-surface-variant hover:bg-surface-container transition-colors active:scale-90"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <p className="m3-title-small text-on-surface font-semibold">Start Session</p>
+            <span className="w-8" />
+          </div>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: [0.2, 0, 0, 1] }}
+          className="flex-1 flex flex-col items-center justify-center px-6 gap-6"
+        >
+          <div className="w-20 h-20 bg-error/10 rounded-full flex items-center justify-center">
+            <AlertTriangle className="w-10 h-10 text-error" />
+          </div>
+
+          <div className="text-center">
+            <h2 className="m3-headline-small text-on-surface mb-2">Not enough words</h2>
+            <p className="m3-body-large text-on-surface-variant max-w-xs">
+              Your active filters only match{' '}
+              <span className="font-bold text-primary">{filteredWords.length}</span>{' '}
+              word{filteredWords.length !== 1 ? 's' : ''}. A session needs at least{' '}
+              <span className="font-bold text-on-surface">{MIN_POOL_SIZE}</span> words
+              for the Matching phase to work.
+            </p>
+          </div>
+
+          {/* Show which filters are currently active */}
+          <div className="bg-surface-container rounded-[20px] px-5 py-4 w-full max-w-sm">
+            <p className="m3-label-medium text-primary uppercase tracking-wider font-bold mb-2">
+              Active Filters
+            </p>
+            <p className="m3-body-medium text-on-surface break-words">
+              {buildFilterSummary(filters) || 'None'}
+            </p>
+          </div>
+
+          <div className="w-full max-w-sm flex flex-col gap-3">
+            <button
+              onClick={() => {
+                triggerHaptic(settings.hapticsEnabled, 'tap');
+                updateFilters({
+                  level: [], cefr: [], pos: [], letter: [], theme: [], favoritesOnly: false,
+                });
+                navigate('/learn');
+              }}
+              className="w-full py-4 bg-primary text-on-primary rounded-full m3-label-large flex items-center justify-center gap-2 active:scale-95 transition-transform duration-100"
+            >
+              <SlidersHorizontal className="w-5 h-5" />
+              Clear Filters & Start
+            </button>
+
+            <button
+              onClick={() => {
+                triggerHaptic(settings.hapticsEnabled, 'tap');
+                navigate('/filter');
+              }}
+              className="w-full py-4 bg-surface-container-high text-on-surface rounded-full m3-label-large flex items-center justify-center gap-2 active:scale-95 transition-transform duration-100"
+            >
+              Adjust Filters
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   // ── Session complete ───────────────────────────────────────────────────────
   if (view.mode === 'complete') {
@@ -267,10 +394,11 @@ export const Learn: React.FC = () => {
 
       {/* ── Sticky header ────────────────────────────────────────── */}
       <div className="sticky top-0 z-20 bg-background px-4 pt-3 pb-3 shrink-0">
-        {/* Row 1: X button + phase counter */}
+
+        {/* Row 1: X + sublabel + phase counter */}
         <div className="flex items-center justify-between mb-3">
           <button
-            onClick={() => navigate('/home')}
+            onClick={handleExit}
             aria-label="Exit session"
             className="p-2 -ml-1 rounded-full text-on-surface-variant hover:bg-surface-container transition-colors active:scale-90"
             style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -285,15 +413,13 @@ export const Learn: React.FC = () => {
           </span>
         </div>
 
-        {/* Row 2: full-width dual-colour bar — same as Total Mastery */}
+        {/* Row 2: dual-colour progress bar */}
         <div className="w-full bg-on-surface/20 rounded-full h-2 overflow-hidden relative">
-          {/* Layer 1: completed phases — solid primary */}
           <motion.div
             className="absolute left-0 top-0 h-full bg-primary rounded-full"
             animate={{ width: `${completedPhasePct}%` }}
             transition={{ duration: 0.5, ease: [0.2, 0, 0, 1] }}
           />
-          {/* Layer 2: current phase in-progress — lighter tint */}
           <motion.div
             className="absolute top-0 h-full bg-primary-container rounded-full"
             animate={{
@@ -303,6 +429,34 @@ export const Learn: React.FC = () => {
             transition={{ duration: 0.35, ease: [0.2, 0, 0, 1] }}
           />
         </div>
+
+        {/* Row 3: filter context badge
+            Shown only on the path screen so it doesn't clutter phase views.
+            Tells the user at a glance that their session is drawn from a
+            filtered subset, e.g. "Hard · Business · 23 words". */}
+        <AnimatePresence>
+          {hasActiveFilters && view.mode === 'path' && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, marginTop: 0 }}
+              animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
+              exit={{ opacity: 0, height: 0, marginTop: 0 }}
+              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="flex items-center justify-between bg-primary/10 rounded-full px-4 py-1.5">
+                <div className="flex items-center gap-2 min-w-0">
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-primary shrink-0" />
+                  <span className="m3-label-small text-primary font-semibold truncate">
+                    {buildFilterSummary(filters)}
+                  </span>
+                </div>
+                <span className="m3-label-small text-primary/70 shrink-0 ml-2">
+                  {sessionPool.length} words
+                </span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* ── Scrollable content ────────────────────────────────────── */}
@@ -329,11 +483,7 @@ export const Learn: React.FC = () => {
 
                 return (
                   <React.Fragment key={node.id}>
-                    {/* Node row */}
-                    <div
-                      ref={isCurrent ? activeNodeRef : undefined}
-                      className=""
-                    >
+                    <div ref={isCurrent ? activeNodeRef : undefined}>
                       <PathNode
                         node={node}
                         state={nodeState}
@@ -341,13 +491,8 @@ export const Learn: React.FC = () => {
                         onTap={() => handleNodeTap(node.id)}
                       />
                     </div>
-
-                    {/* Diagonal connector (not after last) */}
                     {i < phaseNodes.length - 1 && (
-                      <Connector
-                        fromSide={side}
-                        done={completedPhases.has(node.id)}
-                      />
+                      <Connector fromSide={side} done={completedPhases.has(node.id)} />
                     )}
                   </React.Fragment>
                 );
@@ -360,8 +505,6 @@ export const Learn: React.FC = () => {
             <FlashcardPhase
               key={`flash-${view.wordIndex}`}
               word={sessionWords[view.wordIndex]}
-              wordIndex={view.wordIndex}
-              totalInQueue={flashQueue.length}
               onGotIt={handleFlashGotIt}
               onSeeAgain={handleFlashSeeAgain}
             />
