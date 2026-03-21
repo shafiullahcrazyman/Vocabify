@@ -123,6 +123,33 @@ export const buildMultiFillBlank = (
     }
   }
 
+  // Fix POS assignment for duplicate form strings.
+  //
+  // When the same spelling is both Noun and Verb (e.g. "array"), the regex
+  // finds it at multiple positions but the overlap-dedup above always keeps
+  // the same POS for every occurrence (whichever was first in `sorted`).
+  // Example: "They managed to array the soldiers in a vast array of colors."
+  //   -> both blanks end up as "Noun" -- wrong.
+  //
+  // Fix: build a list of all distinct POS for each form string from `forms`,
+  // then cycle through them in order across repeated occurrences, so each
+  // occurrence gets a different POS label.
+  const formPosList = new Map<string, string[]>();
+  for (const { form, pos } of forms) {
+    const key = form.toLowerCase();
+    if (!formPosList.has(key)) formPosList.set(key, []);
+    const list = formPosList.get(key)!;
+    if (!list.includes(pos)) list.push(pos);
+  }
+  const formPosUsage = new Map<string, number>();
+  for (const m of filtered) {
+    const key = m.form.toLowerCase();
+    const posList = formPosList.get(key) ?? [m.pos];
+    const usageIdx = formPosUsage.get(key) ?? 0;
+    m.pos = posList[usageIdx % posList.length];
+    formPosUsage.set(key, usageIdx + 1);
+  }
+
   // Build blanked sentence by replacing in reverse (preserves indices)
   let sentence = word.example;
   for (let i = filtered.length - 1; i >= 0; i--) {
