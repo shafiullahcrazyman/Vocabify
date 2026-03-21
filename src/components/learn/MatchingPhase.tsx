@@ -48,21 +48,55 @@ function wordToPairs(word: WordFamily): PosPair[] {
 }
 
 function buildPosSubBatches(batch: WordFamily[]): PosPair[][] {
-  return batch
-    .map(pairs => {
-      const raw = wordToPairs(pairs);
-      // Keep only first occurrence of each unique form string.
-      // "fine" noun/verb/adj → only one pair kept (Noun).
-      // "familiar/familiarize/familiar" → each unique form kept.
-      const seen = new Set<string>();
-      return raw.filter(p => {
-        const key = p.form.toLowerCase();
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-    })
-    .filter(pairs => pairs.length > 1); // need at least 2 distinct pairs to be a matching exercise
+  // ── Strategy ───────────────────────────────────────────────────────────────
+  // Per-word sub-batches: each round focuses on one word's forms.
+  // But first deduplicate globally so a form that appears as multiple POS
+  // in the same word (e.g. paper = Noun AND Verb) is merged into one tile
+  // with a combined label ("Noun · Verb"), never shown as two identical tiles.
+  //
+  // Step 1: Build a global form → merged PosPair map across ALL words.
+  // Step 2: For each word, collect its unique forms from the global map.
+  // Step 3: Skip words that contribute <2 distinct forms (nothing to match).
+  // Step 4: Mark each form as used once assigned so it never repeats.
+
+  // Step 1 — global dedup with merged POS labels
+  const globalMap = new Map<string, PosPair>();
+  for (const word of batch) {
+    for (const pair of wordToPairs(word)) {
+      const key = pair.form.toLowerCase();
+      if (globalMap.has(key)) {
+        const existing = globalMap.get(key)!;
+        if (!existing.posLabel.includes(pair.posLabel)) {
+          globalMap.set(key, {
+            ...existing,
+            posLabel: `${existing.posLabel} · ${pair.posLabel}`,
+          });
+        }
+      } else {
+        globalMap.set(key, pair);
+      }
+    }
+  }
+
+  // Steps 2-4 — per-word sub-batches, each form consumed only once
+  const used = new Set<string>();
+  const result: PosPair[][] = [];
+
+  for (const word of batch) {
+    // Unique form keys for this word (noun=verb="paper" → only one "paper" key)
+    const keys = wordToPairs(word)
+      .map(p => p.form.toLowerCase())
+      .filter((k, i, arr) => arr.indexOf(k) === i);
+
+    // Only include forms not already used in a previous word's sub-batch
+    const fresh = keys.filter(k => !used.has(k));
+    if (fresh.length < 2) continue;
+
+    result.push(fresh.map(k => globalMap.get(k)!));
+    fresh.forEach(k => used.add(k));
+  }
+
+  return result;
 }
 
 // ── Stage banner ───────────────────────────────────────────────────────────────
