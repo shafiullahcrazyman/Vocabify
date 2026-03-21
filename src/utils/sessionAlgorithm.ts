@@ -1,5 +1,5 @@
 import { WordFamily } from '../types';
-import { shuffle } from './shuffle'; // FIX: was biased sort-based shuffle defined inline
+import { shuffle } from './shuffle';
 
 /** First non-"x" word form — used for matching tiles and distractors. */
 export const getPrimaryForm = (word: WordFamily): string => {
@@ -22,21 +22,41 @@ export const getValidForms = (word: WordFamily): { form: string; pos: string }[]
 
 /**
  * Selects words for a session.
- * Priority: unlearned first → learned words for review.
+ * Priority: unlearned first (shuffled) → learned words for review.
+ *
+ * FIX #5 — Spaced Repetition for review words:
+ * Learned words are now sorted by their last-reviewed date ascending so the
+ * words the user studied longest ago appear first for review. Previously they
+ * were shuffled randomly, giving no SRS benefit. Words with no date record
+ * (e.g. migrated data) are treated as the oldest and always come first.
+ *
  * Always returns at least 4 so matching batches are never empty.
  */
 export const buildSession = (
   words: WordFamily[],
   learnedIds: string[],
   goal: number,
+  learnedDates?: Record<string, string>,
 ): WordFamily[] => {
   const size = Math.max(goal, 4);
   const learnedSet = new Set(learnedIds);
   const valid = words.filter(w =>
     [w.noun, w.verb, w.adjective, w.adverb].some(f => f && f !== 'x')
   );
+
   const unlearned = shuffle(valid.filter(w => !learnedSet.has(w.id)));
-  const learned   = shuffle(valid.filter(w => learnedSet.has(w.id)));
+
+  // Sort learned words oldest-reviewed first for basic spaced repetition.
+  // Words missing a date entry are treated as '0000-00-00' so they surface first.
+  const dates = learnedDates ?? {};
+  const learned = valid
+    .filter(w => learnedSet.has(w.id))
+    .sort((a, b) => {
+      const da = dates[a.id] ?? '0000-00-00';
+      const db = dates[b.id] ?? '0000-00-00';
+      return da.localeCompare(db);
+    });
+
   return [...unlearned, ...learned].slice(0, size);
 };
 
@@ -140,12 +160,7 @@ export const buildMultiFillBlank = (
   return { sentence, blanks };
 };
 
-// Keep old single-blank export for any legacy imports
-export interface FillBlankData {
-  sentence: string;
-  blank: string;
-  options: string[];
-}
-export const buildFillBlank = buildMultiFillBlank as unknown as (
-  word: WordFamily, pool: WordFamily[]
-) => FillBlankData | null;
+// FIX #9: The old buildFillBlank alias was cast through `unknown`, completely
+// bypassing TypeScript. Any call-site accessing `.blank` (singular) would get
+// undefined at runtime since the real return shape has `.blanks` (plural).
+// The alias has been removed. Use buildMultiFillBlank directly everywhere.
