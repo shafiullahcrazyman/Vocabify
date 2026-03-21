@@ -48,33 +48,48 @@ function wordToPairs(word: WordFamily): PosPair[] {
 }
 
 function buildPosSubBatches(batch: WordFamily[]): PosPair[][] {
-  return batch
-    .map(word => {
-      const raw = wordToPairs(word);
+  // ── Cross-batch approach ───────────────────────────────────────────────────
+  // Old approach: one sub-batch per word → fails for homonyms (paper = Noun & Verb)
+  // because after merging identical forms you can end up with only 1 pair per word.
+  //
+  // New approach: collect ALL (form, posLabel) pairs from EVERY word in the batch,
+  // merge any that share the same lowercase form string into one combined entry
+  // (e.g. "paper(Noun)" + "paper(Verb)" → "paper(Noun · Verb)"),
+  // then chunk into groups of 4 for display.
+  // This gives a richer, cross-word exercise and handles homonyms correctly.
 
-      // Group pairs by lowercase form string.
-      // If multiple POS share the same spelling (e.g. "paper" = Noun & Verb),
-      // merge them into ONE pair with a combined posLabel ("Noun · Verb").
-      // This avoids two visually identical left tiles that confuse the user,
-      // and correctly teaches that the word serves multiple roles.
-      const formMap = new Map<string, PosPair>();
-      for (const pair of raw) {
-        const key = pair.form.toLowerCase();
-        if (formMap.has(key)) {
-          // Append the extra POS label to the existing entry
-          const existing = formMap.get(key)!;
+  const formMap = new Map<string, PosPair>();
+
+  for (const word of batch) {
+    const pairs = wordToPairs(word);
+    for (const pair of pairs) {
+      const key = pair.form.toLowerCase();
+      if (formMap.has(key)) {
+        const existing = formMap.get(key)!;
+        // Only append if this POS label isn't already listed
+        if (!existing.posLabel.includes(pair.posLabel)) {
           formMap.set(key, {
             ...existing,
             posLabel: `${existing.posLabel} · ${pair.posLabel}`,
           });
-        } else {
-          formMap.set(key, pair);
         }
+      } else {
+        formMap.set(key, pair);
       }
+    }
+  }
 
-      return [...formMap.values()];
-    })
-    .filter(pairs => pairs.length > 1); // need at least 2 distinct forms to be a matching exercise
+  const allPairs = [...formMap.values()];
+  if (allPairs.length < 2) return [];
+
+  // Chunk into groups of 4 (or fewer for the last group)
+  const CHUNK = 4;
+  const chunks: PosPair[][] = [];
+  for (let i = 0; i < allPairs.length; i += CHUNK) {
+    const chunk = allPairs.slice(i, i + CHUNK);
+    if (chunk.length >= 2) chunks.push(chunk);  // need at least 2 to be a matching exercise
+  }
+  return chunks;
 }
 
 // ── Stage banner ───────────────────────────────────────────────────────────────
