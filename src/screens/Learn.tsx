@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { AnimatePresence, motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { X, BookOpen, Shuffle, PenLine } from 'lucide-react';
-import { useAppContext } from '../context/AppContext';
+import { useAppContext, getLocalDateString } from '../context/AppContext';
 import { buildSession, chunkArray } from '../utils/sessionAlgorithm';
 import { PathNode, NodeState, PhaseNode } from '../components/learn/PathNode';
 import { FlashcardPhase } from '../components/learn/FlashcardPhase';
@@ -86,7 +86,7 @@ type LearnView =
 // ── Component ──────────────────────────────────────────────────────────────────
 export const Learn: React.FC = () => {
   const navigate = useNavigate();
-  const { words, progress, settings, markLearned } = useAppContext();
+  const { words, progress, settings, markLearned, addXP, streak } = useAppContext();
 
   const [sessionWords] = useState<WordFamily[]>(() =>
     buildSession(words, progress.learned, settings.dailyGoal)
@@ -129,7 +129,12 @@ export const Learn: React.FC = () => {
   const completedPhasePct = (completedPhases.size / 3) * 100;
 
   const currentPhaseInternalPct: number = (() => {
-    if (view.mode === 'flashcard') return (flashPos / flashQueue.length) * 100;
+    if (view.mode === 'flashcard') {
+      // FIX: count unique word indices already passed (not flashPos/queue.length which
+      // grows unboundedly as "See Again" appends duplicates, making the bar regress).
+      const uniqueSeen = new Set(flashQueue.slice(0, flashPos)).size;
+      return (uniqueSeen / sessionWords.length) * 100;
+    }
     if (view.mode === 'matching')  return (view.batchIndex / matchBatches.length) * 100;
     if (view.mode === 'fillblank') return (view.wordIndex / sessionWords.length) * 100;
     return 0;
@@ -201,27 +206,46 @@ export const Learn: React.FC = () => {
   }, [matchIndex, matchBatches.length]);
 
   const handleFbNext = useCallback(() => {
-    markLearned(sessionWords[fbIndex].id);
+    // FIX (critical): markLearned has a toggle behaviour — calling it on a word that was
+    // already learned AND counted today will silently un-learn it. This happens on repeat
+    // sessions when the pool runs out of new words and learned words fill the queue.
+    // Guard: only call markLearned when the word has NOT been counted today.
+    const today = getLocalDateString();
+    const alreadyCountedToday = (progress.learnedDates ?? {})[sessionWords[fbIndex].id] === today;
+    if (!alreadyCountedToday) {
+      markLearned(sessionWords[fbIndex].id);
+    }
     setLearnedCount(c => c + 1);
     const next = fbIndex + 1;
     if (next >= sessionWords.length) {
       setCompleted(prev => new Set([...prev, 'fillblank']));
-      // All 3 phases done → session complete
+      // FIX: persist XP to IndexedDB via addXP — previously it was display-only.
+      // learnedCount hasn't flushed yet, so use learnedCount + 1 for the final tally.
+      addXP((learnedCount + 1) * 10);
       setView({ mode: 'complete' });
     } else {
       setFbIndex(next);
       setView({ mode: 'fillblank', wordIndex: next });
     }
-  }, [fbIndex, sessionWords, markLearned]);
+  }, [fbIndex, sessionWords, markLearned, progress.learnedDates, addXP, learnedCount]);
 
   const handlePlayAgain = useCallback(() => {
-    navigate('/home');
-    setTimeout(() => navigate('/learn'), 60);
+    // FIX: navigate('/learn') is enough because the Learn route is now keyed by location.key
+    // (see App.tsx). Each navigate() call creates a new history entry with a unique key,
+    // which causes React to unmount the current Learn instance and mount a fresh one.
+    // The old setTimeout(fn, 60) hack is no longer needed.
+    navigate('/learn');
   }, [navigate]);
 
   // ── Session complete ───────────────────────────────────────────────────────
   if (view.mode === 'complete') {
-    return <SessionComplete wordsCompleted={learnedCount} onPlayAgain={handlePlayAgain} />;
+    return (
+      <SessionComplete
+        wordsCompleted={learnedCount}
+        totalXP={streak.totalXP ?? 0}
+        onPlayAgain={handlePlayAgain}
+      />
+    );
   }
 
   // ── Header sub-label ───────────────────────────────────────────────────────
