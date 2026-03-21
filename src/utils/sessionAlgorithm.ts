@@ -1,6 +1,5 @@
 import { WordFamily } from '../types';
-
-const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
+import { shuffle } from './shuffle'; // FIX: was biased sort-based shuffle defined inline
 
 /** First non-"x" word form — used for matching tiles and distractors. */
 export const getPrimaryForm = (word: WordFamily): string => {
