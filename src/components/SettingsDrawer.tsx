@@ -71,10 +71,10 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
             onClick={handleClose}
           />
 
-          {/* Drawer panel — DefaultSpatial (partial screen, position) */}
+          {/* Drawer panel — enters with M3 emphasized-decelerate (no overshoot), exits with exitCurve */}
           <motion.div
             initial={{ x: '-100%' }}
-            animate={{ x: 0, transition: anim ? defaultSpatial : { duration: 0.15 } }}
+            animate={{ x: 0, transition: anim ? { duration: 0.35, ease: [0.05, 0.7, 0.1, 1] } : { duration: 0.15 } }}
             exit={{ x: '-100%', transition: anim ? exitCurve : { duration: 0.15 } }}
             className="relative bg-background w-[calc(100%-56px)] max-w-[380px] h-full flex flex-col"
           >
