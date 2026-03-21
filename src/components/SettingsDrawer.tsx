@@ -184,7 +184,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                   </div>
                 </div>
               ))}
-            </div>
 
               {/* Start Learning — inside scrollable content at the bottom */}
               <button
