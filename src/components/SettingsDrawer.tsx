@@ -98,24 +98,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-12 space-y-8">
 
-            {/* Start Learning */}
-              <button
-                onClick={() => {
-                  triggerHaptic(settings.hapticsEnabled, 'success');
-                  // FIX: close the drawer first so its overlay doesn't block the Learn screen.
-                  // The exit animation is 150ms (exitCurve), so navigating after 160ms ensures
-                  // the drawer is fully gone before Learn mounts.
-                  onClose();
-                  setTimeout(() => navigate('/learn'), 160);
-                }}
-                aria-label="Start a learning session"
-                className="w-full py-5 bg-primary text-on-primary rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform duration-150"
-                style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '0.02em' }}
-              >
-                <Zap className="w-6 h-6" />
-                Start Learning
-              </button>
-
               {/* Appearance */}
               <div>
                 <h3 className="m3-label-large text-primary px-4 mb-2 tracking-wide uppercase font-bold">Appearance</h3>
@@ -204,6 +186,23 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Start Learning — sticky footer */}
+            <div className="shrink-0 p-4 sm:p-6">
+              <button
+                onClick={() => {
+                  triggerHaptic(settings.hapticsEnabled, 'success');
+                  onClose();
+                  setTimeout(() => navigate('/learn'), 160);
+                }}
+                aria-label="Start a learning session"
+                className="w-full py-5 bg-primary text-on-primary rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform duration-150"
+                style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '0.02em' }}
+              >
+                <Zap className="w-6 h-6" />
+                Start Learning
+              </button>
             </div>
           </motion.div>
           </div>  {/* end clip wrapper */}
