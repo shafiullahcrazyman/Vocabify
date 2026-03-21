@@ -35,4 +35,5 @@ export interface StreakData {
   current: number;
   longest: number;
   lastGoalDate: string; // YYYY-MM-DD of the last day the daily goal was met
+  totalXP: number;      // cumulative XP earned across all sessions
 }
