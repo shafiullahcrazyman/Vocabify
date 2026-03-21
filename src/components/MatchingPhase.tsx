@@ -48,48 +48,55 @@ function wordToPairs(word: WordFamily): PosPair[] {
 }
 
 function buildPosSubBatches(batch: WordFamily[]): PosPair[][] {
-  // ── Cross-batch approach ───────────────────────────────────────────────────
-  // Old approach: one sub-batch per word → fails for homonyms (paper = Noun & Verb)
-  // because after merging identical forms you can end up with only 1 pair per word.
+  // ── Strategy ───────────────────────────────────────────────────────────────
+  // Per-word sub-batches: each round focuses on one word's forms.
+  // But first deduplicate globally so a form that appears as multiple POS
+  // in the same word (e.g. paper = Noun AND Verb) is merged into one tile
+  // with a combined label ("Noun · Verb"), never shown as two identical tiles.
   //
-  // New approach: collect ALL (form, posLabel) pairs from EVERY word in the batch,
-  // merge any that share the same lowercase form string into one combined entry
-  // (e.g. "paper(Noun)" + "paper(Verb)" → "paper(Noun · Verb)"),
-  // then chunk into groups of 4 for display.
-  // This gives a richer, cross-word exercise and handles homonyms correctly.
+  // Step 1: Build a global form → merged PosPair map across ALL words.
+  // Step 2: For each word, collect its unique forms from the global map.
+  // Step 3: Skip words that contribute <2 distinct forms (nothing to match).
+  // Step 4: Mark each form as used once assigned so it never repeats.
 
-  const formMap = new Map<string, PosPair>();
-
+  // Step 1 — global dedup with merged POS labels
+  const globalMap = new Map<string, PosPair>();
   for (const word of batch) {
-    const pairs = wordToPairs(word);
-    for (const pair of pairs) {
+    for (const pair of wordToPairs(word)) {
       const key = pair.form.toLowerCase();
-      if (formMap.has(key)) {
-        const existing = formMap.get(key)!;
-        // Only append if this POS label isn't already listed
+      if (globalMap.has(key)) {
+        const existing = globalMap.get(key)!;
         if (!existing.posLabel.includes(pair.posLabel)) {
-          formMap.set(key, {
+          globalMap.set(key, {
             ...existing,
             posLabel: `${existing.posLabel} · ${pair.posLabel}`,
           });
         }
       } else {
-        formMap.set(key, pair);
+        globalMap.set(key, pair);
       }
     }
   }
 
-  const allPairs = [...formMap.values()];
-  if (allPairs.length < 2) return [];
+  // Steps 2-4 — per-word sub-batches, each form consumed only once
+  const used = new Set<string>();
+  const result: PosPair[][] = [];
 
-  // Chunk into groups of 4 (or fewer for the last group)
-  const CHUNK = 4;
-  const chunks: PosPair[][] = [];
-  for (let i = 0; i < allPairs.length; i += CHUNK) {
-    const chunk = allPairs.slice(i, i + CHUNK);
-    if (chunk.length >= 2) chunks.push(chunk);  // need at least 2 to be a matching exercise
+  for (const word of batch) {
+    // Unique form keys for this word (noun=verb="paper" → only one "paper" key)
+    const keys = wordToPairs(word)
+      .map(p => p.form.toLowerCase())
+      .filter((k, i, arr) => arr.indexOf(k) === i);
+
+    // Only include forms not already used in a previous word's sub-batch
+    const fresh = keys.filter(k => !used.has(k));
+    if (fresh.length < 2) continue;
+
+    result.push(fresh.map(k => globalMap.get(k)!));
+    fresh.forEach(k => used.add(k));
   }
-  return chunks;
+
+  return result;
 }
 
 // ── Stage banner ───────────────────────────────────────────────────────────────
