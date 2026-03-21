@@ -7,10 +7,12 @@ import { getValidForms, getPrimaryForm } from '../../utils/sessionAlgorithm';
 import { useAppContext } from '../../context/AppContext';
 import { triggerHaptic } from '../../utils/haptics';
 
+// FIX #7 — Removed dead props `wordIndex` and `totalInQueue`.
+// Both were declared in the interface and passed from Learn.tsx but were never
+// read inside this component. The header counter is handled by Learn.tsx's
+// subLabel string. Removing them keeps the contract clean and prevents confusion.
 interface Props {
   word: WordFamily;
-  wordIndex: number;
-  totalInQueue: number;
   onGotIt: () => void;
   onSeeAgain: () => void;
 }
@@ -37,8 +39,6 @@ function rowRounding(index: number, total: number): string {
 
 export const FlashcardPhase: React.FC<Props> = ({
   word,
-  wordIndex,
-  totalInQueue,
   onGotIt,
   onSeeAgain,
 }) => {
@@ -73,8 +73,7 @@ export const FlashcardPhase: React.FC<Props> = ({
         window.speechSynthesis.cancel();
       };
     }
-  // FIX: settings.autoPronounce was missing — toggling it mid-session had no effect
-  // until the card changed. forms is omitted (deterministically derived from word.id).
+  // forms is omitted (deterministically derived from word.id).
   }, [word.id, settings.autoPronounce]);
 
   // Always show all 4 POS rows — None/x shown in gray

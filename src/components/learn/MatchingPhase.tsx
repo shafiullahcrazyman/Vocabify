@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2 } from 'lucide-react';
 import { WordFamily } from '../../types';
 import { getPrimaryForm } from '../../utils/sessionAlgorithm';
-import { shuffle } from '../../utils/shuffle'; // FIX: replace biased sort-based shuffle
+import { shuffle } from '../../utils/shuffle';
 import { useAppContext } from '../../context/AppContext';
 import { triggerHaptic } from '../../utils/haptics';
 
@@ -48,17 +48,6 @@ function wordToPairs(word: WordFamily): PosPair[] {
 }
 
 function buildPosSubBatches(batch: WordFamily[]): PosPair[][] {
-  // ── Strategy ───────────────────────────────────────────────────────────────
-  // Per-word sub-batches: each round focuses on one word's forms.
-  // But first deduplicate globally so a form that appears as multiple POS
-  // in the same word (e.g. paper = Noun AND Verb) is merged into one tile
-  // with a combined label ("Noun · Verb"), never shown as two identical tiles.
-  //
-  // Step 1: Build a global form → merged PosPair map across ALL words.
-  // Step 2: For each word, collect its unique forms from the global map.
-  // Step 3: Skip words that contribute <2 distinct forms (nothing to match).
-  // Step 4: Mark each form as used once assigned so it never repeats.
-
   // Step 1 — global dedup with merged POS labels
   const globalMap = new Map<string, PosPair>();
   for (const word of batch) {
@@ -83,12 +72,10 @@ function buildPosSubBatches(batch: WordFamily[]): PosPair[][] {
   const result: PosPair[][] = [];
 
   for (const word of batch) {
-    // Unique form keys for this word (noun=verb="paper" → only one "paper" key)
     const keys = wordToPairs(word)
       .map(p => p.form.toLowerCase())
       .filter((k, i, arr) => arr.indexOf(k) === i);
 
-    // Only include forms not already used in a previous word's sub-batch
     const fresh = keys.filter(k => !used.has(k));
     if (fresh.length < 2) continue;
 
@@ -158,7 +145,6 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
   const [stage, setStage] = useState<Stage>('meaning');
 
   // ── Stage 1 ────────────────────────────────────────────────────────────────
-  // sel: { id, side } — whichever tile was tapped last
   const [sel1, setSel1]           = useState<{ id: string; side: 'left' | 'right' } | null>(null);
   const [matched1, setMatched1]   = useState<Set<string>>(new Set());
   const [wrongL1, setWrongL1]     = useState<string | null>(null);
@@ -166,36 +152,45 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
   const [locked1, setLocked1]     = useState(false);
   const [celebrate1, setCelebrate1] = useState(false);
 
+  // FIX #4 — Shuffle BOTH columns independently in Stage 1.
+  // Previously only the right (meaning) column was shuffled. The left column
+  // always showed words in their original batch order, making it trivial to
+  // exploit positional memory instead of actually learning the meanings.
+  const [leftWords]   = useState(() => shuffle(batch));
   const [rightMeaning] = useState(() =>
     shuffle(batch.map(w => ({ id: w.id, text: w.meaning_bn })))
   );
 
   // ── Stage 2 ────────────────────────────────────────────────────────────────
   const posSubBatches = useMemo(() => buildPosSubBatches(batch), [batch]);
-  const [posSubIdx, setPosSubIdx]     = useState(0);
-  const [sel2, setSel2]               = useState<{ id: string; side: 'left' | 'right' } | null>(null);
-  const [matched2, setMatched2]       = useState<Set<string>>(new Set());
-  const [wrong2L, setWrong2L]         = useState<string | null>(null);
-  const [wrong2R, setWrong2R]         = useState<string | null>(null);
-  const [locked2, setLocked2]         = useState(false);
-  const [celebrate2, setCelebrate2]   = useState(false);
-  const [rightPos, setRightPos]       = useState<PosPair[]>(() => shuffle(posSubBatches[0] ?? []));
+  const [posSubIdx, setPosSubIdx]   = useState(0);
+  const [sel2, setSel2]             = useState<{ id: string; side: 'left' | 'right' } | null>(null);
+  const [matched2, setMatched2]     = useState<Set<string>>(new Set());
+  const [wrong2L, setWrong2L]       = useState<string | null>(null);
+  const [wrong2R, setWrong2R]       = useState<string | null>(null);
+  const [locked2, setLocked2]       = useState(false);
+  const [celebrate2, setCelebrate2] = useState(false);
+
+  // FIX #4 — Shuffle BOTH columns independently in Stage 2.
+  // Left shows word forms, right shows POS labels. Both now start in a random
+  // order so the user cannot guess by position alignment.
+  const [leftPos,  setLeftPos]  = useState<PosPair[]>(() => shuffle(posSubBatches[0] ?? []));
+  const [rightPos, setRightPos] = useState<PosPair[]>(() => shuffle(posSubBatches[0] ?? []));
+
   const currentPosSub = posSubBatches[posSubIdx] ?? [];
 
   useEffect(() => {
     setSel2(null); setMatched2(new Set());
     setWrong2L(null); setWrong2R(null);
     setLocked2(false); setCelebrate2(false);
+    // Re-shuffle both columns independently when advancing to a new sub-batch.
+    setLeftPos(shuffle(posSubBatches[posSubIdx] ?? []));
     setRightPos(shuffle(posSubBatches[posSubIdx] ?? []));
-  // FIX: posSubBatches was missing from the dep array (exhaustive-deps lint warning).
-  // It is stable per mount (derived via useMemo from the batch prop which never changes
-  // within a mounted instance), so adding it here is safe and correct.
   }, [posSubIdx, posSubBatches]);
 
   // Stage 1 completion
   useEffect(() => {
     if (stage === 'meaning' && matched1.size === batch.length && batch.length > 0) {
-      // If no valid Stage 2 sub-batches exist (all words had identical forms), skip straight to complete
       if (posSubBatches.length === 0) {
         setCelebrate1(true);
         const t = setTimeout(() => { setCelebrate1(false); onComplete(); }, 900);
@@ -220,36 +215,21 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
   }, [matched2.size, currentPosSub.length, posSubIdx, posSubBatches.length, stage, onComplete]);
 
   // ── Stage 1 tap ─────────────────────────────────────────────────────────────
-  // Both sides use word.id — matching = same id tapped on opposite sides
   const handleTap1 = (id: string, side: 'left' | 'right') => {
     if (locked1 || matched1.has(id)) return;
     triggerHaptic(settings.hapticsEnabled, 'tap');
 
-    if (!sel1) {
-      setSel1({ id, side });
-      return;
-    }
-    // Tap same tile → deselect
-    if (sel1.id === id && sel1.side === side) {
-      setSel1(null);
-      return;
-    }
-    // Tap same side → switch selection
-    if (sel1.side === side) {
-      setSel1({ id, side });
-      return;
-    }
-    // Opposite side tapped
+    if (!sel1) { setSel1({ id, side }); return; }
+    if (sel1.id === id && sel1.side === side) { setSel1(null); return; }
+    if (sel1.side === side) { setSel1({ id, side }); return; }
+
     if (sel1.id === id) {
-      // Correct — IDs match
       triggerHaptic(settings.hapticsEnabled, 'success');
       setMatched1(prev => new Set([...prev, id]));
       setSel1(null);
     } else {
-      // Wrong — flash BOTH the selected tile and the tapped tile
       triggerHaptic(settings.hapticsEnabled, 'error');
       setLocked1(true);
-      // sel1.side tells us which side the originally selected tile is on
       setWrongL1(sel1.side === 'left' ? sel1.id : id);
       setWrongR1(sel1.side === 'right' ? sel1.id : id);
       setTimeout(() => { setWrongL1(null); setWrongR1(null); setSel1(null); setLocked1(false); }, 800);
@@ -257,24 +237,17 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
   };
 
   // ── Stage 2 tap ─────────────────────────────────────────────────────────────
-  // Left = POS labels, Right = word forms — both use pair.id
+  // Left = word forms, Right = POS labels — both tiles share the same pair.id.
+  // FIX #6 — wrong tile assignment uses sel2.side to correctly identify which
+  // tile is on which side, matching the same pattern as Stage 1 for consistency.
   const handleTap2 = (id: string, side: 'left' | 'right') => {
     if (locked2 || matched2.has(id)) return;
     triggerHaptic(settings.hapticsEnabled, 'tap');
 
-    if (!sel2) {
-      setSel2({ id, side });
-      return;
-    }
-    if (sel2.id === id && sel2.side === side) {
-      setSel2(null);
-      return;
-    }
-    if (sel2.side === side) {
-      setSel2({ id, side });
-      return;
-    }
-    // Opposite side
+    if (!sel2) { setSel2({ id, side }); return; }
+    if (sel2.id === id && sel2.side === side) { setSel2(null); return; }
+    if (sel2.side === side) { setSel2({ id, side }); return; }
+
     if (sel2.id === id) {
       triggerHaptic(settings.hapticsEnabled, 'success');
       setMatched2(prev => new Set([...prev, id]));
@@ -282,7 +255,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
     } else {
       triggerHaptic(settings.hapticsEnabled, 'error');
       setLocked2(true);
-      // Track which specific tile on each side was wrong
+      // sel2.side tells us which side the originally selected tile is on.
       setWrong2L(sel2.side === 'left' ? sel2.id : id);
       setWrong2R(sel2.side === 'right' ? sel2.id : id);
       setTimeout(() => { setWrong2L(null); setWrong2R(null); setSel2(null); setLocked2(false); }, 800);
@@ -312,9 +285,9 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
             transition={{ duration: 0.2 }}
             className="grid grid-cols-2 gap-3"
           >
-            {/* Left: English words */}
+            {/* Left: English words — FIX #4: now rendered from shuffled leftWords */}
             <div className="flex flex-col gap-3">
-              {batch.map(word => {
+              {leftWords.map(word => {
                 const text = getPrimaryForm(word);
                 return (
                   <Tile
@@ -378,9 +351,9 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
             )}
 
             <div className="grid grid-cols-2 gap-3">
-              {/* Left: word forms (unique per word) */}
+              {/* Left: word forms — FIX #4: now rendered from shuffled leftPos */}
               <div className="flex flex-col gap-3">
-                {currentPosSub.map(pair => (
+                {leftPos.map(pair => (
                   <Tile
                     key={`L2-${pair.id}`}
                     id={pair.id}
@@ -396,7 +369,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
                 ))}
               </div>
 
-              {/* Right: POS labels (shuffled, no dots) */}
+              {/* Right: POS labels (shuffled) */}
               <div className="flex flex-col gap-3">
                 {rightPos.map(pair => (
                   <Tile
@@ -433,8 +406,6 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
             <p className="m3-title-medium text-primary font-bold">
               {celebrate1
                 ? 'Nice! Now match the parts of speech'
-                // FIX: was always 'Round complete!' even for intermediate sub-batches.
-                // Only show 'Round complete!' on the very last sub-batch; otherwise 'Next group!'
                 : posSubIdx + 1 >= posSubBatches.length
                   ? 'Round complete!'
                   : 'Next group!'}
