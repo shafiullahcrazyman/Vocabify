@@ -61,7 +61,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex">
+        <div className="fixed inset-0 z-50 flex overflow-hidden">
           {/* Backdrop — DefaultEffects (partial screen, opacity) */}
           <motion.div
             initial={{ opacity: 0 }}
