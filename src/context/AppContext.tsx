@@ -33,6 +33,7 @@ interface AppContextType {
   markLearned: (id: string) => void;
   resetTotalProgress: () => void;
   resetDailyProgress: () => void;
+  addXP: (amount: number) => void;
   userAvatar: string | null;
   setUserAvatar: (avatar: string | null) => void;
   favorites: string[];
@@ -65,6 +66,7 @@ const defaultStreak: StreakData = {
   current: 0,
   longest: 0,
   lastGoalDate: '',
+  totalXP: 0,
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -194,6 +196,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setStreakData(defaultStreak);
   };
 
+  // FIX: persist XP so it survives across sessions
+  const addXP = (amount: number) => {
+    setStreakData(prev => ({ ...prev, totalXP: (prev.totalXP ?? 0) + amount }));
+  };
+
   const resetDailyProgress = () => {
     const today = getLocalDateString();
     const yesterday = getYesterdayString();
@@ -248,6 +255,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         markLearned,
         resetTotalProgress,
         resetDailyProgress,
+        addXP,
         userAvatar,
         setUserAvatar,
         favorites,
