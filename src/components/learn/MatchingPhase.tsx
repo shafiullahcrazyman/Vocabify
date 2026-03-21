@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2 } from 'lucide-react';
 import { WordFamily } from '../../types';
 import { getPrimaryForm } from '../../utils/sessionAlgorithm';
+import { shuffle } from '../../utils/shuffle'; // FIX: replace biased sort-based shuffle
 import { useAppContext } from '../../context/AppContext';
 import { triggerHaptic } from '../../utils/haptics';
 
@@ -28,8 +29,6 @@ interface PosPair {
   form: string;
   posLabel: string;
 }
-
-const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
 
 function tileTextSize(text: string): string {
   if (text.length <= 8)  return 'text-[17px]';
@@ -154,7 +153,10 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
     setWrong2L(null); setWrong2R(null);
     setLocked2(false); setCelebrate2(false);
     setRightPos(shuffle(posSubBatches[posSubIdx] ?? []));
-  }, [posSubIdx]);
+  // FIX: posSubBatches was missing from the dep array (exhaustive-deps lint warning).
+  // It is stable per mount (derived via useMemo from the batch prop which never changes
+  // within a mounted instance), so adding it here is safe and correct.
+  }, [posSubIdx, posSubBatches]);
 
   // Stage 1 completion
   useEffect(() => {
@@ -395,7 +397,13 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
           >
             <CheckCircle2 className="w-9 h-9 text-primary" />
             <p className="m3-title-medium text-primary font-bold">
-              {celebrate1 ? 'Nice! Now match the parts of speech' : 'Round complete!'}
+              {celebrate1
+                ? 'Nice! Now match the parts of speech'
+                // FIX: was always 'Round complete!' even for intermediate sub-batches.
+                // Only show 'Round complete!' on the very last sub-batch; otherwise 'Next group!'
+                : posSubIdx + 1 >= posSubBatches.length
+                  ? 'Round complete!'
+                  : 'Next group!'}
             </p>
           </motion.div>
         )}

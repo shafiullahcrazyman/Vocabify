@@ -7,13 +7,17 @@ import { triggerHaptic } from '../../utils/haptics';
 
 interface Props {
   wordsCompleted: number;
+  // FIX: totalXP is now the persisted lifetime total from IndexedDB (via streak.totalXP),
+  // not a session-only calculation that reset every time.
+  totalXP: number;
   onPlayAgain: () => void;
 }
 
-export const SessionComplete: React.FC<Props> = ({ wordsCompleted, onPlayAgain }) => {
+export const SessionComplete: React.FC<Props> = ({ wordsCompleted, totalXP, onPlayAgain }) => {
   const navigate = useNavigate();
   const { settings, streak } = useAppContext();
-  const xp = wordsCompleted * 10;
+  // XP earned this session only (for display alongside the persisted total)
+  const sessionXP = wordsCompleted * 10;
 
   return (
     <motion.div
@@ -58,9 +62,13 @@ export const SessionComplete: React.FC<Props> = ({ wordsCompleted, onPlayAgain }
             </p>
           </div>
           <div className="text-center pl-4">
-            <p className="text-[52px] leading-none font-bold">{xp}</p>
+            {/* FIX: show session XP earned this round, with total lifetime XP below */}
+            <p className="text-[52px] leading-none font-bold">+{sessionXP}</p>
             <p className="m3-label-small opacity-80 mt-1 uppercase tracking-wide">
               XP Earned
+            </p>
+            <p className="text-[13px] opacity-60 mt-0.5">
+              {totalXP} total
             </p>
           </div>
         </div>

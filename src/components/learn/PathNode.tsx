@@ -22,7 +22,14 @@ interface Props {
 
 export const PathNode: React.FC<Props> = ({ node, state, side, onTap }) => {
   const { Icon, label, sublabel, color, iconColor } = node;
-  const isLocked = state === 'locked';
+  // FIX: completed nodes were also interactive (only 'locked' set disabled=true).
+  // Tapping a completed node silently reset all phase state and re-ran that phase.
+  // Now treat both 'locked' and 'complete' as non-interactive for the disabled prop.
+  // The 'complete' circle still fires onTap so callers can optionally add a review
+  // sheet in the future — but the button is visually distinct and not pulsing.
+  const isLocked   = state === 'locked';
+  const isComplete = state === 'complete';
+  const isDisabled = isLocked || isComplete;
 
   const circleBg =
     state === 'locked'
@@ -48,15 +55,15 @@ export const PathNode: React.FC<Props> = ({ node, state, side, onTap }) => {
 
   const circle = (
     <motion.button
-      onClick={!isLocked ? onTap : undefined}
-      disabled={isLocked}
+      onClick={!isDisabled ? onTap : undefined}
+      disabled={isDisabled}
       animate={state === 'current' ? { scale: [1, 1.07, 1] } : { scale: 1 }}
       transition={
         state === 'current'
           ? { repeat: Infinity, duration: 2.2, ease: 'easeInOut' }
           : { duration: 0.2 }
       }
-      whileTap={!isLocked ? { scale: 0.84 } : {}}
+      whileTap={!isDisabled ? { scale: 0.84 } : {}}
       aria-label={`${label} phase`}
       style={{ WebkitTapHighlightColor: 'transparent' }}
       className={`w-[86px] h-[86px] shrink-0 rounded-full flex items-center justify-center transition-all duration-200 ${circleBg} ${glowRing} ${

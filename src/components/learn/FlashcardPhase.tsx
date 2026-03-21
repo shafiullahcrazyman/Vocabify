@@ -73,7 +73,9 @@ export const FlashcardPhase: React.FC<Props> = ({
         window.speechSynthesis.cancel();
       };
     }
-  }, [word.id]);
+  // FIX: settings.autoPronounce was missing — toggling it mid-session had no effect
+  // until the card changed. forms is omitted (deterministically derived from word.id).
+  }, [word.id, settings.autoPronounce]);
 
   // Always show all 4 POS rows — None/x shown in gray
   const posRows: { pos: string; label: string; form: string | null }[] = [
