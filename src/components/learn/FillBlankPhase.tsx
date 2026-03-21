@@ -47,12 +47,12 @@ const SentenceDisplay: React.FC<{
           {part}
           {i < blanks.length && (
             <span
-              className={`inline-flex items-center mx-1 px-2 py-0.5 rounded-lg font-bold transition-all duration-300 ${
+              className={`inline-flex items-center mx-1 px-2 py-0.5 rounded-lg border-b-2 font-bold transition-all duration-300 ${
                 answers[i] !== null
-                  ? 'bg-primary/20 text-primary'
+                  ? 'border-primary bg-primary/20 text-primary'
                   : i === currentIdx
-                  ? 'bg-primary/10 text-primary animate-pulse'
-                  : 'bg-surface-container-high text-on-surface-variant/40'
+                  ? 'border-primary text-primary bg-primary/5 animate-pulse'
+                  : 'border-outline/30 text-on-surface-variant/40 bg-surface-container'
               }`}
             >
               {answers[i] !== null ? blanks[i].answer : '______'}

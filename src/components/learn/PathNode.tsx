@@ -33,13 +33,13 @@ export const PathNode: React.FC<Props> = ({ node, state, side, onTap }) => {
 
   const circleBg =
     state === 'locked'
-      // Tonal elevation: surface-container-highest is one step above surface-container-high,
-      // clearly showing the locked node is inert without needing a border.
       ? 'bg-surface-container-highest'
-      : `${color}`;
+      : `${color} border-[4px] border-white/10`;
 
-  // Remove ring — the repeat pulse animation already signals 'current' clearly.
-  // No decorative borders or ring effects anywhere in the app.
+  const glowRing =
+    state === 'current'
+      ? 'ring-4 ring-offset-2 ring-offset-background ring-primary/40'
+      : '';
 
   const labelColor =
     state === 'locked'
@@ -66,7 +66,7 @@ export const PathNode: React.FC<Props> = ({ node, state, side, onTap }) => {
       whileTap={!isDisabled ? { scale: 0.84 } : {}}
       aria-label={`${label} phase`}
       style={{ WebkitTapHighlightColor: 'transparent' }}
-      className={`w-[86px] h-[86px] shrink-0 rounded-full flex items-center justify-center transition-all duration-200 ${circleBg} ${
+      className={`w-[86px] h-[86px] shrink-0 rounded-full flex items-center justify-center transition-all duration-200 ${circleBg} ${glowRing} ${
         isLocked ? 'opacity-30' : ''
       }`}
     >
