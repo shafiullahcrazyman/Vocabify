@@ -127,7 +127,7 @@ export const FlashcardPhase: React.FC<Props> = ({
                 <span className="m3-label-medium uppercase tracking-wider opacity-70">
                   {label}
                 </span>
-                <span className={`text-[20px] font-bold capitalize text-on-surface ${isNone ? 'italic opacity-40' : ''}`}>
+                <span className={`text-[20px] font-bold capitalize ${isNone ? 'opacity-40' : ''}`}>
                   {isNone ? 'None' : form}
                 </span>
               </div>
