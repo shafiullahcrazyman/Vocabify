@@ -100,7 +100,7 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
             </h3>
             <div className="flex items-center gap-1 flex-shrink-0">
 
-              {/* Volume button — spring animation only, no animate-pulse */}
+              {/* Pronounce */}
               <motion.button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -120,7 +120,7 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
                 <Volume2 className="w-5 h-5" />
               </motion.button>
 
-              {/* Favorite — spring scale on toggle */}
+              {/* Favorite */}
               <motion.button
                 onClick={handleFavoriteClick}
                 whileTap={settings.animationsEnabled ? { scale: 0.80 } : undefined}
@@ -139,10 +139,7 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
             </div>
           </div>
 
-          {/*
-            Bengali meaning — click to toggle audio (no speaker icon).
-            Visual feedback: underline when playing, hover underline when not.
-          */}
+          {/* Bengali meaning — tap to toggle audio */}
           <motion.p
             onClick={handleBnClick}
             whileTap={settings.animationsEnabled ? { scale: 0.97 } : undefined}
@@ -175,10 +172,7 @@ export const WordCard: React.FC<WordCardProps> = ({ word, onClick, position = 'o
         </span>
       </div>
 
-      {/*
-        Example sentence — click to toggle audio (no speaker icon).
-        Visual feedback: underline + italic dimming when playing.
-      */}
+      {/* Example sentence — tap to toggle audio */}
       <motion.p
         onClick={handleExampleClick}
         whileTap={settings.animationsEnabled ? { scale: 0.98 } : undefined}
