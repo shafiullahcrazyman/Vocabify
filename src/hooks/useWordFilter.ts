@@ -29,33 +29,29 @@ export const useWordFilter = (
     const isSearching = query !== '';
 
     let result = words.filter((word) => {
-      
-      // 1. UNIVERSAL SEARCH OVERRIDE
-      // If the user is actively typing in the search bar, ignore all other filters
-      // and search the entire dictionary universally.
+
+      // 1. Search overrides all other filters — query the full dictionary.
       if (isSearching) {
         const n = word.noun?.toLowerCase() || '';
         const v = word.verb?.toLowerCase() || '';
         const adj = word.adjective?.toLowerCase() || '';
         const adv = word.adverb?.toLowerCase() || '';
-        const m = word.meaning_bn || ''; 
+        const m = word.meaning_bn || '';
 
         return n.includes(query) || v.includes(query) || adj.includes(query) || adv.includes(query) || m.includes(query);
       }
 
-      // --- THE FOLLOWING FILTERS ONLY APPLY IF NOT SEARCHING ---
-
-      // 2. Favorites Filter
+      // 2. Favorites filter
       if (filters.favoritesOnly && !favorites.includes(word.id)) {
         if (word.id !== activeWordId) return false;
       }
 
-      // 3. Smart Hide
+      // 3. Hide learned words
       if (settings.hideLearnedWords && progress.learned.includes(word.id)) {
         if (word.id !== activeWordId) return false;
       }
 
-      // 4. Difficulty
+      // 4. Difficulty (level and CEFR are OR'd together when both are active)
       const levelActive = filters.level.length > 0;
       const cefrActive = filters.cefr.length > 0;
       if (levelActive || cefrActive) {
@@ -66,11 +62,11 @@ export const useWordFilter = (
         else if (cefrActive && !matchesCefr) return false;
       }
 
-      // 5. Categories
+      // 5. Theme and letter
       if (filters.theme.length > 0 && !filters.theme.includes(word.theme)) return false;
       if (filters.letter.length > 0 && !filters.letter.includes(word.letter)) return false;
-      
-      // 6. POS
+
+      // 6. Part of speech
       if (filters.pos.length > 0) {
         const hasPos = filters.pos.some(pos => {
           if (pos === 'noun' && word.noun && word.noun.toLowerCase() !== 'x') return true;
@@ -85,7 +81,7 @@ export const useWordFilter = (
       return true;
     });
 
-    // Smart Sorting for Search Results (Optimized)
+    // Sort search results: exact matches first, then prefix matches.
     if (isSearching) {
       result.sort((a, b) => {
         const aN = a.noun?.toLowerCase() || ''; const aV = a.verb?.toLowerCase() || '';

@@ -9,7 +9,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
     } catch (error) {
-      // SMART SELF-HEALING: If data is corrupted, wipe it and use defaults.
+      // Corrupted data — clear it and fall back to defaults.
       console.warn(`[Vocabify Cache] Corrupted data found for "${key}". Auto-healing...`);
       window.localStorage.removeItem(key);
       return initialValue;
@@ -17,8 +17,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
   });
 
   const setValue = (value: T | ((val: T) => T)) => {
-    // Use the functional updater form of setStoredValue so we always operate
-    // on the latest state — never a stale closure snapshot.
+    // Functional updater avoids writing a stale value.
     setStoredValue((prev) => {
       const valueToStore = value instanceof Function ? value(prev) : value;
       try {
