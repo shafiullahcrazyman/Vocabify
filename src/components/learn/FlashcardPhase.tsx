@@ -45,13 +45,14 @@ export const FlashcardPhase: React.FC<Props> = ({ word, onGotIt, onSeeAgain }) =
   const isBnPlaying      = isPlaying && playingText === bnSpeechText;
   const isExamplePlaying = isPlaying && playingText === word.example;
 
-  const forms      = getValidForms(word);
+  const forms       = getValidForms(word);
   const primaryForm = getPrimaryForm(word);
 
   const outerRef   = useRef<HTMLDivElement>(null);
   const buttonsRef = useRef<HTMLDivElement>(null);
   const cardRef    = useRef<HTMLDivElement>(null);
   const titleRef   = useRef<HTMLParagraphElement>(null);
+  const meaningRef = useRef<HTMLParagraphElement>(null);
   const exampleRef = useRef<HTMLParagraphElement>(null);
 
   useLayoutEffect(() => {
@@ -59,49 +60,111 @@ export const FlashcardPhase: React.FC<Props> = ({ word, onGotIt, onSeeAgain }) =
     const buttons = buttonsRef.current;
     const card    = cardRef.current;
     const title   = titleRef.current;
+    const meaning = meaningRef.current;
     const example = exampleRef.current;
-    if (!outer || !buttons || !card || !title || !example) return;
+    if (!outer || !buttons || !card || !title || !meaning || !example) return;
 
     const fit = () => {
-      // --- Reset both elements to their natural base sizes ---
+      // ── 1. Reset everything to natural / base sizes ──────────────────────
       const baseTitle = getTitleBaseSize(primaryForm.length);
       title.style.fontSize   = `${baseTitle}px`;
       title.style.whiteSpace = 'nowrap';
+
+      // POS value spans (the word form text, e.g. "Rat") — natural 20px
+      const posValues = card.querySelectorAll<HTMLElement>('[data-fit="pos-value"]');
+      posValues.forEach(el => { el.style.fontSize = '20px'; });
+
+      // POS rows — natural vertical padding is py-3.5 = 14px top + 14px bottom
+      const posRows = card.querySelectorAll<HTMLElement>('[data-fit="pos-row"]');
+      posRows.forEach(el => { el.style.paddingTop = ''; el.style.paddingBottom = ''; });
+
+      // Meaning text — m3-title-large is ~22px; reset to CSS class, measure actual
+      meaning.style.fontSize = '';
+      const meaningNatural = parseFloat(getComputedStyle(meaning).fontSize) || 22;
+
+      // Example text
       example.style.fontSize = '16px';
 
-      // --- Step 1: fit title on ONE line (width-based) ---
+      // ── 2. Fit title onto ONE line (width) ────────────────────────────────
+      // Title must never shrink below POS word size (20px)
+      const T_MIN = 20;
       let tSize = baseTitle;
-      while (title.scrollWidth > title.offsetWidth && tSize > 10) {
+      while (title.scrollWidth > title.offsetWidth && tSize > T_MIN) {
         tSize -= 1;
         title.style.fontSize = `${tSize}px`;
       }
+      // If still overflowing even at T_MIN, allow wrap as absolute last resort
       if (title.scrollWidth > title.offsetWidth) {
-        title.style.whiteSpace = 'normal'; // last resort: allow wrap
+        title.style.whiteSpace = 'normal';
       }
 
-      // --- Step 2: available height = outer - buttons - spacing ---
-      // pt-4 (16) above card + gap (20) between card and buttons + pb-8 (32) below buttons
+      // ── 3. Available height ───────────────────────────────────────────────
+      // outer height minus buttons height minus spacing:
+      //   pt-4 (16) above card + gap between card area and buttons (20) + pb-8 (32)
       const availH = outer.clientHeight - buttons.offsetHeight - (16 + 20 + 32);
 
-      // --- Step 3: coordinated shrink loop ---
-      // shrink title first (to 12px min), then example (to 10px min)
-      const T_MIN = 12;
-      const E_MIN = 10;
-      let eSize = 16;
+      // ── 4. Coordinated shrink loop ────────────────────────────────────────
+      // Priority order:
+      //   a. Title (to T_MIN=20)
+      //   b. POS row padding (14px → 6px)
+      //   c. POS value text (20px → 13px)
+      //   d. Meaning text (natural → 13px)
+      //   e. Example text (16px → 10px)
+      //
+      // Outer card container (bg, padding, rounded corners) is NEVER touched.
+
+      let posRowPad = 14;   // current py value in px (py-3.5)
+      let pSize     = 20;   // POS value font size
+      let mSize     = meaningNatural;
+      let eSize     = 16;
+
+      const POS_PAD_MIN = 6;
+      const POS_V_MIN   = 13;
+      const M_MIN       = 13;
+      const E_MIN       = 10;
 
       while (card.scrollHeight > availH) {
         let shrank = false;
+
+        // a. Title
         if (tSize > T_MIN) {
           tSize -= 1;
           title.style.fontSize = `${tSize}px`;
           shrank = true;
         }
+
+        // b. POS row padding
+        if (card.scrollHeight > availH && posRowPad > POS_PAD_MIN) {
+          posRowPad = Math.max(POS_PAD_MIN, posRowPad - 2);
+          posRows.forEach(el => {
+            el.style.paddingTop    = `${posRowPad}px`;
+            el.style.paddingBottom = `${posRowPad}px`;
+          });
+          shrank = true;
+        }
+
+        // c. POS value text
+        if (card.scrollHeight > availH && pSize > POS_V_MIN) {
+          pSize -= 0.5;
+          posValues.forEach(el => { el.style.fontSize = `${pSize}px`; });
+          shrank = true;
+        }
+
+        // d. Meaning text
+        if (card.scrollHeight > availH && mSize > M_MIN) {
+          mSize -= 0.5;
+          meaning.style.fontSize = `${mSize}px`;
+          shrank = true;
+        }
+
+        // e. Example text
         if (card.scrollHeight > availH && eSize > E_MIN) {
           eSize -= 0.5;
           example.style.fontSize = `${eSize}px`;
           shrank = true;
         }
-        if (!shrank) break;
+
+        if (!shrank) break; // everything at minimum, stop
       }
     };
 
@@ -144,11 +207,13 @@ export const FlashcardPhase: React.FC<Props> = ({ word, onGotIt, onSeeAgain }) =
       transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
       className="h-full flex flex-col overflow-hidden"
     >
-      {/* Card area — fills all space above the buttons */}
-      <div className="flex-1 min-h-0 overflow-hidden px-4 pt-4">
+      {/* Card area: overflow-y-auto means if somehow the card is STILL too tall
+          after the fit loop exhausts all minimums, it scrolls gracefully instead
+          of sliding under the buttons. In normal cases no scroll appears. */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-4">
         <div ref={cardRef} className="bg-surface-container rounded-[28px] p-6">
 
-          {/* Title word */}
+          {/* Title word — font size controlled by fit loop */}
           <p
             ref={titleRef}
             onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); toggle(primaryForm, 'en'); }}
@@ -162,21 +227,27 @@ export const FlashcardPhase: React.FC<Props> = ({ word, onGotIt, onSeeAgain }) =
             {primaryForm}
           </p>
 
-          {/* POS rows */}
+          {/* POS rows — data-fit attributes let the fit loop query them */}
           <div className="flex flex-col mb-5">
             {posRows.map(({ pos, label, form }, i) => {
               const isNone = form === null;
               return (
                 <div
                   key={pos}
-                  className={`flex items-center justify-between px-4 py-3.5 ${
+                  data-fit="pos-row"
+                  className={`flex items-center justify-between px-4 ${
                     isNone ? 'bg-surface-container-highest/60' : POS_STYLES[pos]
                   } ${rowRounding(i, posRows.length)} ${i < posRows.length - 1 ? 'mb-[2px]' : ''}`}
+                  style={{ paddingTop: '14px', paddingBottom: '14px' }}
                 >
                   <span className={`m3-label-medium uppercase tracking-wider ${isNone ? 'text-on-surface-variant/50' : ''}`}>
                     {label}
                   </span>
-                  <span className={`text-[20px] font-bold capitalize ${isNone ? 'text-on-surface-variant/50' : 'text-on-surface'}`}>
+                  <span
+                    data-fit="pos-value"
+                    className={`font-bold capitalize ${isNone ? 'text-on-surface-variant/50' : 'text-on-surface'}`}
+                    style={{ fontSize: '20px' }}
+                  >
                     {isNone ? 'None' : form}
                   </span>
                 </div>
@@ -188,6 +259,7 @@ export const FlashcardPhase: React.FC<Props> = ({ word, onGotIt, onSeeAgain }) =
           <div className="bg-surface-container-high rounded-t-[20px] rounded-b-[4px] p-4 mb-[2px]">
             <p className="m3-label-medium text-primary uppercase tracking-wider font-bold mb-1.5">Meaning</p>
             <p
+              ref={meaningRef}
               onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); toggle(bnSpeechText, 'bn'); }}
               className={`m3-title-large cursor-pointer select-none transition-all duration-200 ${
                 isBnPlaying
@@ -199,7 +271,7 @@ export const FlashcardPhase: React.FC<Props> = ({ word, onGotIt, onSeeAgain }) =
             </p>
           </div>
 
-          {/* Example */}
+          {/* Example — font size controlled by fit loop */}
           <div className="bg-surface-container-high rounded-t-[4px] rounded-b-[20px] p-4">
             <p className="m3-label-medium text-primary uppercase tracking-wider font-bold mb-1.5">Example</p>
             <p
@@ -218,7 +290,8 @@ export const FlashcardPhase: React.FC<Props> = ({ word, onGotIt, onSeeAgain }) =
         </div>
       </div>
 
-      {/* Buttons — always pinned at bottom, never shrink */}
+      {/* Buttons — flex-shrink-0 means they NEVER shrink or move.
+          They are always visible at the bottom of the screen. */}
       <div ref={buttonsRef} className="flex-shrink-0 grid grid-cols-2 gap-4 px-4 pt-5 pb-8">
         <button
           onClick={() => { triggerHaptic(settings.hapticsEnabled, 'tap'); onSeeAgain(); }}
