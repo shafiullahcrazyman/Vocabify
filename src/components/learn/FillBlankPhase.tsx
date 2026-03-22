@@ -232,7 +232,7 @@ export const FillBlankPhase: React.FC<Props> = ({
             >
               <XCircle className="w-5 h-5 shrink-0" />
               <span className="m3-body-medium font-medium">
-                Try again — the answer is the {blank.pos.toLowerCase()} form
+                Try again; the answer is the {blank.pos.toLowerCase()} form
               </span>
             </motion.div>
           )}
