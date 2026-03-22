@@ -86,20 +86,26 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const words = wordsData as WordFamily[];
 
-  // Tracks today's learned count via a ref so rapid markLearned calls
-  // don't read a stale state snapshot before React re-renders.
+  // FIX #3 — Race-safe today-count tracker.
+  // Using a ref avoids the stale-closure problem where rapid markLearned calls
+  // all read the same snapshot of progress.learnedDates before React re-renders.
+  // The ref is updated synchronously on every markLearned call, so even if 10
+  // words are marked in quick succession the streak fires exactly once at the goal.
   const todayCountRef = useRef(0);
 
-  // Seed the ref once IndexedDB has loaded.
+  // Initialise the ref once data has loaded from IndexedDB.
   useEffect(() => {
     if (!progressLoaded) return;
     const today = getLocalDateString();
     const count = Object.values(progress.learnedDates ?? {}).filter(d => d === today).length;
     todayCountRef.current = count;
+  // Only run once on load — progress state changes are tracked synchronously via the ref.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progressLoaded]);
 
-  // Break a stale streak on load if the user missed a day.
+  // Auto-break streak on load if the user skipped a day.
+  // Without this, a stale streak (e.g. 7) would keep showing even after missing
+  // days — it only corrected itself the next time the goal was earned.
   useEffect(() => {
     if (!streakLoaded) return;
     const today = getLocalDateString();
@@ -113,11 +119,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       lastGoalDate !== yesterday;
 
     if (streakIsBroken) {
+      // FIX #1 — spread prev so totalXP is never overwritten.
       setStreakData(prev => ({ ...prev, current: 0 }));
     }
   }, [streakLoaded]);
 
-  // Re-check streak when the tab becomes visible again, in case the app stayed open overnight.
+  // Re-check streak whenever the user returns to the tab or app.
+  // The load-time check above only fires once; if the app stays open overnight
+  // the streak would stay stale until the next hard reload without this listener.
   useEffect(() => {
     if (!streakLoaded) return;
 
@@ -181,7 +190,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const prevDates = prev.learnedDates || {};
 
       if (alreadyInLearned && countedToday) {
-        // Word was learned and counted today — remove it entirely.
+        // Full un-learn: word was learned and counted today — remove it entirely.
         const newDates = { ...prevDates };
         delete newDates[id];
         return {
@@ -189,7 +198,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           learnedDates: newDates,
         };
       } else {
-        // Fresh learn or re-learn after a daily reset.
+        // Fresh learn OR post-Reset-Today re-learn.
         return {
           learned: alreadyInLearned ? prevLearned : [...prevLearned, id],
           learnedDates: { ...prevDates, [id]: today },
@@ -197,10 +206,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
     });
 
-    // Keep ref in sync so rapid calls don't double-trigger streak logic.
+    // FIX #3 — Update the ref synchronously so rapid calls can't double-trigger.
     if (isAdding) {
       todayCountRef.current += 1;
     } else {
+      // Un-learning: decrement safely.
       todayCountRef.current = Math.max(0, todayCountRef.current - 1);
     }
 
@@ -215,7 +225,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           streakData.lastGoalDate === yesterday
             ? streakData.current + 1
             : 1;
-        // Spread prev to preserve totalXP and all other fields.
+        // FIX #1 — spread prev so totalXP (and any future fields) are never lost.
         setStreakData(prev => ({
           ...prev,
           current: newCurrent,
@@ -233,7 +243,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setStreakData(defaultStreak);
   };
 
-  // Spreads prev to avoid overwriting streak fields other than totalXP.
+  // FIX #1 — persist XP so it survives across sessions; spread prev so other
+  // streak fields (current, longest, lastGoalDate) are never overwritten.
   const addXP = (amount: number) => {
     setStreakData(prev => ({ ...prev, totalXP: (prev.totalXP ?? 0) + amount }));
   };
