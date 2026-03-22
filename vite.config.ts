@@ -22,8 +22,9 @@ export default defineConfig(() => {
       VitePWA({
         registerType: 'autoUpdate',
         injectRegister: 'script',
-        // tutorial.mp4 is excluded from precache (1.1 MB) — it is handled by
-        // runtimeCaching below so it is only fetched and cached on first play.
+        // tutorial.mp4 removed from precache — it is 1.1 MB and bloats the SW
+        // install bundle. It is handled by runtimeCaching below instead, so it
+        // gets cached on first play and is available offline after that.
         includeAssets: ['icon.png'],
         manifest: {
           name: 'Vocabify',
@@ -32,7 +33,6 @@ export default defineConfig(() => {
           theme_color: '#141218',
           background_color: '#141218',
           display: 'standalone',
-          orientation: 'portrait',
           scope: '/Vocabify/',
           start_url: '/Vocabify/',
           icons: [
@@ -42,10 +42,8 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          // Cache all built assets
-          // mp4 is excluded from precache — see runtimeCaching below
+          // mp4 removed from precache glob — handled by runtimeCaching below
           globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff2,woff}'],
-          // Runtime caching for Google Fonts so they work offline after first load
           runtimeCaching: [
             {
               // Cache tutorial.mp4 at runtime (first play) rather than at
