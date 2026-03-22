@@ -95,11 +95,24 @@ export const Learn: React.FC = () => {
     markLearned, addXP, streak, updateFilters,
   } = useAppContext();
 
-  // Two intentional overrides for the session pool:
-  // - searchQuery is forced to '' so a live search never silently shrinks the pool.
-  // - hideLearnedWords is forced to false so learned words remain available for SRS review.
+  // ── Build session pool respecting active filters ───────────────────────────
+  //
+  // We run useWordFilter here with two intentional overrides:
+  //
+  //   1. searchQuery = ''
+  //      The live search bar text is user-ephemeral — a typed search should
+  //      never silently shrink the session pool. Only persistent filter
+  //      selections (level, theme, POS, etc.) should apply.
+  //
+  //   2. settingsForPool.hideLearnedWords = false
+  //      Learned words are still needed as SRS review candidates. If we
+  //      honoured hideLearnedWords here, a user with that setting on would
+  //      never see any review words in their session — they would only ever
+  //      see brand-new words, breaking spaced repetition entirely.
+  //
   const settingsForPool = useMemo(
     () => ({ ...settings, hideLearnedWords: false }),
+    // Deliberately exclude hideLearnedWords from deps — see comment above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [settings.theme, settings.dailyGoal, settings.hapticsEnabled,
      settings.animationsEnabled, settings.autoPronounce],
@@ -115,13 +128,16 @@ export const Learn: React.FC = () => {
     null,
   );
 
-  // Use the filtered pool when filters are active, otherwise the full dictionary.
+  // Pool = filtered words when filters are on; full dictionary otherwise.
   const sessionPool: WordFamily[] = hasActiveFilters ? filteredWords : words;
 
-  // Show a warning screen if the filtered pool is too small for the Matching phase.
+  // Guard: Matching phase needs ≥ MIN_POOL_SIZE words. If the filtered pool is
+  // too small, render a dedicated warning screen instead of a broken session.
   const tooFewWords = hasActiveFilters && filteredWords.length < MIN_POOL_SIZE;
 
-  // Session word list is frozen at mount so it never changes mid-session.
+  // ── Session words — frozen at mount ───────────────────────────────────────
+  // buildSession is called once via useState initialiser so the word list never
+  // changes while a session is in progress (even if context changes).
   const [sessionWords] = useState<WordFamily[]>(() => {
     if (tooFewWords) return [];
     return buildSession(sessionPool, progress.learned, settings.dailyGoal, progress.learnedDates);
@@ -143,7 +159,9 @@ export const Learn: React.FC = () => {
   const [learnedCount, setLearnedCount] = useState(0);
   const [matchIndex, setMatchIndex]    = useState(0);
 
-  // Prevents addXP being called twice if the phase completes and the user also exits.
+  // Guard: tracks whether session XP has already been awarded so neither
+  // handleFbNext (phase complete) nor handleExit (mid-session quit) can
+  // accidentally call addXP twice for the same session.
   const xpAwardedRef = useRef(false);
 
   const currentPhaseIdx = completedPhases.size;
@@ -240,14 +258,16 @@ export const Learn: React.FC = () => {
 
     if (!alreadyCountedToday) {
       markLearned(sessionWords[fbIndex].id);
-      // Only count genuinely new learns for the session complete screen.
+      // Only increment for genuinely new learns to keep the complete screen accurate
       setLearnedCount(c => c + 1);
     }
 
     const next = fbIndex + 1;
     if (next >= sessionWords.length) {
       setCompleted(prev => new Set([...prev, 'fillblank']));
-      // learnedCount was already incremented above; no +1 needed here.
+      // FIX: learnedCount was already incremented above when applicable.
+      // Do NOT add +1 here — the old code did `alreadyCountedToday ? c : c + 1`
+      // which caused a double-increment (and 10 extra XP) on the last new word.
       setLearnedCount(c => {
         if (!xpAwardedRef.current) {
           xpAwardedRef.current = true;
@@ -262,8 +282,8 @@ export const Learn: React.FC = () => {
     }
   }, [fbIndex, sessionWords, markLearned, progress.learnedDates, addXP]);
 
-  // Awards partial XP on mid-session exit. xpAwardedRef prevents a double-award
-  // if the phase already completed and awarded XP before the user navigated away.
+  // Award partial XP when user exits mid-session after completing some fill-blank words.
+  // xpAwardedRef prevents a double-award if the phase already completed and awarded XP.
   const handleExit = useCallback(() => {
     if (learnedCount > 0 && !xpAwardedRef.current) {
       xpAwardedRef.current = true;
@@ -272,14 +292,14 @@ export const Learn: React.FC = () => {
     navigate('/home');
   }, [navigate, learnedCount, addXP]);
 
-  // Back button: from any active phase, return to path view rather than exiting.
+  // Back button: from any active phase -> return to path view (not exit)
   const isInPhase = view.mode === 'flashcard' || view.mode === 'matching' || view.mode === 'fillblank';
   const handleBackToPath = useCallback(() => {
     triggerHaptic(settings.hapticsEnabled, 'tap');
     setView({ mode: 'path' });
   }, [settings.hapticsEnabled]);
 
-  // Hardware/browser back during a phase returns to the path, not the previous route.
+  // Hardware / browser back during a phase should go back to path, not navigate away
   useBackButton(isInPhase, handleBackToPath);
 
   const handlePlayAgain = useCallback(() => {
