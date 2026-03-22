@@ -7,6 +7,48 @@ import { getValidForms, getPrimaryForm } from '../../utils/sessionAlgorithm';
 import { useAppContext } from '../../context/AppContext';
 import { triggerHaptic } from '../../utils/haptics';
 
+// Maximum font sizes for the title based on rough word length —
+// these are the STARTING points; the layout effect will shrink further if needed.
+function getTitleBaseSize(len: number): number {
+  if (len <= 7)  return 44;
+  if (len <= 10) return 38;
+  if (len <= 14) return 30;
+  if (len <= 18) return 24;
+  return 20;
+}
+
+// Fit a single-line heading: shrink font until scrollWidth <= offsetWidth.
+function fitTitleFont(el: HTMLElement, baseSize: number, minSize = 16): void {
+  el.style.fontSize   = `${baseSize}px`;
+  el.style.whiteSpace = 'nowrap';          // force single line while measuring
+  let size = baseSize;
+  while (el.scrollWidth > el.offsetWidth && size > minSize) {
+    size -= 1;
+    el.style.fontSize = `${size}px`;
+  }
+  // If even at minSize it still overflows, allow wrapping (graceful fallback)
+  if (el.scrollWidth > el.offsetWidth) {
+    el.style.whiteSpace = 'normal';
+  }
+}
+
+// Fit example text: shrink font until scrollHeight fits within maxLines lines.
+function fitExampleFont(
+  el: HTMLElement,
+  baseSize = 16,
+  lineHeightMultiple = 1.625, // leading-relaxed in Tailwind
+  maxLines = 5,
+  minSize = 11,
+): void {
+  el.style.fontSize = `${baseSize}px`;
+  let size = baseSize;
+  const maxH = Math.round(baseSize * lineHeightMultiple * maxLines);
+  while (el.scrollHeight > maxH && size > minSize) {
+    size -= 0.5;
+    el.style.fontSize = `${size}px`;
+  }
+}
+
 interface Props {
   word: WordFamily;
   onGotIt: () => void;
@@ -47,61 +89,22 @@ export const FlashcardPhase: React.FC<Props> = ({
   const forms = getValidForms(word);
   const primaryForm = getPrimaryForm(word);
 
-  const wordRef      = useRef<HTMLParagraphElement>(null);
-  const exampleRef   = useRef<HTMLParagraphElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef   = useRef<HTMLDivElement>(null);
+  // Refs for targeted font fitting — only these two elements resize, nothing else.
+  const titleRef   = useRef<HTMLParagraphElement>(null);
+  const exampleRef = useRef<HTMLParagraphElement>(null);
 
+  // ── Fit title word: shrink font size until the word fits on a single line ──
   useLayoutEffect(() => {
-    const wordEl    = wordRef.current;
-    const exampleEl = exampleRef.current;
-    const outer     = containerRef.current;
-    const inner     = contentRef.current;
-    if (!wordEl || !exampleEl || !outer || !inner) return;
+    if (titleRef.current) {
+      fitTitleFont(titleRef.current, getTitleBaseSize(primaryForm.length));
+    }
+  }, [word.id, primaryForm]);
 
-    const apply = () => {
-      // ── Step 1: smart-resize the main word to fit on one line ──
-      wordEl.style.whiteSpace = 'nowrap';
-      const WORD_SIZES = [44, 38, 30, 24, 20, 16, 13];
-      let chosenSize = WORD_SIZES[WORD_SIZES.length - 1];
-      for (const size of WORD_SIZES) {
-        wordEl.style.fontSize = `${size}px`;
-        if (wordEl.scrollWidth <= wordEl.clientWidth) {
-          chosenSize = size;
-          break;
-        }
-      }
-      wordEl.style.fontSize   = `${chosenSize}px`;
-      wordEl.style.whiteSpace = '';
-
-      // ── Step 2: smart-resize the example if it's too tall ──
-      exampleEl.style.fontSize   = '';
-      exampleEl.style.lineHeight = '';
-      const MAX_EXAMPLE_H = 120; // ~5 lines
-      if (exampleEl.scrollHeight > MAX_EXAMPLE_H) {
-        const EXAMPLE_STEPS: [number, string][] = [[13, '20px'], [11, '17px']];
-        for (const [size, lh] of EXAMPLE_STEPS) {
-          exampleEl.style.fontSize   = `${size}px`;
-          exampleEl.style.lineHeight = lh;
-          if (exampleEl.scrollHeight <= MAX_EXAMPLE_H) break;
-        }
-      }
-
-      // ── Step 3: full-card scale as last resort so buttons never leave screen ──
-      inner.style.transform = '';
-      const avail = outer.clientHeight;
-      const full  = inner.scrollHeight;
-      if (full > avail) {
-        inner.style.transform       = `scale(${avail / full})`;
-        inner.style.transformOrigin = 'top center';
-      }
-    };
-
-    apply();
-
-    const ro = new ResizeObserver(apply);
-    ro.observe(outer);
-    return () => ro.disconnect();
+  // ── Fit example: shrink font size until it fits within 5 lines ──
+  useLayoutEffect(() => {
+    if (exampleRef.current) {
+      fitExampleFont(exampleRef.current);
+    }
   }, [word.id]);
 
   useEffect(() => {
@@ -131,31 +134,28 @@ export const FlashcardPhase: React.FC<Props> = ({
   ];
 
   return (
-    // outer: h-full so it takes exactly the available height given by Learn.tsx
-    // overflow-hidden clips anything that escapes before scale is applied
     <motion.div
-      ref={containerRef}
       initial={{ opacity: 0, x: 40 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -40 }}
       transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
-      className="h-full overflow-hidden"
+      className="h-full overflow-y-auto"
     >
-      <div ref={contentRef} className="px-4 pt-4 pb-8 flex flex-col gap-5">
+      <div className="px-4 pt-4 pb-8 flex flex-col gap-5">
 
         {/* Main card */}
         <div className="bg-surface-container rounded-[28px] p-6">
 
-          {/* Large primary word — tap to speak */}
+          {/* Large primary word — font size fitted dynamically by useLayoutEffect */}
           <p
-            ref={wordRef}
+            ref={titleRef}
             onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); toggle(primaryForm, 'en'); }}
-            className={`font-bold leading-tight mb-5 cursor-pointer select-none transition-colors duration-200 ${
+            className={`font-bold leading-tight mb-5 cursor-pointer select-none transition-colors duration-200 overflow-hidden ${
               isPlaying && playingText === primaryForm
                 ? 'text-primary underline underline-offset-4 decoration-primary/60 opacity-80'
                 : 'text-on-surface'
             }`}
-            style={{ fontSize: '44px', fontVariationSettings: '"wdth" 100' }}
+            style={{ fontVariationSettings: '"wdth" 100' }}
           >
             {primaryForm}
           </p>
@@ -203,7 +203,7 @@ export const FlashcardPhase: React.FC<Props> = ({
             </p>
           </div>
 
-          {/* Example — tap to speak/stop */}
+          {/* Example — font size fitted dynamically; tap to speak/stop */}
           <div className="bg-surface-container-high rounded-t-[4px] rounded-b-[20px] p-4">
             <p className="m3-label-medium text-primary uppercase tracking-wider font-bold mb-1.5">
               Example
@@ -211,7 +211,7 @@ export const FlashcardPhase: React.FC<Props> = ({
             <p
               ref={exampleRef}
               onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); toggle(word.example, 'en'); }}
-              className={`m3-body-large italic leading-relaxed cursor-pointer select-none transition-colors duration-200 ${
+              className={`italic leading-relaxed cursor-pointer select-none transition-colors duration-200 overflow-hidden ${
                 isExamplePlaying
                   ? 'text-on-surface underline underline-offset-4 decoration-on-surface/40 opacity-75'
                   : 'text-on-surface-variant'
