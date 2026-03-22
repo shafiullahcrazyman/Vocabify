@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { Home, RotateCcw, Flame, BookOpen, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -11,16 +11,78 @@ interface Props {
   onPlayAgain: () => void;
 }
 
-// M3 emphasized easing — used throughout Material You for entrances
 const M3_EASE = [0.2, 0, 0, 1] as const;
-
-// Spring config for the stat cards pop-in
 const CARD_SPRING = { type: 'spring', damping: 22, stiffness: 280 } as const;
+
+// M3 standard easing function (cubic-bezier 0.2, 0, 0, 1) as a JS function
+// Used to drive the count-up with the same feel as the card entrance.
+function m3Ease(t: number): number {
+  // Approximate cubic-bezier(0.2, 0, 0, 1) via simple exponential decay curve
+  return 1 - Math.pow(1 - t, 3.2);
+}
+
+interface CountUpProps {
+  target: number;
+  prefix?: string;
+  /** Delay in ms before counting starts — should match card entrance delay */
+  delay?: number;
+  /** Total duration of the count animation in ms */
+  duration?: number;
+  className?: string;
+}
+
+const CountUp: React.FC<CountUpProps> = ({
+  target,
+  prefix = '',
+  delay = 0,
+  duration = 900,
+  className,
+}) => {
+  const [display, setDisplay] = useState(0);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setDisplay(0);
+    const startTimeout = setTimeout(() => {
+      const startTime = performance.now();
+
+      const tick = (now: number) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = m3Ease(progress);
+        setDisplay(Math.round(eased * target));
+
+        if (progress < 1) {
+          rafRef.current = requestAnimationFrame(tick);
+        } else {
+          setDisplay(target); // snap to exact final value
+        }
+      };
+
+      rafRef.current = requestAnimationFrame(tick);
+    }, delay);
+
+    return () => {
+      clearTimeout(startTimeout);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
+  }, [target, delay, duration]);
+
+  return (
+    <span className={className}>
+      {prefix}{display}
+    </span>
+  );
+};
 
 export const SessionComplete: React.FC<Props> = ({ wordsCompleted, totalXP, onPlayAgain }) => {
   const navigate = useNavigate();
   const { settings, streak } = useAppContext();
   const sessionXP = wordsCompleted * 10;
+
+  // Entrance delay per card (matches transition delay below) in ms
+  // card i has delay: (0.18 + i * 0.09)s — count starts after spring settles (~+400ms)
+  const COUNT_SETTLE = 400;
 
   const cards = [
     {
@@ -29,16 +91,18 @@ export const SessionComplete: React.FC<Props> = ({ wordsCompleted, totalXP, onPl
       iconCls: 'text-on-primary',
       valueCls: 'text-on-primary',
       labelCls: 'text-on-primary/80',
-      value: String(wordsCompleted),
-      label: 'Words Learned',
+      target: wordsCompleted,
+      prefix: '',
+      label: 'Words\nLearned',
     },
     {
       bg: 'bg-primary',
       Icon: Zap,
-      iconCls: 'text-on-primary fill-on-primary',
+      iconCls: 'text-on-primary',
       valueCls: 'text-on-primary',
       labelCls: 'text-on-primary/80',
-      value: `+${sessionXP}`,
+      target: sessionXP,
+      prefix: '+',
       label: 'XP Earned',
     },
     {
@@ -47,7 +111,8 @@ export const SessionComplete: React.FC<Props> = ({ wordsCompleted, totalXP, onPl
       iconCls: 'text-on-primary',
       valueCls: 'text-on-primary',
       labelCls: 'text-on-primary/80',
-      value: String(streak.current),
+      target: streak.current,
+      prefix: '',
       label: 'Day Streak',
     },
   ];
@@ -58,7 +123,7 @@ export const SessionComplete: React.FC<Props> = ({ wordsCompleted, totalXP, onPl
       {/* ── Scrollable upper content ─────────────────────────────── */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 pt-12 pb-6 gap-8">
 
-        {/* Title — fade + slide up */}
+        {/* Title */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -69,27 +134,50 @@ export const SessionComplete: React.FC<Props> = ({ wordsCompleted, totalXP, onPl
           <p className="m3-body-large text-on-surface-variant">Keep it up, great work!</p>
         </motion.div>
 
-        {/* Stat cards — staggered spring pop-in */}
+        {/* Stat cards */}
         <div className="w-full max-w-sm flex gap-3">
-          {cards.map((card, i) => (
-            <motion.div
-              key={card.label}
-              initial={{ opacity: 0, scale: 0.72, y: 24 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ ...CARD_SPRING, delay: 0.18 + i * 0.09 }}
-              className={`flex-1 ${card.bg} rounded-[24px] flex flex-col items-center gap-3 py-7 px-3`}
-            >
-              <card.Icon className={`w-10 h-10 ${card.iconCls}`} />
-              <div className="text-center">
-                <p className={`text-[34px] leading-none font-bold tracking-tight ${card.valueCls}`}>
-                  {card.value}
-                </p>
-                <p className={`m3-label-small mt-2 uppercase tracking-wide leading-snug ${card.labelCls}`}>
-                  {card.label}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+          {cards.map((card, i) => {
+            const cardDelay = 0.18 + i * 0.09;
+            const countDelay = Math.round(cardDelay * 1000) + COUNT_SETTLE;
+
+            return (
+              <motion.div
+                key={card.label}
+                initial={{ opacity: 0, scale: 0.72, y: 24 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ ...CARD_SPRING, delay: cardDelay }}
+                className={`flex-1 ${card.bg} rounded-[24px] flex flex-col items-center gap-3 py-7 px-3`}
+              >
+                {/* Filled icon — fill="currentColor" fills the SVG paths */}
+                <card.Icon
+                  className={`w-10 h-10 ${card.iconCls}`}
+                  fill="currentColor"
+                  strokeWidth={0}
+                />
+
+                <div className="text-center">
+                  {/* Count-up number */}
+                  <p className={`text-[34px] leading-none font-bold tracking-tight ${card.valueCls}`}>
+                    <CountUp
+                      target={card.target}
+                      prefix={card.prefix}
+                      delay={countDelay}
+                      duration={850}
+                    />
+                  </p>
+                  {/* Label — newlines rendered as <br> */}
+                  <p className={`m3-label-small mt-2 uppercase tracking-wide leading-snug ${card.labelCls}`}>
+                    {card.label.split('\n').map((line, j) => (
+                      <React.Fragment key={j}>
+                        {j > 0 && <br />}
+                        {line}
+                      </React.Fragment>
+                    ))}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
 
