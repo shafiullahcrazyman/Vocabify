@@ -1,29 +1,16 @@
 /**
- * M3 Expressive Spring Tokens — Web (Framer Motion / motion-react)
+ * M3 Expressive spring tokens for Framer Motion / motion-react.
  *
- * Source: Official M3 spring values from material-components-android docs:
- *   FastSpatial   → stiffness: 1400, dampingRatio: 0.9
- *   DefaultSpatial → stiffness: 700,  dampingRatio: 0.9
- *   SlowSpatial   → stiffness: 300,  dampingRatio: 0.9
- *   FastEffects   → stiffness: 3800, dampingRatio: 1.0 (no bounce)
- *   DefaultEffects → stiffness: 1600, dampingRatio: 1.0
- *   SlowEffects   → stiffness: 800,  dampingRatio: 1.0
+ * Three size tiers × two categories:
+ *   Spatial  → position, scale, size  (allows slight bounce)
+ *   Effects  → opacity, color         (critically damped, no bounce)
  *
- * Converted to Framer Motion coefficients using:
- *   damping_coeff = dampingRatio * 2 * sqrt(stiffness * mass)  [mass=1]
+ *   Fast     → small elements: buttons, chips, switches
+ *   Default  → partial-screen: drawers, bottom sheets, cards
+ *   Slow     → full-screen: overlays, page transitions
  *
- * Then scaled for web pixels (Android values are in physical units).
- * Web-tuned to feel identical in rhythm and bounce character.
- *
- * M3 Expressive scheme (default) = lower damping → noticeable bounce.
- * M3 Standard scheme             = higher damping → minimal bounce.
- *
- * Rules:
- *   Spatial   → position, scale, size, shape → use matching Spatial spring
- *   Effects   → opacity, color               → use matching Effects spring
- *   Fast      → small components (buttons, chips, switches)
- *   Default   → partial-screen elements (drawers, bottom sheets, cards)
- *   Slow      → full-screen transitions, overlays, page changes
+ * Exit animations use exitCurve (duration-based) because springs overshoot
+ * in the wrong direction on exit.
  */
 
 // ─── Expressive scheme (recommended default) ──────────────────────────────────

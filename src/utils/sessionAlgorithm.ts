@@ -22,15 +22,9 @@ export const getValidForms = (word: WordFamily): { form: string; pos: string }[]
 
 /**
  * Selects words for a session.
- * Priority: unlearned first (shuffled) → learned words for review.
- *
- * FIX #5 — Spaced Repetition for review words:
- * Learned words are now sorted by their last-reviewed date ascending so the
- * words the user studied longest ago appear first for review. Previously they
- * were shuffled randomly, giving no SRS benefit. Words with no date record
- * (e.g. migrated data) are treated as the oldest and always come first.
- *
- * Always returns at least 4 so matching batches are never empty.
+ * Unlearned words come first (shuffled), followed by learned words sorted
+ * oldest-reviewed first for basic spaced repetition. Always returns at least
+ * 4 words so matching batches are never empty.
  */
 export const buildSession = (
   words: WordFamily[],
@@ -46,8 +40,8 @@ export const buildSession = (
 
   const unlearned = shuffle(valid.filter(w => !learnedSet.has(w.id)));
 
-  // Sort learned words oldest-reviewed first for basic spaced repetition.
-  // Words missing a date entry are treated as '0000-00-00' so they surface first.
+  // Sort learned words oldest-reviewed first. Words with no date are treated
+  // as '0000-00-00' so they always surface before recently reviewed words.
   const dates = learnedDates ?? {};
   const learned = valid
     .filter(w => learnedSet.has(w.id))
@@ -94,8 +88,8 @@ export const buildMultiFillBlank = (
   const forms = getValidForms(word);
   if (forms.length === 0) return null;
 
-  // Sort longest first to prevent partial-match replacements
-  // e.g. replace "familiarize" before "familiar"
+  // Sort longest form first to prevent partial-match replacements
+  // (e.g. replace "familiarize" before "familiar").
   const sorted = [...forms].sort((a, b) => b.form.length - a.form.length);
 
   type RawMatch = { index: number; end: number; form: string; pos: string };
@@ -112,7 +106,7 @@ export const buildMultiFillBlank = (
 
   if (raw.length === 0) return null;
 
-  // Sort by position, remove overlaps (keep first / longest already sorted)
+  // Sort by position, then remove overlapping matches (longest already sorted first).
   raw.sort((a, b) => a.index - b.index);
   const filtered: RawMatch[] = [];
   let lastEnd = -1;
@@ -123,17 +117,9 @@ export const buildMultiFillBlank = (
     }
   }
 
-  // Fix POS assignment for duplicate form strings.
-  //
-  // When the same spelling is both Noun and Verb (e.g. "array"), the regex
-  // finds it at multiple positions but the overlap-dedup above always keeps
-  // the same POS for every occurrence (whichever was first in `sorted`).
-  // Example: "They managed to array the soldiers in a vast array of colors."
-  //   -> both blanks end up as "Noun" -- wrong.
-  //
-  // Fix: build a list of all distinct POS for each form string from `forms`,
-  // then cycle through them in order across repeated occurrences, so each
-  // occurrence gets a different POS label.
+  // When the same spelling serves as both Noun and Verb (e.g. "array"), the
+  // overlap-dedup above assigns the same POS to every occurrence. Fix this by
+  // cycling through all distinct POS labels for each repeated form string.
   const formPosList = new Map<string, string[]>();
   for (const { form, pos } of forms) {
     const key = form.toLowerCase();
@@ -150,17 +136,17 @@ export const buildMultiFillBlank = (
     formPosUsage.set(key, usageIdx + 1);
   }
 
-  // Build blanked sentence by replacing in reverse (preserves indices)
+  // Replace in reverse order to preserve original string indices.
   let sentence = word.example;
   for (let i = filtered.length - 1; i >= 0; i--) {
     const m = filtered[i];
     sentence = sentence.slice(0, m.index) + '______' + sentence.slice(m.end);
   }
 
-  // Build BlankItem for each match
+  // Build one BlankItem per match with 3 distractor options.
   const blanks: BlankItem[] = filtered.map(m => {
     const distractors = shuffle(
-      // Deduplicate by lowercase to prevent duplicate option buttons (React key conflicts)
+      // Deduplicate by lowercase to avoid duplicate option buttons.
       [...new Set(
         pool
           .filter(w => w.id !== word.id)
@@ -186,8 +172,3 @@ export const buildMultiFillBlank = (
 
   return { sentence, blanks };
 };
-
-// FIX #9: The old buildFillBlank alias was cast through `unknown`, completely
-// bypassing TypeScript. Any call-site accessing `.blank` (singular) would get
-// undefined at runtime since the real return shape has `.blanks` (plural).
-// The alias has been removed. Use buildMultiFillBlank directly everywhere.
