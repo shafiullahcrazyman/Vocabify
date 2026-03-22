@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://shafiullahcrazyman.github.io/Vocabify/og-image.png" width="100%" alt="Vocabify — Offline English Vocabulary Learning App">
+<img src="https://shafiullahcrazyman.github.io/Vocabify/og-image.png" width="100%" alt="Vocabify: Offline English Vocabulary Learning App">
 
 # Vocabify
 
@@ -37,7 +37,7 @@ The application operates entirely offline after the first visit. No account is r
 
 ### <img src="https://api.iconify.design/material-symbols/book-2-outline.svg?color=%236750A4" height="18" align="center"> Vocabulary
 
-- 3,887 English word families, each with Noun, Verb, Adjective, and Adverb forms
+- 5,000+ English word families, each with Noun, Verb, Adjective, and Adverb forms
 - Bengali (বাংলা) meanings for every word
 - CEFR level classification: A1, A2, B1, B2, C1, C2
 - Contextual example sentences for every entry
@@ -55,7 +55,7 @@ The application operates entirely offline after the first visit. No account is r
 - Configurable daily learning goals: 5, 10, 20, or 50 words per day
 - Streak tracking with timezone-safe date logic (no UTC midnight bugs)
 - Automatic streak-break detection on app load
-- Full progress overview showing total words mastered out of 3,887
+- Full progress overview showing total words mastered out of 5,000+
 - Export learned words as JSON for personal use
 
 ### <img src="https://api.iconify.design/material-symbols/volume-up-outline.svg?color=%236750A4" height="18" align="center"> Pronunciation
@@ -79,9 +79,9 @@ The application operates entirely offline after the first visit. No account is r
 
 - Installable on Android and iOS via Add to Home Screen
 - All application assets, fonts, and data pre-cached on first visit via Workbox
-- Google Fonts served from cache after first load — no font flash offline
+- Google Fonts served from cache after first load; no font flash offline
 - Android hardware back button correctly closes the frontmost modal using a LIFO handler stack
-- Infinite scroll loads 3,887 words in batches of 20 with an IntersectionObserver
+- Infinite scroll loads 5,000+ words in batches of 20 with an IntersectionObserver
 - Service worker auto-updates silently in the background
 
 ### <img src="https://api.iconify.design/material-symbols/security.svg?color=%236750A4" height="18" align="center"> Security
@@ -196,7 +196,7 @@ Vocabify/
 
 Developer • Storyteller • Writer • Dreamer
 
-I am a Business Studies student from Patuakhali, Bangladesh. I build software through a practice I call vibe coding focusing on the feeling and flow of an application just as much as its functionality. Outside of development, I write fiction and create stories, and I believe the two disciplines share more in common than they appear to.
+I am a Business Studies student from Patuakhali, Bangladesh. I develop software using an approach known as “vibe coding,” where equal importance is given to the experience and flow of an application alongside it's functionality.
 
 Vocabify was built with the conviction that learning tools should feel worth returning to not because they demand it, but because they are genuinely pleasant to use.
 
