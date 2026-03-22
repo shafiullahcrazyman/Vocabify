@@ -159,6 +159,11 @@ export const Learn: React.FC = () => {
   const [learnedCount, setLearnedCount] = useState(0);
   const [matchIndex, setMatchIndex]    = useState(0);
 
+  // Guard: tracks whether session XP has already been awarded so neither
+  // handleFbNext (phase complete) nor handleExit (mid-session quit) can
+  // accidentally call addXP twice for the same session.
+  const xpAwardedRef = useRef(false);
+
   const currentPhaseIdx = completedPhases.size;
 
   const activeNodeRef = useRef<HTMLDivElement>(null);
@@ -260,10 +265,15 @@ export const Learn: React.FC = () => {
     const next = fbIndex + 1;
     if (next >= sessionWords.length) {
       setCompleted(prev => new Set([...prev, 'fillblank']));
+      // FIX: learnedCount was already incremented above when applicable.
+      // Do NOT add +1 here — the old code did `alreadyCountedToday ? c : c + 1`
+      // which caused a double-increment (and 10 extra XP) on the last new word.
       setLearnedCount(c => {
-        const finalCount = alreadyCountedToday ? c : c + 1;
-        addXP(finalCount * 10);
-        return finalCount;
+        if (!xpAwardedRef.current) {
+          xpAwardedRef.current = true;
+          addXP(c * 10);
+        }
+        return c;
       });
       setView({ mode: 'complete' });
     } else {
@@ -272,9 +282,13 @@ export const Learn: React.FC = () => {
     }
   }, [fbIndex, sessionWords, markLearned, progress.learnedDates, addXP]);
 
-  // Award partial XP when user exits mid-session after completing some fill-blank words
+  // Award partial XP when user exits mid-session after completing some fill-blank words.
+  // xpAwardedRef prevents a double-award if the phase already completed and awarded XP.
   const handleExit = useCallback(() => {
-    if (learnedCount > 0) addXP(learnedCount * 10);
+    if (learnedCount > 0 && !xpAwardedRef.current) {
+      xpAwardedRef.current = true;
+      addXP(learnedCount * 10);
+    }
     navigate('/home');
   }, [navigate, learnedCount, addXP]);
 
