@@ -47,49 +47,59 @@ export const FlashcardPhase: React.FC<Props> = ({
   const forms = getValidForms(word);
   const primaryForm = getPrimaryForm(word);
 
-  const titleSize =
-    primaryForm.length <= 7  ? 'text-[44px]' :
-    primaryForm.length <= 10 ? 'text-[38px]' :
-    primaryForm.length <= 14 ? 'text-[30px]' :
-    primaryForm.length <= 18 ? 'text-[24px]' :
-                               'text-[20px]';
+  // ── Targeted auto-sizing: only the main word and example text resize ──
+  // Everything else (POS rows, meaning) stays at its natural size.
 
-  // ── Dynamic fit: scale content down if it overflows the available height ──
-  // containerRef = the outer bounds (motion.div, h-full)
-  // contentRef   = the inner natural-layout div whose transform we manipulate
-  //
-  // useLayoutEffect fires synchronously before paint, so there is no visible
-  // flash of oversized content. ResizeObserver re-applies on viewport resize
-  // (e.g. keyboard open/close on mobile).
-  const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef   = useRef<HTMLDivElement>(null);
+  const wordRef    = useRef<HTMLParagraphElement>(null);
+  const exampleRef = useRef<HTMLParagraphElement>(null);
 
+  // Auto-fit the primary word: step down font size until it fits in one line
   useLayoutEffect(() => {
-    const outer = containerRef.current;
-    const inner = contentRef.current;
-    if (!outer || !inner) return;
+    const el = wordRef.current;
+    if (!el) return;
 
-    const apply = () => {
-      // Reset first so scrollHeight reflects the true natural size
-      inner.style.transform = '';
+    const SIZES = [44, 38, 30, 24, 20, 16, 13];
 
-      const avail = outer.clientHeight;
-      const full  = inner.scrollHeight;
+    // Prevent wrapping so we can measure true single-line overflow
+    el.style.whiteSpace = 'nowrap';
 
-      if (full > avail) {
-        const s = avail / full;
-        inner.style.transform        = `scale(${s})`;
-        inner.style.transformOrigin  = 'top center';
+    let chosen = SIZES[SIZES.length - 1];
+    for (const size of SIZES) {
+      el.style.fontSize = `${size}px`;
+      if (el.scrollWidth <= el.clientWidth) {
+        chosen = size;
+        break;
       }
-    };
+    }
 
-    apply();
+    el.style.fontSize  = `${chosen}px`;
+    el.style.whiteSpace = ''; // restore normal wrapping
+  }, [primaryForm]);
 
-    // Re-measure if the viewport changes (e.g. soft keyboard)
-    const ro = new ResizeObserver(apply);
-    ro.observe(outer);
-    return () => ro.disconnect();
-  }, [word.id]); // re-run whenever the word changes
+  // Auto-fit the example: shrink font if the block gets too tall (~5 lines)
+  useLayoutEffect(() => {
+    const el = exampleRef.current;
+    if (!el) return;
+
+    const MAX_H = 120; // ~5 lines at 24 px line-height
+
+    // Reset first so we always measure from the base size
+    el.style.fontSize   = '';
+    el.style.lineHeight = '';
+
+    if (el.scrollHeight <= MAX_H) return; // already fits — nothing to do
+
+    const STEPS: [number, string][] = [
+      [13, '20px'],
+      [11, '17px'],
+    ];
+
+    for (const [size, lh] of STEPS) {
+      el.style.fontSize   = `${size}px`;
+      el.style.lineHeight = lh;
+      if (el.scrollHeight <= MAX_H) break;
+    }
+  }, [word.example]);
 
   useEffect(() => {
     if (settings.autoPronounce && forms.length > 0) {
@@ -121,28 +131,27 @@ export const FlashcardPhase: React.FC<Props> = ({
     // outer: h-full so it takes exactly the available height given by Learn.tsx
     // overflow-hidden clips anything that escapes before scale is applied
     <motion.div
-      ref={containerRef}
       initial={{ opacity: 0, x: 40 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -40 }}
       transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
       className="h-full overflow-hidden"
     >
-      {/* inner: natural layout — gets CSS scale applied by the effect above */}
-      <div ref={contentRef} className="px-4 pt-4 pb-8 flex flex-col gap-5">
+      <div className="px-4 pt-4 pb-8 flex flex-col gap-5">
 
         {/* Main card */}
         <div className="bg-surface-container rounded-[28px] p-6">
 
           {/* Large primary word — tap to speak */}
           <p
+            ref={wordRef}
             onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); toggle(primaryForm, 'en'); }}
-            className={`${titleSize} font-bold leading-tight mb-5 cursor-pointer select-none transition-all duration-200 ${
+            className={`font-bold leading-tight mb-5 cursor-pointer select-none transition-colors duration-200 ${
               isPlaying && playingText === primaryForm
                 ? 'text-primary underline underline-offset-4 decoration-primary/60 opacity-80'
                 : 'text-on-surface'
             }`}
-            style={{ fontVariationSettings: '"wdth" 100' }}
+            style={{ fontSize: '44px', fontVariationSettings: '"wdth" 100' }}
           >
             {primaryForm}
           </p>
@@ -196,8 +205,9 @@ export const FlashcardPhase: React.FC<Props> = ({
               Example
             </p>
             <p
+              ref={exampleRef}
               onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); toggle(word.example, 'en'); }}
-              className={`m3-body-large italic leading-relaxed cursor-pointer select-none transition-all duration-200 ${
+              className={`m3-body-large italic leading-relaxed cursor-pointer select-none transition-colors duration-200 ${
                 isExamplePlaying
                   ? 'text-on-surface underline underline-offset-4 decoration-on-surface/40 opacity-75'
                   : 'text-on-surface-variant'
