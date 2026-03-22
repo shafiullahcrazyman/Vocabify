@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-d
 import { AnimatePresence, MotionConfig, MotionGlobalConfig } from 'motion/react';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { BottomNav } from './components/BottomNav';
+import { UpdatePrompt } from './components/UpdatePrompt';
 import { Home } from './screens/Home';
 import { Filter } from './screens/Filter';
 import { Progress } from './screens/Progress';
@@ -69,6 +70,8 @@ function AppContent() {
 
   return (
     <MotionConfig reducedMotion="user">
+      {/* UpdatePrompt sits outside the router so it persists across route changes */}
+      <UpdatePrompt />
       <HashRouter>
         <ScrollToTop />
         <AppShell />
