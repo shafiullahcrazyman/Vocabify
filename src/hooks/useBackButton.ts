@@ -1,22 +1,33 @@
 /**
- * useBackButton — intercepts the hardware/browser back button for modals and overlays.
+ * useBackButton — Universal PWA Back Button Manager
  *
- * Maintains a global LIFO handler stack. When a modal opens it pushes a history
- * entry and registers a handler; the back button fires only the topmost handler.
- * When a modal closes via a button, history.back() pops the sentinel entry so the
- * browser history stays clean. cleanupBackCount prevents that programmatic call
- * from accidentally triggering the next handler in the stack.
+ * How it works:
+ *   - Maintains a global handler stack (LIFO). Each open modal/overlay
+ *     pushes a handler; only the TOP handler fires when back is pressed.
+ *   - When a modal opens  → pushState so the back button intercepts here.
+ *   - When back is pressed → fires the topmost handler (closes that modal).
+ *   - When a modal closes via button → calls history.back() to pop the
+ *     sentinel entry we pushed, keeping browser history clean.
+ *   - cleanupBackCount prevents that programmatic history.back() from
+ *     accidentally triggering the next handler in the stack.
+ *
+ * Supports any depth of nested modals correctly (e.g. TipsOverlay inside
+ * WordOverlay inside the main screen).
  */
 
 import { useEffect, useRef } from 'react';
 
 type Handler = () => void;
 
-// Module-level singleton — one popstate listener shared across all hook instances.
+// ─── Module-level singleton ───────────────────────────────────────────────────
 
 const handlerStack: Handler[] = [];
 
-// Counts pending programmatic history.back() calls so the listener can ignore them.
+/**
+ * Counts how many programmatic `history.back()` calls we are waiting for.
+ * Each one increments the counter; the corresponding popstate decrements it
+ * and returns early so it doesn't trigger a real close.
+ */
 let cleanupBackCount = 0;
 
 let initialized = false;
@@ -43,26 +54,34 @@ function init(): void {
   }
 }
 
+// ─── Hook ─────────────────────────────────────────────────────────────────────
+
 /**
- * Drop into any modal or overlay component.
+ * Drop this into any modal/overlay component.
  *
- * @param isOpen  - Whether the layer is currently visible.
- * @param onClose - Callback to close the layer (same one used by the X button).
+ * @param isOpen  - Reactive boolean controlling whether the layer is visible.
+ * @param onClose - Callback to close the layer (same one you pass to the X button).
  *
  * @example
  *   useBackButton(isOpen, onClose);
- *   useBackButton(true, onClose); // always-mounted overlay
+ *   useBackButton(true, onClose);   // for always-mounted overlays
  */
 export function useBackButton(isOpen: boolean, onClose: () => void): void {
-  // Holds the latest onClose without causing effect re-runs.
+  // Always hold the latest onClose without causing re-runs
   const onCloseRef = useRef<Handler>(onClose);
   onCloseRef.current = onClose;
 
-  // True while this instance owns a live history entry that needs cleanup.
+  /**
+   * Did THIS effect instance push a history entry that still needs cleanup?
+   * Set to true on push, false when the back button fires (history already moved)
+   * or after programmatic cleanup.
+   */
   const isPushedRef = useRef(false);
 
-  // True when the back button (not a UI button) triggered the close.
-  // Prevents calling history.back() a second time after it already navigated.
+  /**
+   * Was this modal closed by the back button (true) or by a button click (false)?
+   * When true, we must NOT call history.back() again — the navigation already happened.
+   */
   const closedByBackRef = useRef(false);
 
   useEffect(() => {
@@ -70,13 +89,13 @@ export function useBackButton(isOpen: boolean, onClose: () => void): void {
 
     if (!isOpen) return;
 
-    // ── Open ───────────────────────────────────────────────────────────────
+    // ── Open: register ──────────────────────────────────────────────────────
     window.history.pushState({ _vocabModal: true }, '');
     isPushedRef.current = true;
     closedByBackRef.current = false;
 
     const handler: Handler = () => {
-      // Back button fired — history already moved, no need to call back() again.
+      // Mark that the back button (not a button click) caused this close
       closedByBackRef.current = true;
       isPushedRef.current = false;
       onCloseRef.current();
@@ -84,19 +103,19 @@ export function useBackButton(isOpen: boolean, onClose: () => void): void {
 
     handlerStack.push(handler);
 
-    // ── Cleanup ────────────────────────────────────────────────────────────
+    // ── Close / unmount: cleanup ────────────────────────────────────────────
     return () => {
-      // Remove our handler — may already be gone if the back button fired first.
+      // Remove our handler — may already be gone if back button fired first
       const idx = handlerStack.lastIndexOf(handler);
       if (idx !== -1) {
         handlerStack.splice(idx, 1);
       }
 
-      // If we still own a live history entry (closed via button, not back),
-      // pop it to keep browser history clean.
+      // If WE still own a live history entry (closed via button, not back button),
+      // pop it so browser history stays clean.
       if (isPushedRef.current && !closedByBackRef.current) {
         isPushedRef.current = false;
-        cleanupBackCount++;
+        cleanupBackCount++; // tell the listener to ignore the upcoming popstate
         window.history.back();
       }
     };

@@ -4,11 +4,16 @@ import localforage from 'localforage';
 /**
  * useIndexedDB — persists state to IndexedDB via localforage.
  *
- * Cross-tab sync: a BroadcastChannel notifies other tabs on every write so
- * they re-read the updated value, keeping all open tabs in sync without a reload.
+ * Multi-tab sync: a BroadcastChannel named `vocabify_db_sync` carries a
+ * notification whenever any tab writes a key. Other tabs re-read that key
+ * from IndexedDB and update their local state, so two open tabs always
+ * converge on the latest data without a page reload.
+ *
+ * BroadcastChannel is supported in all modern browsers and in PWA service
+ * worker contexts. The channel is closed on unmount via the cleanup return.
  */
 
-// One shared channel instance for all hook invocations in this tab.
+// One shared channel instance across all hook invocations in this tab.
 const syncChannel =
   typeof BroadcastChannel !== 'undefined'
     ? new BroadcastChannel('vocabify_db_sync')
@@ -22,12 +27,13 @@ export function useIndexedDB<T>(key: string, initialValue: T) {
   const [storedValue, setStoredValue] = useState<T>(initialValue);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Ref keeps the current key accessible inside the channel listener
-  // without stale closure issues.
+  // Keep a ref to the current key so the channel listener doesn't capture
+  // a stale closure value — important if the hook is ever called with a
+  // dynamic key (though in practice Vocabify uses fixed keys).
   const keyRef = useRef(key);
   keyRef.current = key;
 
-  // ── Initial load ──────────────────────────────────────────────────────────
+  // ── Initial load from IndexedDB ───────────────────────────────────────────
   useEffect(() => {
     localforage.getItem<T>(key).then((value) => {
       if (value !== null) {
@@ -42,13 +48,13 @@ export function useIndexedDB<T>(key: string, initialValue: T) {
     });
   }, [key]);
 
-  // ── Cross-tab sync ────────────────────────────────────────────────────────
+  // ── Cross-tab sync listener ───────────────────────────────────────────────
   useEffect(() => {
     if (!syncChannel) return;
 
     const handler = (event: MessageEvent<SyncMessage>) => {
       if (event.data?.key !== keyRef.current) return;
-      // Another tab wrote this key — re-read the latest value.
+      // Another tab wrote this key — re-read the latest value from IndexedDB.
       localforage.getItem<T>(keyRef.current).then((value) => {
         if (value !== null) setStoredValue(value);
       }).catch(err => {
@@ -62,11 +68,11 @@ export function useIndexedDB<T>(key: string, initialValue: T) {
 
   // ── Write ─────────────────────────────────────────────────────────────────
   const setValue = (value: T | ((val: T) => T)) => {
-    // Functional updater avoids operating on a stale state snapshot.
+    // Functional updater guarantees we never operate on a stale state snapshot.
     setStoredValue((prev) => {
       const valueToStore = value instanceof Function ? value(prev) : value;
 
-      // Persist, then notify other tabs.
+      // Fire-and-forget persist, then notify other tabs.
       localforage.setItem(key, valueToStore)
         .then(() => {
           syncChannel?.postMessage({ key } satisfies SyncMessage);
