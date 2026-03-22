@@ -148,11 +148,9 @@ export const SessionComplete: React.FC<Props> = ({ wordsCompleted, totalXP, onPl
                 transition={{ ...CARD_SPRING, delay: cardDelay }}
                 className={`flex-1 ${card.bg} rounded-[24px] flex flex-col items-center gap-3 py-7 px-3`}
               >
-                {/* Filled icon — fill="currentColor" fills the SVG paths */}
                 <card.Icon
                   className={`w-10 h-10 ${card.iconCls}`}
-                  fill="currentColor"
-                  strokeWidth={0}
+                  strokeWidth={2.2}
                 />
 
                 <div className="text-center">
