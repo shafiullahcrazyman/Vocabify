@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, ReactNod
 import { AppSettings, FilterOptions, WordFamily, StreakData } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useIndexedDB } from '../hooks/useIndexedDB';
+import { STORAGE_KEYS } from '../utils/storageKeys';
 import wordsData from '../data/words.json';
 
 // Helper: local YYYY-MM-DD to avoid UTC timezone bugs
@@ -72,14 +73,14 @@ const defaultStreak: StreakData = {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [storedSettings, setSettings] = useLocalStorage<AppSettings>('vocab_settings', defaultSettings);
+  const [storedSettings, setSettings] = useLocalStorage<AppSettings>(STORAGE_KEYS.SETTINGS, defaultSettings);
   const settings = { ...defaultSettings, ...storedSettings };
-  const [filters, setFilters] = useLocalStorage<FilterOptions>('vocab_filters', defaultFilters);
+  const [filters, setFilters] = useLocalStorage<FilterOptions>(STORAGE_KEYS.FILTERS, defaultFilters);
 
-  const [progress, setProgress, progressLoaded] = useIndexedDB<ProgressData>('vocab_progress', { learned: [], learnedDates: {} });
-  const [userAvatar, setUserAvatar, avatarLoaded] = useIndexedDB<string | null>('vocab_user_avatar', null);
-  const [favorites, setFavorites, favsLoaded] = useIndexedDB<string[]>('vocab_favorites', []);
-  const [streakData, setStreakData, streakLoaded] = useIndexedDB<StreakData>('vocab_streak', defaultStreak);
+  const [progress, setProgress, progressLoaded] = useIndexedDB<ProgressData>(STORAGE_KEYS.PROGRESS, { learned: [], learnedDates: {} });
+  const [userAvatar, setUserAvatar, avatarLoaded] = useIndexedDB<string | null>(STORAGE_KEYS.AVATAR, null);
+  const [favorites, setFavorites, favsLoaded] = useIndexedDB<string[]>(STORAGE_KEYS.FAVORITES, []);
+  const [streakData, setStreakData, streakLoaded] = useIndexedDB<StreakData>(STORAGE_KEYS.STREAK, defaultStreak);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -121,6 +122,30 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       // FIX #1 — spread prev so totalXP is never overwritten.
       setStreakData(prev => ({ ...prev, current: 0 }));
     }
+  }, [streakLoaded]);
+
+  // Re-check streak whenever the user returns to the tab or app.
+  // The load-time check above only fires once; if the app stays open overnight
+  // the streak would stay stale until the next hard reload without this listener.
+  useEffect(() => {
+    if (!streakLoaded) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') return;
+      const today = getLocalDateString();
+      const yesterday = getYesterdayString();
+      setStreakData(prev => {
+        const broken =
+          prev.current > 0 &&
+          prev.lastGoalDate !== '' &&
+          prev.lastGoalDate !== today &&
+          prev.lastGoalDate !== yesterday;
+        return broken ? { ...prev, current: 0 } : prev;
+      });
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [streakLoaded]);
 
   // Apply theme class + update the theme-color meta tag dynamically
