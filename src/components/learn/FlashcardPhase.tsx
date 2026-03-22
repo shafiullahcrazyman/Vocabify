@@ -54,9 +54,13 @@ export const FlashcardPhase: React.FC<Props> = ({
     primaryForm.length <= 18 ? 'text-[24px]' :
                                'text-[20px]';
 
-  // Scales content down when it overflows the available height.
-  // useLayoutEffect fires before paint to avoid a visible flash.
-  // ResizeObserver re-applies on viewport changes (e.g. soft keyboard).
+  // ── Dynamic fit: scale content down if it overflows the available height ──
+  // containerRef = the outer bounds (motion.div, h-full)
+  // contentRef   = the inner natural-layout div whose transform we manipulate
+  //
+  // useLayoutEffect fires synchronously before paint, so there is no visible
+  // flash of oversized content. ResizeObserver re-applies on viewport resize
+  // (e.g. keyboard open/close on mobile).
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef   = useRef<HTMLDivElement>(null);
 
@@ -66,7 +70,7 @@ export const FlashcardPhase: React.FC<Props> = ({
     if (!outer || !inner) return;
 
     const apply = () => {
-      // Reset transform first so scrollHeight reflects the true natural size.
+      // Reset first so scrollHeight reflects the true natural size
       inner.style.transform = '';
 
       const avail = outer.clientHeight;
@@ -81,11 +85,11 @@ export const FlashcardPhase: React.FC<Props> = ({
 
     apply();
 
-    // Re-measure when the viewport changes (e.g. soft keyboard).
+    // Re-measure if the viewport changes (e.g. soft keyboard)
     const ro = new ResizeObserver(apply);
     ro.observe(outer);
     return () => ro.disconnect();
-  }, [word.id]);
+  }, [word.id]); // re-run whenever the word changes
 
   useEffect(() => {
     if (settings.autoPronounce && forms.length > 0) {
@@ -114,6 +118,8 @@ export const FlashcardPhase: React.FC<Props> = ({
   ];
 
   return (
+    // outer: h-full so it takes exactly the available height given by Learn.tsx
+    // overflow-hidden clips anything that escapes before scale is applied
     <motion.div
       ref={containerRef}
       initial={{ opacity: 0, x: 40 }}
@@ -122,6 +128,7 @@ export const FlashcardPhase: React.FC<Props> = ({
       transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
       className="h-full overflow-hidden"
     >
+      {/* inner: natural layout — gets CSS scale applied by the effect above */}
       <div ref={contentRef} className="px-4 pt-4 pb-8 flex flex-col gap-5">
 
         {/* Main card */}

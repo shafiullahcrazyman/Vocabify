@@ -152,7 +152,10 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
   const [locked1, setLocked1]     = useState(false);
   const [celebrate1, setCelebrate1] = useState(false);
 
-  // Both columns are shuffled independently so positional memory cannot be exploited.
+  // FIX #4 — Shuffle BOTH columns independently in Stage 1.
+  // Previously only the right (meaning) column was shuffled. The left column
+  // always showed words in their original batch order, making it trivial to
+  // exploit positional memory instead of actually learning the meanings.
   const [leftWords]   = useState(() => shuffle(batch));
   const [rightMeaning] = useState(() =>
     shuffle(batch.map(w => ({ id: w.id, text: w.meaning_bn })))
@@ -168,7 +171,9 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
   const [locked2, setLocked2]       = useState(false);
   const [celebrate2, setCelebrate2] = useState(false);
 
-  // Both columns shuffled independently — left: word forms, right: POS labels.
+  // FIX #4 — Shuffle BOTH columns independently in Stage 2.
+  // Left shows word forms, right shows POS labels. Both now start in a random
+  // order so the user cannot guess by position alignment.
   const [leftPos,  setLeftPos]  = useState<PosPair[]>(() => shuffle(posSubBatches[0] ?? []));
   const [rightPos, setRightPos] = useState<PosPair[]>(() => shuffle(posSubBatches[0] ?? []));
 
@@ -231,7 +236,10 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
     }
   };
 
-  // Stage 2: left = word forms, right = POS labels — both tiles share the same pair.id.
+  // ── Stage 2 tap ─────────────────────────────────────────────────────────────
+  // Left = word forms, Right = POS labels — both tiles share the same pair.id.
+  // FIX #6 — wrong tile assignment uses sel2.side to correctly identify which
+  // tile is on which side, matching the same pattern as Stage 1 for consistency.
   const handleTap2 = (id: string, side: 'left' | 'right') => {
     if (locked2 || matched2.has(id)) return;
     triggerHaptic(settings.hapticsEnabled, 'tap');
@@ -247,6 +255,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
     } else {
       triggerHaptic(settings.hapticsEnabled, 'error');
       setLocked2(true);
+      // sel2.side tells us which side the originally selected tile is on.
       setWrong2L(sel2.side === 'left' ? sel2.id : id);
       setWrong2R(sel2.side === 'right' ? sel2.id : id);
       setTimeout(() => { setWrong2L(null); setWrong2R(null); setSel2(null); setLocked2(false); }, 800);
@@ -276,7 +285,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
             transition={{ duration: 0.2 }}
             className="grid grid-cols-2 gap-3"
           >
-            {/* Left: English words */}
+            {/* Left: English words — FIX #4: now rendered from shuffled leftWords */}
             <div className="flex flex-col gap-3">
               {leftWords.map(word => {
                 const text = getPrimaryForm(word);
@@ -342,7 +351,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
             )}
 
             <div className="grid grid-cols-2 gap-3">
-              {/* Left: word forms */}
+              {/* Left: word forms — FIX #4: now rendered from shuffled leftPos */}
               <div className="flex flex-col gap-3">
                 {leftPos.map(pair => (
                   <Tile
