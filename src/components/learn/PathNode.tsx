@@ -22,11 +22,7 @@ interface Props {
 
 export const PathNode: React.FC<Props> = ({ node, state, side, onTap }) => {
   const { Icon, label, sublabel, color, iconColor } = node;
-  // FIX: completed nodes were also interactive (only 'locked' set disabled=true).
-  // Tapping a completed node silently reset all phase state and re-ran that phase.
-  // Now treat both 'locked' and 'complete' as non-interactive for the disabled prop.
-  // The 'complete' circle still fires onTap so callers can optionally add a review
-  // sheet in the future — but the button is visually distinct and not pulsing.
+  // Completed nodes are non-interactive to prevent accidentally re-running a phase.
   const isLocked   = state === 'locked';
   const isComplete = state === 'complete';
   const isDisabled = isLocked || isComplete;

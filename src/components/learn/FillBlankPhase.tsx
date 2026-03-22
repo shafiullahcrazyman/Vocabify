@@ -30,12 +30,11 @@ function optionTextSize(text: string): string {
   return 'text-[12px]';
 }
 
-// ── Sentence renderer ──────────────────────────────────────────────────────────
-// Splits the sentence on '______' and renders each blank slot with state styling.
+// Renders the sentence with each blank slot styled based on answer state.
 const SentenceDisplay: React.FC<{
   sentence: string;
   blanks: MultiFillBlankData['blanks'];
-  answers: (string | null)[];  // per-blank answered value (null = not yet)
+  answers: (string | null)[];
   currentIdx: number;
 }> = ({ sentence, blanks, answers, currentIdx }) => {
   const parts = sentence.split('______');
@@ -64,7 +63,6 @@ const SentenceDisplay: React.FC<{
   );
 };
 
-// ── Main component ─────────────────────────────────────────────────────────────
 export const FillBlankPhase: React.FC<Props> = ({
   word,
   allSessionWords,
@@ -78,19 +76,16 @@ export const FillBlankPhase: React.FC<Props> = ({
     buildMultiFillBlank(word, allSessionWords)
   );
 
-  // Which blank the user is currently answering
   const [currentBlank, setCurrentBlank] = useState(0);
-  // Per-blank answers: null = unanswered
   const [answers, setAnswers] = useState<(string | null)[]>(() =>
     fillData ? fillData.blanks.map(() => null) : []
   );
-  // Currently selected wrong option (for brief red flash)
   const [wrongOption, setWrongOption] = useState<string | null>(null);
 
   const advanceTimer = useRef<ReturnType<typeof setTimeout>>();
   React.useEffect(() => () => clearTimeout(advanceTimer.current), []);
 
-  // ── Fallback ────────────────────────────────────────────────────────────────
+  // Fallback: no blank could be built — show a simple review card.
   if (!fillData || fillData.blanks.length === 0) {
     return (
       <motion.div
@@ -129,7 +124,6 @@ export const FillBlankPhase: React.FC<Props> = ({
     triggerHaptic(settings.hapticsEnabled, correct ? 'success' : 'error');
 
     if (correct) {
-      // Mark this blank answered
       setAnswers(prev => prev.map((a, i) => i === currentBlank ? option : a));
       const delay = isLastBlank ? 1400 : 900;
       advanceTimer.current = setTimeout(() => {
@@ -140,23 +134,19 @@ export const FillBlankPhase: React.FC<Props> = ({
         }
       }, delay);
     } else {
-      // Flash wrong briefly then clear
       setWrongOption(option);
       setTimeout(() => setWrongOption(null), 800);
     }
   };
 
   const optionClass = (option: string): string => {
-    // Dynamic text size based on option length — base no longer includes a fixed font size
     const base = 'py-4 px-3 rounded-[18px] text-center font-semibold min-h-[68px] flex items-center justify-center transition-all duration-150 active:scale-95 leading-tight';
 
-    // After correct answer is given
     if (isAnswered) {
       if (option === blank.answer) return `${base} bg-primary/20 text-primary`;
       return `${base} bg-surface-container text-on-surface/30`;
     }
 
-    // Wrong flash
     if (wrongOption === option) return `${base} bg-error/20 text-error`;
 
     return `${base} bg-surface-container-high text-on-surface`;

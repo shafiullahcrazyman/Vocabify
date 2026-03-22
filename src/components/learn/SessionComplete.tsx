@@ -11,10 +11,10 @@ interface Props {
   onPlayAgain: () => void;
 }
 
-// M3 emphasized easing — used throughout Material You for entrances
+// M3 emphasized easing curve
 const M3_EASE = [0.2, 0, 0, 1] as const;
 
-// Spring config for the stat cards pop-in
+// Spring for stat card pop-in
 const CARD_SPRING = { type: 'spring', damping: 22, stiffness: 280 } as const;
 
 export const SessionComplete: React.FC<Props> = ({ wordsCompleted, totalXP, onPlayAgain }) => {
