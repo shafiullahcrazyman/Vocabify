@@ -42,20 +42,30 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    // Capture the input element before any await — React may recycle the event object.
+    // Hold a DOM reference before any await — React may recycle the synthetic
+    // event object after the first yield, but the underlying input element stays.
     const inputEl = event.target;
 
     if (!file) return;
 
-    // Size check first — no async I/O needed.
+    // ── Size check first — cheap, no async I/O needed ──────────────────────
     if (file.size > 2 * 1024 * 1024) {
       alert('Please choose an image smaller than 2MB so it can be saved offline.');
       inputEl.value = '';
       return;
     }
 
-    // Validate by magic bytes, not file extension — extensions can be renamed to bypass type checks.
-    // JPEG: FF D8 FF | PNG: 89 50 4E 47 | GIF: 47 49 46 38 | WebP: RIFF....WEBP
+    // ── Magic byte validation ───────────────────────────────────────────────
+    // file.type is provided by the OS based on the file extension, not the
+    // actual byte content. A user can rename evil.svg → evil.png and bypass
+    // an extension-only check. Reading the first 12 bytes of the file confirms
+    // the real format regardless of what the OS reports.
+    //
+    // Signatures used:
+    //   JPEG  : FF D8 FF  (bytes 0-2)
+    //   PNG   : 89 50 4E 47  (bytes 0-3)
+    //   GIF   : 47 49 46 38  (bytes 0-3 — shared prefix for GIF87a & GIF89a)
+    //   WebP  : 52 49 46 46 at 0-3 ("RIFF") + 57 45 42 50 at 8-11 ("WEBP")
     try {
       const buffer = await file.slice(0, 12).arrayBuffer();
       const b = new Uint8Array(buffer);
@@ -72,13 +82,13 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
         return;
       }
     } catch {
-      // arrayBuffer() can throw on a corrupted or unreadable file.
+      // arrayBuffer() can theoretically throw on a corrupted or unreadable file.
       alert('Could not read the image file. Please try a different one.');
       inputEl.value = '';
       return;
     }
 
-    // All checks passed — store as a data URL for offline availability.
+    // ── All checks passed — read as data URL for IndexedDB storage ──────────
     const reader = new FileReader();
     reader.onloadend = () => {
       setUserAvatar(reader.result as string);

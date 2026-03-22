@@ -25,17 +25,18 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleSoftReset = () => {
-    // Clears settings and filters only — progress and favorites are preserved.
+    // Smart Reset: Clears volatile settings but KEEPS user progress & favorites.
+    // Uses STORAGE_KEYS constants so a key rename in one place stays in sync here.
     localStorage.removeItem(STORAGE_KEYS.SETTINGS);
     localStorage.removeItem(STORAGE_KEYS.FILTERS);
     window.location.reload();
   };
 
   private handleHardReset = async () => {
-    // Wipes all data including progress, streak, favorites, and avatar.
+    // Nuclear option: Wipes everything — localStorage AND IndexedDB (localforage)
     if (window.confirm("Are you sure? This will delete all your learned words and progress.")) {
       localStorage.clear();
-      await localforage.clear();
+      await localforage.clear(); // clears progress, streak, favorites, avatar from IndexedDB
       window.location.reload();
     }
   };

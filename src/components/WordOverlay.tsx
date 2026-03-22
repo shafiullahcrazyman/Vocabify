@@ -38,7 +38,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
   const isFavorite = favorites.includes(word.id);
   const [isTipsOpen, setIsTipsOpen] = useState(false);
 
-  // Derived audio states
+  // Derived playing states
   const bnSpeechText     = prepareBnSpeech(word.meaning_bn);
   const isBnPlaying      = isPlaying && playingText === bnSpeechText;
   const isExamplePlaying = isPlaying && playingText === word.example;
@@ -192,7 +192,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto p-6 pointer-events-auto touch-pan-y">
           <div className="text-center mb-10 mt-2">
-            {/* Main word */}
+            {/* Main word with speaker icon — spring animation only, no animate-pulse */}
             <div className="flex items-center justify-center gap-3 mb-2 px-2">
               <h2 className={`${getOverlayTitleSize(mainWord)} font-bold tracking-tight text-on-surface leading-none capitalize break-words`}>
                 {mainWord}
@@ -213,7 +213,10 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
               </motion.button>
             </div>
 
-            {/* Bengali meaning — tap to toggle audio */}
+            {/*
+              Bengali meaning — click to toggle Bengali audio (no speaker icon).
+              Underline appears when playing; hover underline otherwise.
+            */}
             <motion.p
               onClick={() => {
                 triggerHaptic(settings.hapticsEnabled, 'selection');
@@ -260,6 +263,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
                         <span className={`text-[20px] font-semibold capitalize ${valid ? 'text-on-surface' : 'text-on-surface-variant/50'}`}>
                           {valid ? val : 'None'}
                         </span>
+                        {/* Speaker icon buttons — spring animation only, no animate-pulse */}
                         {valid && (
                           <motion.button
                             onClick={() => { triggerHaptic(settings.hapticsEnabled, 'selection'); speak(val!); }}
@@ -278,7 +282,10 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
               </div>
             </div>
 
-            {/* Example sentence — tap to toggle audio */}
+            {/*
+              Example sentence — click to toggle audio (no speaker icon).
+              Visual feedback: underline + dimming when playing.
+            */}
             <div className="bg-primary-container/30 rounded-3xl p-5">
               <h4 className="m3-title-medium text-on-surface mb-2">Example</h4>
               <motion.p
@@ -330,7 +337,7 @@ export const WordOverlay: React.FC<WordOverlayProps> = ({
             <ChevronLeft className="w-7 h-7" />
           </motion.button>
 
-          {/* Mark Learned */}
+          {/* Mark Learned — M3 Expressive spring */}
           <motion.button
             onClick={handleMarkLearned}
             whileTap={anim ? { scale: 0.96 } : undefined}
