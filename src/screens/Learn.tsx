@@ -34,7 +34,7 @@ const PHASE_DEFS: Omit<PhaseNode, 'sublabel'>[] = [
   },
   {
     id: 'fillblank',
-    label: 'Fill in Blank',
+    label: 'Fill in the Blanks',
     Icon: PenLine,
     color: 'bg-[#2D6A4F]',
     iconColor: 'text-white',
@@ -417,7 +417,7 @@ export const Learn: React.FC = () => {
       ? `Flashcards · ${flashPos + 1} of ${flashQueue.length}`
       : view.mode === 'matching'
       ? `Match Pairs · Round ${matchIndex + 1} of ${matchBatches.length}`
-      : `Fill in Blank · ${fbIndex + 1} of ${sessionWords.length}`;
+      : `Fill in the Blanks · ${fbIndex + 1} of ${sessionWords.length}`;
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col">
