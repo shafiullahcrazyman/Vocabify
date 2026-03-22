@@ -98,7 +98,7 @@ const StageBanner: React.FC<{ stage: Stage }> = ({ stage }) => (
     <div className={`w-2.5 h-2.5 rounded-full transition-colors ${stage === 'meaning' ? 'bg-primary' : 'bg-on-surface/20'}`} />
     <div className={`w-2.5 h-2.5 rounded-full transition-colors ${stage === 'pos'     ? 'bg-primary' : 'bg-on-surface/20'}`} />
     <span className="ml-1 m3-body-small text-on-surface-variant font-medium">
-      {stage === 'meaning' ? 'Stage 1 · Match the meaning' : 'Stage 2 · Match POS to its word form'}
+      {stage === 'meaning' ? 'Stage 1 · Match the meanings' : 'Stage 2 · Match the parts of speech'}
     </span>
   </motion.div>
 );
