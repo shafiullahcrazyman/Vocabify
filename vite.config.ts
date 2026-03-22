@@ -22,7 +22,9 @@ export default defineConfig(() => {
       VitePWA({
         registerType: 'autoUpdate',
         injectRegister: 'script',
-        includeAssets: ['icon.png', 'tutorial.mp4'],
+        // tutorial.mp4 is excluded from precache (1.1 MB) — it is handled by
+        // runtimeCaching below so it is only fetched and cached on first play.
+        includeAssets: ['icon.png'],
         manifest: {
           name: 'Vocabify',
           short_name: 'Vocabify',
@@ -30,6 +32,7 @@ export default defineConfig(() => {
           theme_color: '#141218',
           background_color: '#141218',
           display: 'standalone',
+          orientation: 'portrait',
           scope: '/Vocabify/',
           start_url: '/Vocabify/',
           icons: [
@@ -40,9 +43,24 @@ export default defineConfig(() => {
         },
         workbox: {
           // Cache all built assets
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,mp4,json,woff2,woff}'],
+          // mp4 is excluded from precache — see runtimeCaching below
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff2,woff}'],
           // Runtime caching for Google Fonts so they work offline after first load
           runtimeCaching: [
+            {
+              // Cache tutorial.mp4 at runtime (first play) rather than at
+              // SW install time — keeps the precache payload ~1.1 MB lighter.
+              urlPattern: /\/tutorial\.mp4$/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'video-cache',
+                expiration: {
+                  maxEntries: 1,
+                  maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                },
+                cacheableResponse: { statuses: [200] },
+              },
+            },
             {
               // Cache the CSS descriptor from fonts.googleapis.com
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
