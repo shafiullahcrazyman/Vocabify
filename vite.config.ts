@@ -36,8 +36,12 @@ export default defineConfig(() => {
             { src: 'icon.png', sizes: '192x192', type: 'image/png' },
             { src: 'icon.png', sizes: '512x512', type: 'image/png' },
             { src: 'icon.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-            // For true maskable support: generate icon-maskable.png at https://maskable.app
-            // then uncomment: { src: 'icon-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+            // Maskable icon — Android uses this to fill adaptive icon shapes without
+            // a white square border. The same icon.png is used here as a baseline so
+            // the app installs cleanly. For a pixel-perfect result, generate a version
+            // with the correct safe-zone padding at https://maskable.app and replace
+            // this entry with: { src: 'icon-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+            { src: 'icon.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
           ],
         },
         workbox: {
