@@ -47,59 +47,62 @@ export const FlashcardPhase: React.FC<Props> = ({
   const forms = getValidForms(word);
   const primaryForm = getPrimaryForm(word);
 
-  // ── Targeted auto-sizing: only the main word and example text resize ──
-  // Everything else (POS rows, meaning) stays at its natural size.
+  const wordRef      = useRef<HTMLParagraphElement>(null);
+  const exampleRef   = useRef<HTMLParagraphElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef   = useRef<HTMLDivElement>(null);
 
-  const wordRef    = useRef<HTMLParagraphElement>(null);
-  const exampleRef = useRef<HTMLParagraphElement>(null);
-
-  // Auto-fit the primary word: step down font size until it fits in one line
   useLayoutEffect(() => {
-    const el = wordRef.current;
-    if (!el) return;
+    const wordEl    = wordRef.current;
+    const exampleEl = exampleRef.current;
+    const outer     = containerRef.current;
+    const inner     = contentRef.current;
+    if (!wordEl || !exampleEl || !outer || !inner) return;
 
-    const SIZES = [44, 38, 30, 24, 20, 16, 13];
-
-    // Prevent wrapping so we can measure true single-line overflow
-    el.style.whiteSpace = 'nowrap';
-
-    let chosen = SIZES[SIZES.length - 1];
-    for (const size of SIZES) {
-      el.style.fontSize = `${size}px`;
-      if (el.scrollWidth <= el.clientWidth) {
-        chosen = size;
-        break;
+    const apply = () => {
+      // ── Step 1: smart-resize the main word to fit on one line ──
+      wordEl.style.whiteSpace = 'nowrap';
+      const WORD_SIZES = [44, 38, 30, 24, 20, 16, 13];
+      let chosenSize = WORD_SIZES[WORD_SIZES.length - 1];
+      for (const size of WORD_SIZES) {
+        wordEl.style.fontSize = `${size}px`;
+        if (wordEl.scrollWidth <= wordEl.clientWidth) {
+          chosenSize = size;
+          break;
+        }
       }
-    }
+      wordEl.style.fontSize   = `${chosenSize}px`;
+      wordEl.style.whiteSpace = '';
 
-    el.style.fontSize  = `${chosen}px`;
-    el.style.whiteSpace = ''; // restore normal wrapping
-  }, [primaryForm]);
+      // ── Step 2: smart-resize the example if it's too tall ──
+      exampleEl.style.fontSize   = '';
+      exampleEl.style.lineHeight = '';
+      const MAX_EXAMPLE_H = 120; // ~5 lines
+      if (exampleEl.scrollHeight > MAX_EXAMPLE_H) {
+        const EXAMPLE_STEPS: [number, string][] = [[13, '20px'], [11, '17px']];
+        for (const [size, lh] of EXAMPLE_STEPS) {
+          exampleEl.style.fontSize   = `${size}px`;
+          exampleEl.style.lineHeight = lh;
+          if (exampleEl.scrollHeight <= MAX_EXAMPLE_H) break;
+        }
+      }
 
-  // Auto-fit the example: shrink font if the block gets too tall (~5 lines)
-  useLayoutEffect(() => {
-    const el = exampleRef.current;
-    if (!el) return;
+      // ── Step 3: full-card scale as last resort so buttons never leave screen ──
+      inner.style.transform = '';
+      const avail = outer.clientHeight;
+      const full  = inner.scrollHeight;
+      if (full > avail) {
+        inner.style.transform       = `scale(${avail / full})`;
+        inner.style.transformOrigin = 'top center';
+      }
+    };
 
-    const MAX_H = 120; // ~5 lines at 24 px line-height
+    apply();
 
-    // Reset first so we always measure from the base size
-    el.style.fontSize   = '';
-    el.style.lineHeight = '';
-
-    if (el.scrollHeight <= MAX_H) return; // already fits — nothing to do
-
-    const STEPS: [number, string][] = [
-      [13, '20px'],
-      [11, '17px'],
-    ];
-
-    for (const [size, lh] of STEPS) {
-      el.style.fontSize   = `${size}px`;
-      el.style.lineHeight = lh;
-      if (el.scrollHeight <= MAX_H) break;
-    }
-  }, [word.example]);
+    const ro = new ResizeObserver(apply);
+    ro.observe(outer);
+    return () => ro.disconnect();
+  }, [word.id]);
 
   useEffect(() => {
     if (settings.autoPronounce && forms.length > 0) {
@@ -131,13 +134,14 @@ export const FlashcardPhase: React.FC<Props> = ({
     // outer: h-full so it takes exactly the available height given by Learn.tsx
     // overflow-hidden clips anything that escapes before scale is applied
     <motion.div
+      ref={containerRef}
       initial={{ opacity: 0, x: 40 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -40 }}
       transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
       className="h-full overflow-hidden"
     >
-      <div className="px-4 pt-4 pb-8 flex flex-col gap-5">
+      <div ref={contentRef} className="px-4 pt-4 pb-8 flex flex-col gap-5">
 
         {/* Main card */}
         <div className="bg-surface-container rounded-[28px] p-6">
