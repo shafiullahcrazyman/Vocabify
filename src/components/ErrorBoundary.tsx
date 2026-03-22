@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Trash2 } from 'lucide-react';
 import localforage from 'localforage';
+import { STORAGE_KEYS } from '../utils/storageKeys';
 
 interface Props {
   children: ReactNode;
@@ -24,9 +25,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleSoftReset = () => {
-    // Smart Reset: Clears volatile settings but KEEPS user progress & favorites
-    localStorage.removeItem('vocab_settings');
-    localStorage.removeItem('vocab_filters');
+    // Smart Reset: Clears volatile settings but KEEPS user progress & favorites.
+    // Uses STORAGE_KEYS constants so a key rename in one place stays in sync here.
+    localStorage.removeItem(STORAGE_KEYS.SETTINGS);
+    localStorage.removeItem(STORAGE_KEYS.FILTERS);
     window.location.reload();
   };
 

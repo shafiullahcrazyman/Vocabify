@@ -40,30 +40,60 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
     setIsSettingsOpen(true);
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    // Hold a DOM reference before any await — React may recycle the synthetic
+    // event object after the first yield, but the underlying input element stays.
+    const inputEl = event.target;
 
-    if (file) {
-      // Block SVGs — they can embed scripts. Only allow safe raster formats.
-      const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-      if (!ALLOWED_TYPES.includes(file.type)) {
-        alert("Only JPEG, PNG, GIF, or WebP images are allowed.");
-        event.target.value = '';
-        return;
-      }
+    if (!file) return;
 
-      if (file.size > 2 * 1024 * 1024) {
-        alert("Please choose an image smaller than 2MB so it can be saved offline.");
-        event.target.value = '';
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUserAvatar(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    // ── Size check first — cheap, no async I/O needed ──────────────────────
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Please choose an image smaller than 2MB so it can be saved offline.');
+      inputEl.value = '';
+      return;
     }
+
+    // ── Magic byte validation ───────────────────────────────────────────────
+    // file.type is provided by the OS based on the file extension, not the
+    // actual byte content. A user can rename evil.svg → evil.png and bypass
+    // an extension-only check. Reading the first 12 bytes of the file confirms
+    // the real format regardless of what the OS reports.
+    //
+    // Signatures used:
+    //   JPEG  : FF D8 FF  (bytes 0-2)
+    //   PNG   : 89 50 4E 47  (bytes 0-3)
+    //   GIF   : 47 49 46 38  (bytes 0-3 — shared prefix for GIF87a & GIF89a)
+    //   WebP  : 52 49 46 46 at 0-3 ("RIFF") + 57 45 42 50 at 8-11 ("WEBP")
+    try {
+      const buffer = await file.slice(0, 12).arrayBuffer();
+      const b = new Uint8Array(buffer);
+
+      const isJpeg = b[0] === 0xFF && b[1] === 0xD8 && b[2] === 0xFF;
+      const isPng  = b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47;
+      const isGif  = b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38;
+      const isWebp = b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46
+                  && b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50;
+
+      if (!isJpeg && !isPng && !isGif && !isWebp) {
+        alert('Only JPEG, PNG, GIF, or WebP images are allowed.');
+        inputEl.value = '';
+        return;
+      }
+    } catch {
+      // arrayBuffer() can theoretically throw on a corrupted or unreadable file.
+      alert('Could not read the image file. Please try a different one.');
+      inputEl.value = '';
+      return;
+    }
+
+    // ── All checks passed — read as data URL for IndexedDB storage ──────────
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUserAvatar(reader.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
