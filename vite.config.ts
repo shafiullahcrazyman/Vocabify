@@ -7,14 +7,15 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig(() => {
   return {
     base: '/Vocabify/',
+    // Strip all console.* calls and debugger statements from production bundle.
+    // This prevents internal storage key names and debug info leaking to DevTools.
+    // NOTE: Must be at the top level — build.esbuild does not exist in Vite's config.
+    esbuild: {
+      drop: ['console', 'debugger'],
+    },
     build: {
       outDir: 'dist',
-      // Strip all console.* calls and debugger statements from production bundle.
-      // This prevents internal storage key names and debug info leaking to DevTools.
       minify: true,
-      esbuild: {
-        drop: ['console', 'debugger'],
-      },
     },
     plugins: [
       react(),
