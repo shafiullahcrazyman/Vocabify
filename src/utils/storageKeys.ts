@@ -1,8 +1,16 @@
 /**
- * Single source of truth for all localStorage and IndexedDB key strings.
- * Import these constants instead of typing raw strings so a key rename
- * stays in sync everywhere, including in ErrorBoundary which must call
- * localStorage directly without going through hooks.
+ * storageKeys — Single source of truth for every localStorage / IndexedDB key
+ * used across the app.
+ *
+ * Why this file exists:
+ *   ErrorBoundary is a class component and cannot use hooks, so it must call
+ *   localStorage directly rather than going through useLocalStorage. Without
+ *   a shared constants file, the key strings 'vocab_settings' and
+ *   'vocab_filters' were duplicated between AppContext and ErrorBoundary.
+ *   A key rename in one place would silently break the other.
+ *
+ * Import this wherever a storage key string is needed instead of typing
+ * the raw string literal.
  */
 
 export const STORAGE_KEYS = {
