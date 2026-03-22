@@ -24,10 +24,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        # actions/checkout v4.2.2 — SHA-pinned for supply-chain safety.
+        # Mutable version tags (e.g. @v4) can be silently updated by the
+        # action maintainer. Pinning to a commit SHA guarantees the exact
+        # code that ran when this SHA was reviewed keeps running.
+        # To update: find the new SHA at https://github.com/actions/checkout/releases
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        # actions/setup-node v4.4.0
+        # Verify / update SHA: https://github.com/actions/setup-node/releases
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4.4.0
         with:
           node-version: 24
 
@@ -38,10 +45,14 @@ jobs:
         run: npm run build
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        # actions/configure-pages v5.0.0
+        # Verify / update SHA: https://github.com/actions/configure-pages/releases
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b  # v5.0.0
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        # actions/upload-pages-artifact v3.0.1
+        # Verify / update SHA: https://github.com/actions/upload-pages-artifact/releases
+        uses: actions/upload-pages-artifact@56afc609e74202658d3b0910bf08a1bae6ef4c37  # v3.0.1
         with:
           path: './dist'
 
@@ -54,4 +65,6 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        # actions/deploy-pages v4.0.5
+        # Verify / update SHA: https://github.com/actions/deploy-pages/releases
+        uses: actions/deploy-pages@d6773196f4a1f772b5371d8b4f704730b731f7e2  # v4.0.5
