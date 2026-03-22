@@ -56,14 +56,22 @@ export const useWordFilter = (
       }
 
       // 4. Difficulty
+      // When both level and CEFR are active, use OR logic — a word passes if it
+      // matches EITHER filter. The previous else-if chain incorrectly applied AND
+      // logic, rejecting words that matched level but not CEFR (and vice versa).
       const levelActive = filters.level.length > 0;
       const cefrActive = filters.cefr.length > 0;
       if (levelActive || cefrActive) {
         const matchesLevel = levelActive && filters.level.includes(word.level);
         const matchesCefr = cefrActive && !!word.cefr && filters.cefr.includes(word.cefr);
-        if (levelActive && cefrActive && !matchesLevel && !matchesCefr) return false;
-        else if (levelActive && !matchesLevel) return false;
-        else if (cefrActive && !matchesCefr) return false;
+        if (levelActive && cefrActive) {
+          // Both active — reject only if NEITHER matches (OR logic)
+          if (!matchesLevel && !matchesCefr) return false;
+        } else if (levelActive && !matchesLevel) {
+          return false;
+        } else if (cefrActive && !matchesCefr) {
+          return false;
+        }
       }
 
       // 5. Categories
