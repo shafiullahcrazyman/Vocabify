@@ -72,14 +72,14 @@ export const useWordFilter = (
       
       // 6. POS
       if (filters.pos.length > 0) {
-        const hasPos = filters.pos.some(pos => {
+        const hasAllSelectedPos = filters.pos.every(pos => {
           if (pos === 'noun' && word.noun && word.noun.toLowerCase() !== 'x') return true;
           if (pos === 'verb' && word.verb && word.verb.toLowerCase() !== 'x') return true;
           if (pos === 'adjective' && word.adjective && word.adjective.toLowerCase() !== 'x') return true;
           if (pos === 'adverb' && word.adverb && word.adverb.toLowerCase() !== 'x') return true;
           return false;
         });
-        if (!hasPos) return false;
+        if (!hasAllSelectedPos) return false;
       }
 
       return true;
