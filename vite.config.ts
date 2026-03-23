@@ -7,15 +7,14 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig(() => {
   return {
     base: '/Vocabify/',
-    // Strip all console.* calls and debugger statements from production bundle.
-    // This prevents internal storage key names and debug info leaking to DevTools.
-    // NOTE: Must be at the top level — build.esbuild does not exist in Vite's config.
-    esbuild: {
-      drop: ['console', 'debugger'],
-    },
     build: {
       outDir: 'dist',
+      // Strip all console.* calls and debugger statements from production bundle.
+      // This prevents internal storage key names and debug info leaking to DevTools.
       minify: true,
+      esbuild: {
+        drop: ['console', 'debugger'],
+      },
     },
     plugins: [
       react(),
@@ -23,10 +22,7 @@ export default defineConfig(() => {
       VitePWA({
         registerType: 'autoUpdate',
         injectRegister: 'script',
-        // tutorial.mp4 removed from precache — it is 1.1 MB and bloats the SW
-        // install bundle. It is handled by runtimeCaching below instead, so it
-        // gets cached on first play and is available offline after that.
-        includeAssets: ['icon.png'],
+        includeAssets: ['icon.png', 'tutorial.mp4'],
         manifest: {
           name: 'Vocabify',
           short_name: 'Vocabify',
@@ -43,23 +39,10 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          // mp4 removed from precache glob — handled by runtimeCaching below
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff2,woff}'],
+          // Cache all built assets
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,mp4,json,woff2,woff}'],
+          // Runtime caching for Google Fonts so they work offline after first load
           runtimeCaching: [
-            {
-              // Cache tutorial.mp4 at runtime (first play) rather than at
-              // SW install time — keeps the precache payload ~1.1 MB lighter.
-              urlPattern: /\/tutorial\.mp4$/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'video-cache',
-                expiration: {
-                  maxEntries: 1,
-                  maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-                },
-                cacheableResponse: { statuses: [200] },
-              },
-            },
             {
               // Cache the CSS descriptor from fonts.googleapis.com
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
