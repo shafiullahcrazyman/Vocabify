@@ -305,9 +305,9 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
                     isWrong={wrongL1 === word.id}
                     onTap={() => handleTap1(word.id, 'left')}
                   >
-                    <div className="flex flex-col items-start gap-[5px] w-full">
+                    <div className="flex flex-col items-center gap-[5px] w-full">
                       {englishForms.map((form, j) => (
-                        <span key={j} className={`${lineTextSize(form)} font-bold text-left leading-snug w-full`}>
+                        <span key={j} className={`${lineTextSize(form)} font-bold text-center leading-snug w-full`}>
                           {form}
                         </span>
                       ))}
@@ -322,9 +322,9 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
                     isWrong={wrongR1 === rightTile.id}
                     onTap={() => handleTap1(rightTile.id, 'right')}
                   >
-                    <div className="flex flex-col items-end gap-[5px] w-full">
+                    <div className="flex flex-col items-center gap-[5px] w-full">
                       {bnLines.map((line, j) => (
-                        <span key={j} className={`${lineTextSize(line)} font-semibold text-right leading-snug w-full`}>
+                        <span key={j} className={`${lineTextSize(line)} font-semibold text-center leading-snug w-full`}>
                           {line}
                         </span>
                       ))}
