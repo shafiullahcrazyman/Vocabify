@@ -415,7 +415,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
             <CheckCircle2 className="w-6 h-6 text-primary" />
             <p className="m3-title-medium text-primary font-bold">
               {celebrate1
-                ? 'Match parts of speech'
+                ? 'Match the parts of speech'
                 : posSubIdx + 1 >= posSubBatches.length
                   ? 'Round complete!'
                   : 'Next group!'}
