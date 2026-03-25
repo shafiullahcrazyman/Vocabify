@@ -14,6 +14,7 @@ interface Props {
   onComplete: () => void;
 }
 
+// ── POS config ─────────────────────────────────────────────────────────────────
 const POS_CONFIG = [
   { key: 'noun',      label: 'Noun'      },
   { key: 'verb',      label: 'Verb'      },
@@ -22,13 +23,6 @@ const POS_CONFIG = [
 ] as const;
 
 type Stage = 'meaning' | 'pos';
-
-// One English form paired with its single Bengali meaning line
-interface MeaningPair {
-  id: string;        // e.g. "42__noun" — unique, shared on both sides for matching
-  form: string;      // English word form
-  meaningBn: string; // Single Bengali line (no slashes)
-}
 
 interface PosPair {
   id: string;
@@ -47,25 +41,6 @@ function splitMeaningBn(meaning_bn: string): string[] {
   return meaning_bn.split(' / ').map(s => s.trim()).filter(Boolean);
 }
 
-// Build Stage 1 sub-batches: one sub-batch per word, each pair = one form + one meaning line
-function buildMeaningSubBatches(batch: WordFamily[]): MeaningPair[][] {
-  const result: MeaningPair[][] = [];
-  for (const word of batch) {
-    const forms = getValidForms(word);
-    const bnLines = splitMeaningBn(word.meaning_bn);
-    const len = Math.min(forms.length, bnLines.length);
-    if (len < 2) continue;
-    result.push(
-      Array.from({ length: len }, (_, i) => ({
-        id: `${word.id}__${forms[i].pos.toLowerCase()}`,
-        form: forms[i].form,
-        meaningBn: bnLines[i],
-      }))
-    );
-  }
-  return result;
-}
-
 function wordToPairs(word: WordFamily): PosPair[] {
   return POS_CONFIG
     .filter(cfg => { const v = word[cfg.key as keyof WordFamily] as string; return v && v !== 'x'; })
@@ -77,6 +52,7 @@ function wordToPairs(word: WordFamily): PosPair[] {
 }
 
 function buildPosSubBatches(batch: WordFamily[]): PosPair[][] {
+  // Step 1 — global dedup with merged POS labels
   const globalMap = new Map<string, PosPair>();
   for (const word of batch) {
     for (const pair of wordToPairs(word)) {
@@ -84,46 +60,37 @@ function buildPosSubBatches(batch: WordFamily[]): PosPair[][] {
       if (globalMap.has(key)) {
         const existing = globalMap.get(key)!;
         if (!existing.posLabel.includes(pair.posLabel)) {
-          globalMap.set(key, { ...existing, posLabel: `${existing.posLabel} · ${pair.posLabel}` });
+          globalMap.set(key, {
+            ...existing,
+            posLabel: `${existing.posLabel} · ${pair.posLabel}`,
+          });
         }
       } else {
         globalMap.set(key, pair);
       }
     }
   }
+
+  // Steps 2-4 — per-word sub-batches, each form consumed only once
   const used = new Set<string>();
   const result: PosPair[][] = [];
+
   for (const word of batch) {
     const keys = wordToPairs(word)
       .map(p => p.form.toLowerCase())
       .filter((k, i, arr) => arr.indexOf(k) === i);
+
     const fresh = keys.filter(k => !used.has(k));
     if (fresh.length < 2) continue;
+
     result.push(fresh.map(k => globalMap.get(k)!));
     fresh.forEach(k => used.add(k));
   }
+
   return result;
 }
 
-// Progress dots shared by both stages
-const SubBatchDots: React.FC<{ total: number; current: number }> = ({ total, current }) => {
-  if (total <= 1) return null;
-  return (
-    <div className="flex justify-center gap-1.5 mb-4">
-      {Array.from({ length: total }).map((_, i) => (
-        <div
-          key={i}
-          className={`h-1.5 rounded-full transition-all duration-300 ${
-            i < current   ? 'w-5 bg-primary' :
-            i === current ? 'w-7 bg-primary/70' :
-            'w-3 bg-on-surface/15'
-          }`}
-        />
-      ))}
-    </div>
-  );
-};
-
+// ── Stage banner ───────────────────────────────────────────────────────────────
 const StageBanner: React.FC<{ stage: Stage }> = ({ stage }) => (
   <motion.div
     key={stage}
@@ -140,6 +107,7 @@ const StageBanner: React.FC<{ stage: Stage }> = ({ stage }) => (
   </motion.div>
 );
 
+// ── Tile component ─────────────────────────────────────────────────────────────
 const Tile: React.FC<{
   id: string;
   children: React.ReactNode;
@@ -175,34 +143,29 @@ const Tile: React.FC<{
   );
 };
 
+// ── Main component ─────────────────────────────────────────────────────────────
 export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches, onComplete }) => {
   const { settings } = useAppContext();
   const [stage, setStage] = useState<Stage>('meaning');
 
-  // ── Stage 1 state ──────────────────────────────────────────────────────────
-  const meaningSubBatches = useMemo(() => buildMeaningSubBatches(batch), [batch]);
-  const [meaningSubIdx, setMeaningSubIdx] = useState(0);
-  const [sel1, setSel1]         = useState<{ id: string; side: 'left' | 'right' } | null>(null);
-  const [matched1, setMatched1] = useState<Set<string>>(new Set());
-  const [wrongL1, setWrongL1]   = useState<string | null>(null);
-  const [wrongR1, setWrongR1]   = useState<string | null>(null);
-  const [locked1, setLocked1]   = useState(false);
+  // ── Stage 1 ────────────────────────────────────────────────────────────────
+  const [sel1, setSel1]           = useState<{ id: string; side: 'left' | 'right' } | null>(null);
+  const [matched1, setMatched1]   = useState<Set<string>>(new Set());
+  const [wrongL1, setWrongL1]     = useState<string | null>(null);
+  const [wrongR1, setWrongR1]     = useState<string | null>(null);
+  const [locked1, setLocked1]     = useState(false);
   const [celebrate1, setCelebrate1] = useState(false);
 
-  const [leftMeaning,  setLeftMeaning]  = useState<MeaningPair[]>(() => shuffle(meaningSubBatches[0] ?? []));
-  const [rightMeaning, setRightMeaning] = useState<MeaningPair[]>(() => shuffle(meaningSubBatches[0] ?? []));
+  // FIX #4 — Shuffle BOTH columns independently in Stage 1.
+  // Previously only the right (meaning) column was shuffled. The left column
+  // always showed words in their original batch order, making it trivial to
+  // exploit positional memory instead of actually learning the meanings.
+  const [leftWords]   = useState(() => shuffle(batch));
+  const [rightMeaning] = useState(() =>
+    shuffle(batch.map(w => ({ id: w.id, text: w.meaning_bn })))
+  );
 
-  const currentMeaningSub = meaningSubBatches[meaningSubIdx] ?? [];
-
-  useEffect(() => {
-    setSel1(null); setMatched1(new Set());
-    setWrongL1(null); setWrongR1(null);
-    setLocked1(false); setCelebrate1(false);
-    setLeftMeaning(shuffle(meaningSubBatches[meaningSubIdx] ?? []));
-    setRightMeaning(shuffle(meaningSubBatches[meaningSubIdx] ?? []));
-  }, [meaningSubIdx, meaningSubBatches]);
-
-  // ── Stage 2 state ──────────────────────────────────────────────────────────
+  // ── Stage 2 ────────────────────────────────────────────────────────────────
   const posSubBatches = useMemo(() => buildPosSubBatches(batch), [batch]);
   const [posSubIdx, setPosSubIdx]   = useState(0);
   const [sel2, setSel2]             = useState<{ id: string; side: 'left' | 'right' } | null>(null);
@@ -212,6 +175,9 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
   const [locked2, setLocked2]       = useState(false);
   const [celebrate2, setCelebrate2] = useState(false);
 
+  // FIX #4 — Shuffle BOTH columns independently in Stage 2.
+  // Left shows word forms, right shows POS labels. Both now start in a random
+  // order so the user cannot guess by position alignment.
   const [leftPos,  setLeftPos]  = useState<PosPair[]>(() => shuffle(posSubBatches[0] ?? []));
   const [rightPos, setRightPos] = useState<PosPair[]>(() => shuffle(posSubBatches[0] ?? []));
 
@@ -221,35 +187,26 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
     setSel2(null); setMatched2(new Set());
     setWrong2L(null); setWrong2R(null);
     setLocked2(false); setCelebrate2(false);
+    // Re-shuffle both columns independently when advancing to a new sub-batch.
     setLeftPos(shuffle(posSubBatches[posSubIdx] ?? []));
     setRightPos(shuffle(posSubBatches[posSubIdx] ?? []));
   }, [posSubIdx, posSubBatches]);
 
-  // ── Stage 1 completion ─────────────────────────────────────────────────────
+  // Stage 1 completion
   useEffect(() => {
-    if (stage !== 'meaning') return;
-
-    // Edge case: no sub-batches at all, skip to Stage 2 or complete
-    if (meaningSubBatches.length === 0) {
-      if (posSubBatches.length === 0) { onComplete(); } else { setStage('pos'); }
-      return;
-    }
-
-    if (matched1.size < currentMeaningSub.length) return;
-
-    setCelebrate1(true);
-    const t = setTimeout(() => {
-      setCelebrate1(false);
-      if (meaningSubIdx + 1 >= meaningSubBatches.length) {
-        if (posSubBatches.length === 0) { onComplete(); } else { setStage('pos'); }
-      } else {
-        setMeaningSubIdx(s => s + 1);
+    if (stage === 'meaning' && matched1.size === batch.length && batch.length > 0) {
+      if (posSubBatches.length === 0) {
+        setCelebrate1(true);
+        const t = setTimeout(() => { setCelebrate1(false); onComplete(); }, 900);
+        return () => clearTimeout(t);
       }
-    }, 700);
-    return () => clearTimeout(t);
-  }, [matched1.size, currentMeaningSub.length, meaningSubIdx, meaningSubBatches.length, stage, posSubBatches.length, onComplete]);
+      setCelebrate1(true);
+      const t = setTimeout(() => { setCelebrate1(false); setStage('pos'); }, 900);
+      return () => clearTimeout(t);
+    }
+  }, [matched1.size, batch.length, stage, posSubBatches.length]);
 
-  // ── Stage 2 completion ─────────────────────────────────────────────────────
+  // Stage 2 sub-batch completion
   useEffect(() => {
     if (stage !== 'pos') return;
     if (currentPosSub.length > 0 && matched2.size === currentPosSub.length) {
@@ -261,13 +218,15 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
     }
   }, [matched2.size, currentPosSub.length, posSubIdx, posSubBatches.length, stage, onComplete]);
 
-  // ── Stage 1 tap ────────────────────────────────────────────────────────────
+  // ── Stage 1 tap ─────────────────────────────────────────────────────────────
   const handleTap1 = (id: string, side: 'left' | 'right') => {
     if (locked1 || matched1.has(id)) return;
     triggerHaptic(settings.hapticsEnabled, 'tap');
+
     if (!sel1) { setSel1({ id, side }); return; }
     if (sel1.id === id && sel1.side === side) { setSel1(null); return; }
     if (sel1.side === side) { setSel1({ id, side }); return; }
+
     if (sel1.id === id) {
       triggerHaptic(settings.hapticsEnabled, 'success');
       setMatched1(prev => new Set([...prev, id]));
@@ -281,13 +240,18 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
     }
   };
 
-  // ── Stage 2 tap ────────────────────────────────────────────────────────────
+  // ── Stage 2 tap ─────────────────────────────────────────────────────────────
+  // Left = word forms, Right = POS labels — both tiles share the same pair.id.
+  // FIX #6 — wrong tile assignment uses sel2.side to correctly identify which
+  // tile is on which side, matching the same pattern as Stage 1 for consistency.
   const handleTap2 = (id: string, side: 'left' | 'right') => {
     if (locked2 || matched2.has(id)) return;
     triggerHaptic(settings.hapticsEnabled, 'tap');
+
     if (!sel2) { setSel2({ id, side }); return; }
     if (sel2.id === id && sel2.side === side) { setSel2(null); return; }
     if (sel2.side === side) { setSel2({ id, side }); return; }
+
     if (sel2.id === id) {
       triggerHaptic(settings.hapticsEnabled, 'success');
       setMatched2(prev => new Set([...prev, id]));
@@ -295,13 +259,14 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
     } else {
       triggerHaptic(settings.hapticsEnabled, 'error');
       setLocked2(true);
+      // sel2.side tells us which side the originally selected tile is on.
       setWrong2L(sel2.side === 'left' ? sel2.id : id);
       setWrong2R(sel2.side === 'right' ? sel2.id : id);
       setTimeout(() => { setWrong2L(null); setWrong2R(null); setSel2(null); setLocked2(false); }, 800);
     }
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -314,58 +279,64 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
 
       <AnimatePresence mode="wait">
 
-        {/* ── STAGE 1: one tile per form/meaning pair ────────────────────── */}
+        {/* ── STAGE 1: Bengali meaning ──────────────────────────── */}
         {stage === 'meaning' && (
           <motion.div
-            key={`meaning-${meaningSubIdx}`}
+            key="meaning"
             initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -16 }}
             transition={{ duration: 0.2 }}
+            className="flex flex-col gap-3"
           >
-            <SubBatchDots total={meaningSubBatches.length} current={meaningSubIdx} />
-
-            <div className="grid grid-cols-2 gap-3">
-              {/* Left: English forms (independently shuffled) */}
-              <div className="flex flex-col gap-3">
-                {leftMeaning.map(pair => (
+            {/* Zip left[i] + right[i] by index only for height -- they are NOT the same word.
+                Both arrays are independently shuffled so positional alignment gives no hint. */}
+            {leftWords.map((word, i) => {
+              const englishForms = getValidForms(word).map(f => f.form);
+              const rightTile = rightMeaning[i];
+              const bnLines = splitMeaningBn(rightTile.text);
+              return (
+                <div key={word.id} className="grid grid-cols-2 gap-3 items-stretch">
+                  {/* Left: all English forms stacked */}
                   <Tile
-                    key={`L1-${pair.id}`}
-                    id={pair.id}
-                    isMatched={matched1.has(pair.id)}
-                    isSelected={sel1?.id === pair.id && sel1?.side === 'left'}
-                    isWrong={wrongL1 === pair.id}
-                    onTap={() => handleTap1(pair.id, 'left')}
+                    id={word.id}
+                    isMatched={matched1.has(word.id)}
+                    isSelected={sel1?.id === word.id && sel1?.side === 'left'}
+                    isWrong={wrongL1 === word.id}
+                    onTap={() => handleTap1(word.id, 'left')}
                   >
-                    <span className={`${lineTextSize(pair.form)} font-bold text-center leading-snug w-full`}>
-                      {pair.form}
-                    </span>
+                    <div className="flex flex-col items-center gap-[5px] w-full">
+                      {englishForms.map((form, j) => (
+                        <span key={j} className={`${lineTextSize(form)} font-bold text-center leading-snug w-full`}>
+                          {form}
+                        </span>
+                      ))}
+                    </div>
                   </Tile>
-                ))}
-              </div>
 
-              {/* Right: Bengali meanings (independently shuffled) */}
-              <div className="flex flex-col gap-3">
-                {rightMeaning.map(pair => (
+                  {/* Right: all Bengali meanings stacked */}
                   <Tile
-                    key={`R1-${pair.id}`}
-                    id={pair.id}
-                    isMatched={matched1.has(pair.id)}
-                    isSelected={sel1?.id === pair.id && sel1?.side === 'right'}
-                    isWrong={wrongR1 === pair.id}
-                    onTap={() => handleTap1(pair.id, 'right')}
+                    id={rightTile.id}
+                    isMatched={matched1.has(rightTile.id)}
+                    isSelected={sel1?.id === rightTile.id && sel1?.side === 'right'}
+                    isWrong={wrongR1 === rightTile.id}
+                    onTap={() => handleTap1(rightTile.id, 'right')}
                   >
-                    <span className={`${lineTextSize(pair.meaningBn)} font-semibold text-center leading-snug w-full`}>
-                      {pair.meaningBn}
-                    </span>
+                    <div className="flex flex-col items-center gap-[5px] w-full">
+                      {bnLines.map((line, j) => (
+                        <span key={j} className={`${lineTextSize(line)} font-semibold text-center leading-snug w-full`}>
+                          {line}
+                        </span>
+                      ))}
+                    </div>
                   </Tile>
-                ))}
-              </div>
-            </div>
+                </div>
+              );
+            })}
           </motion.div>
         )}
 
-        {/* ── STAGE 2: word form → POS label ────────────────────────────── */}
+        {/* ── STAGE 2: POS → word form ──────────────────────────── */}
         {stage === 'pos' && (
           <motion.div
             key={`pos-${posSubIdx}`}
@@ -374,9 +345,23 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
             exit={{ opacity: 0, x: -16 }}
             transition={{ duration: 0.2 }}
           >
-            <SubBatchDots total={posSubBatches.length} current={posSubIdx} />
+            {posSubBatches.length > 1 && (
+              <div className="flex justify-center gap-1.5 mb-4">
+                {posSubBatches.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      i < posSubIdx  ? 'w-5 bg-primary' :
+                      i === posSubIdx ? 'w-7 bg-primary/70' :
+                      'w-3 bg-on-surface/15'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3">
+              {/* Left: word forms — FIX #4: now rendered from shuffled leftPos */}
               <div className="flex flex-col gap-3">
                 {leftPos.map(pair => (
                   <Tile
@@ -393,6 +378,8 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
                   </Tile>
                 ))}
               </div>
+
+              {/* Right: POS labels (shuffled) */}
               <div className="flex flex-col gap-3">
                 {rightPos.map(pair => (
                   <Tile
@@ -428,9 +415,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
             <CheckCircle2 className="w-6 h-6 text-primary" />
             <p className="m3-title-medium text-primary font-bold">
               {celebrate1
-                ? meaningSubIdx + 1 >= meaningSubBatches.length
-                  ? 'Match parts of speech'
-                  : 'Next group!'
+                ? 'Match parts of speech'
                 : posSubIdx + 1 >= posSubBatches.length
                   ? 'Round complete!'
                   : 'Next group!'}
