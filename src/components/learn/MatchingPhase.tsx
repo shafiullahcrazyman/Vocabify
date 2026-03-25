@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2 } from 'lucide-react';
 import { WordFamily } from '../../types';
-import { getValidForms } from '../../utils/sessionAlgorithm';
+import { getPrimaryForm } from '../../utils/sessionAlgorithm';
 import { shuffle } from '../../utils/shuffle';
 import { useAppContext } from '../../context/AppContext';
 import { triggerHaptic } from '../../utils/haptics';
@@ -30,15 +30,11 @@ interface PosPair {
   posLabel: string;
 }
 
-function lineTextSize(line: string): string {
-  if (line.length <= 8)  return 'text-[16px]';
-  if (line.length <= 14) return 'text-[14px]';
-  if (line.length <= 22) return 'text-[12px]';
-  return 'text-[11px]';
-}
-
-function splitMeaningBn(meaning_bn: string): string[] {
-  return meaning_bn.split(' / ').map(s => s.trim()).filter(Boolean);
+function tileTextSize(text: string): string {
+  if (text.length <= 8)  return 'text-[17px]';
+  if (text.length <= 12) return 'text-[15px]';
+  if (text.length <= 18) return 'text-[13px]';
+  return 'text-[13px]';
 }
 
 function wordToPairs(word: WordFamily): PosPair[] {
@@ -287,52 +283,46 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -16 }}
             transition={{ duration: 0.2 }}
-            className="flex flex-col gap-3"
+            className="grid grid-cols-2 gap-3"
           >
-            {/* Zip left[i] + right[i] by index only for height -- they are NOT the same word.
-                Both arrays are independently shuffled so positional alignment gives no hint. */}
-            {leftWords.map((word, i) => {
-              const englishForms = getValidForms(word).map(f => f.form);
-              const rightTile = rightMeaning[i];
-              const bnLines = splitMeaningBn(rightTile.text);
-              return (
-                <div key={word.id} className="grid grid-cols-2 gap-3 items-stretch">
-                  {/* Left: all English forms stacked */}
+            {/* Left: English words — FIX #4: now rendered from shuffled leftWords */}
+            <div className="flex flex-col gap-3">
+              {leftWords.map(word => {
+                const text = getPrimaryForm(word);
+                return (
                   <Tile
+                    key={`L1-${word.id}`}
                     id={word.id}
                     isMatched={matched1.has(word.id)}
                     isSelected={sel1?.id === word.id && sel1?.side === 'left'}
                     isWrong={wrongL1 === word.id}
                     onTap={() => handleTap1(word.id, 'left')}
                   >
-                    <div className="flex flex-col items-center gap-[5px] w-full">
-                      {englishForms.map((form, j) => (
-                        <span key={j} className={`${lineTextSize(form)} font-bold text-center leading-snug w-full`}>
-                          {form}
-                        </span>
-                      ))}
-                    </div>
+                    <span className={`${tileTextSize(text)} font-bold text-center leading-tight w-full`}>
+                      {text}
+                    </span>
                   </Tile>
+                );
+              })}
+            </div>
 
-                  {/* Right: all Bengali meanings stacked */}
-                  <Tile
-                    id={rightTile.id}
-                    isMatched={matched1.has(rightTile.id)}
-                    isSelected={sel1?.id === rightTile.id && sel1?.side === 'right'}
-                    isWrong={wrongR1 === rightTile.id}
-                    onTap={() => handleTap1(rightTile.id, 'right')}
-                  >
-                    <div className="flex flex-col items-center gap-[5px] w-full">
-                      {bnLines.map((line, j) => (
-                        <span key={j} className={`${lineTextSize(line)} font-semibold text-center leading-snug w-full`}>
-                          {line}
-                        </span>
-                      ))}
-                    </div>
-                  </Tile>
-                </div>
-              );
-            })}
+            {/* Right: Bengali meanings (shuffled) */}
+            <div className="flex flex-col gap-3">
+              {rightMeaning.map(tile => (
+                <Tile
+                  key={`R1-${tile.id}`}
+                  id={tile.id}
+                  isMatched={matched1.has(tile.id)}
+                  isSelected={sel1?.id === tile.id && sel1?.side === 'right'}
+                  isWrong={wrongR1 === tile.id}
+                  onTap={() => handleTap1(tile.id, 'right')}
+                >
+                  <span className={`${tileTextSize(tile.text.split('/')[0].trim())} font-semibold text-center leading-tight w-full`}>
+                    {tile.text.split('/')[0].trim()}
+                  </span>
+                </Tile>
+              ))}
+            </div>
           </motion.div>
         )}
 
@@ -372,7 +362,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
                     isWrong={wrong2L === pair.id}
                     onTap={() => handleTap2(pair.id, 'left')}
                   >
-                    <span className={`${lineTextSize(pair.form)} font-bold text-center leading-tight w-full`}>
+                    <span className={`${tileTextSize(pair.form)} font-bold text-center leading-tight w-full`}>
                       {pair.form}
                     </span>
                   </Tile>
@@ -390,7 +380,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
                     isWrong={wrong2R === pair.id}
                     onTap={() => handleTap2(pair.id, 'right')}
                   >
-                    <span className={`${lineTextSize(pair.posLabel)} font-bold text-center w-full`}>
+                    <span className={`${tileTextSize(pair.posLabel)} font-bold text-center w-full`}>
                       {pair.posLabel}
                     </span>
                   </Tile>
@@ -415,7 +405,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
             <CheckCircle2 className="w-6 h-6 text-primary" />
             <p className="m3-title-medium text-primary font-bold">
               {celebrate1
-                ? 'Match the parts of speech'
+                ? 'Match parts of speech'
                 : posSubIdx + 1 >= posSubBatches.length
                   ? 'Round complete!'
                   : 'Next group!'}
