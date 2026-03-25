@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useAppContext, getLocalDateString } from '../context/AppContext';
 import { Target, RotateCcw, Award, Copy, Check, Download, X, Flame, Sparkles, ChevronDown, Zap } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
@@ -328,6 +328,7 @@ export const Progress: React.FC = () => {
         </div>
 
         {/* Export Modal */}
+        <AnimatePresence>
         {showExportModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-on-surface/40 backdrop-blur-sm p-4 sm:p-6">
             <motion.div
@@ -391,6 +392,7 @@ export const Progress: React.FC = () => {
             </motion.div>
           </div>
         )}
+        </AnimatePresence>
       </motion.div>
     </>
   );
