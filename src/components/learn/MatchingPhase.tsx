@@ -27,7 +27,7 @@ type Stage = 'meaning' | 'pos';
 interface MeaningPair {
   id: string;        // e.g. "42__noun" — unique, shared on both sides for matching
   form: string;      // English word form
-  meaningBn: string; // Single Bengali line (no slashes)
+  meaningBnLines: string[]; // One or more Bengali lines (merged when form is shared across POS)
 }
 
 interface PosPair {
@@ -47,7 +47,10 @@ function splitMeaningBn(meaning_bn: string): string[] {
   return meaning_bn.split(' / ').map(s => s.trim()).filter(Boolean);
 }
 
-// Build Stage 1 sub-batches: one sub-batch per word, each pair = one form + one meaning line
+// Build Stage 1 sub-batches: one sub-batch per word.
+// When the same English form serves multiple POS (e.g. "dare" = noun + verb),
+// those pairs are merged into one tile: left shows the shared form once,
+// right shows all its Bengali meanings stacked — mirroring Stage 2 dedup logic.
 function buildMeaningSubBatches(batch: WordFamily[]): MeaningPair[][] {
   const result: MeaningPair[][] = [];
   for (const word of batch) {
@@ -55,13 +58,32 @@ function buildMeaningSubBatches(batch: WordFamily[]): MeaningPair[][] {
     const bnLines = splitMeaningBn(word.meaning_bn);
     const len = Math.min(forms.length, bnLines.length);
     if (len < 2) continue;
-    result.push(
-      Array.from({ length: len }, (_, i) => ({
-        id: `${word.id}__${forms[i].pos.toLowerCase()}`,
-        form: forms[i].form,
-        meaningBn: bnLines[i],
-      }))
-    );
+
+    // Group by lowercased form — same word across multiple POS gets merged
+    const map = new Map<string, MeaningPair>();
+    for (let i = 0; i < len; i++) {
+      const key = forms[i].form.toLowerCase();
+      if (map.has(key)) {
+        const existing = map.get(key)!;
+        // Append the new Bengali line and extend the id
+        map.set(key, {
+          id: `${existing.id}__${forms[i].pos.toLowerCase()}`,
+          form: existing.form,
+          meaningBnLines: [...existing.meaningBnLines, bnLines[i]],
+        });
+      } else {
+        map.set(key, {
+          id: `${word.id}__${forms[i].pos.toLowerCase()}`,
+          form: forms[i].form,
+          meaningBnLines: [bnLines[i]],
+        });
+      }
+    }
+
+    const pairs = Array.from(map.values());
+    // Need at least 2 distinct tiles to make the game playable
+    if (pairs.length < 2) continue;
+    result.push(pairs);
   }
   return result;
 }
@@ -355,9 +377,13 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
                     isWrong={wrongR1 === pair.id}
                     onTap={() => handleTap1(pair.id, 'right')}
                   >
-                    <span className={`${lineTextSize(pair.meaningBn)} font-semibold text-center leading-snug w-full`}>
-                      {pair.meaningBn}
-                    </span>
+                    <div className="flex flex-col items-center gap-[5px] w-full">
+                      {pair.meaningBnLines.map((line, j) => (
+                        <span key={j} className={`${lineTextSize(line)} font-semibold text-center leading-snug w-full`}>
+                          {line}
+                        </span>
+                      ))}
+                    </div>
                   </Tile>
                 ))}
               </div>
