@@ -72,17 +72,14 @@ export const Home: React.FC = () => {
       }
     );
 
-    // Attach the sensor to our loader div
-    if (loaderRef.current) {
-      observer.observe(loaderRef.current);
-    }
+    // Capture the element now — ref.current may be null by the time cleanup runs
+    const el = loaderRef.current;
+    if (!el) return;
+
+    observer.observe(el);
 
     // Cleanup the sensor when the component updates or unmounts
-    return () => {
-      if (loaderRef.current) {
-        observer.unobserve(loaderRef.current);
-      }
-    };
+    return () => observer.unobserve(el);
   }, [hasMore]);
 
   return (
