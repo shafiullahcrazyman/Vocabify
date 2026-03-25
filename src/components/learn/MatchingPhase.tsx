@@ -317,8 +317,8 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
                   isWrong={wrongR1 === tile.id}
                   onTap={() => handleTap1(tile.id, 'right')}
                 >
-                  <span className={`${tileTextSize(tile.text)} font-semibold text-center leading-tight w-full`}>
-                    {tile.text}
+                  <span className={`${tileTextSize(tile.text.split('/')[0].trim())} font-semibold text-center leading-tight w-full`}>
+                    {tile.text.split('/')[0].trim()}
                   </span>
                 </Tile>
               ))}
