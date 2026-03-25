@@ -47,27 +47,31 @@ function splitMeaningBn(meaning_bn: string): string[] {
   return meaning_bn.split(' / ').map(s => s.trim()).filter(Boolean);
 }
 
-// Build Stage 1 sub-batches: one sub-batch per word.
-// When the same English form serves multiple POS (e.g. "dare" = noun + verb),
-// those pairs are merged into one tile: left shows the shared form once,
-// right shows all its Bengali meanings stacked — mirroring Stage 2 dedup logic.
+const MEANING_SUB_BATCH_SIZE = 4;
+
+// Build Stage 1 sub-batches.
+// Words with >= 2 distinct English forms → own sub-batch per word.
+// Words whose forms all collapse to 1 unique form after dedup (e.g. "aid" n+v)
+// → pooled into shared mixed sub-batches of up to MEANING_SUB_BATCH_SIZE tiles,
+//   so they never silently disappear from the game.
 function buildMeaningSubBatches(batch: WordFamily[]): MeaningPair[][] {
   const result: MeaningPair[][] = [];
+  const orphans: MeaningPair[] = []; // merged pairs that can't stand alone
+
   for (const word of batch) {
     const forms = getValidForms(word);
     const bnLines = splitMeaningBn(word.meaning_bn);
     const len = Math.min(forms.length, bnLines.length);
     if (len < 2) continue;
 
-    // Group by lowercased form — same word across multiple POS gets merged
+    // Merge same-form entries
     const map = new Map<string, MeaningPair>();
     for (let i = 0; i < len; i++) {
       const key = forms[i].form.toLowerCase();
       if (map.has(key)) {
         const existing = map.get(key)!;
-        // Append the new Bengali line and extend the id
         map.set(key, {
-          id: `${existing.id}__${forms[i].pos.toLowerCase()}`,
+          id: `${existing.id}_${forms[i].pos.toLowerCase()}`,
           form: existing.form,
           meaningBnLines: [...existing.meaningBnLines, bnLines[i]],
         });
@@ -81,10 +85,20 @@ function buildMeaningSubBatches(batch: WordFamily[]): MeaningPair[][] {
     }
 
     const pairs = Array.from(map.values());
-    // Need at least 2 distinct tiles to make the game playable
-    if (pairs.length < 2) continue;
-    result.push(pairs);
+    if (pairs.length >= 2) {
+      result.push(pairs);
+    } else if (pairs.length === 1) {
+      // Only 1 unique tile — pool it with other orphans
+      orphans.push(pairs[0]);
+    }
   }
+
+  // Chunk orphans into sub-batches of MEANING_SUB_BATCH_SIZE
+  for (let i = 0; i < orphans.length; i += MEANING_SUB_BATCH_SIZE) {
+    const chunk = orphans.slice(i, i + MEANING_SUB_BATCH_SIZE);
+    if (chunk.length >= 2) result.push(chunk);
+  }
+
   return result;
 }
 
