@@ -85,27 +85,6 @@
     </script>
 
     <!-- ═══════════════════════════════════════════════════════════
-         GOOGLE FONTS — non-render-blocking async load
-         1. preconnect warms up the DNS+TLS handshake early.
-         2. media="print" makes the stylesheet load off the critical path.
-            onload flips it to media="all" once it arrives, so it applies
-            without ever blocking the first paint.
-         3. <noscript> covers JS-disabled browsers.
-         Previously loaded via CSS @import which is synchronous and was
-         adding ~300ms to First Contentful Paint.
-    ════════════════════════════════════════════════════════════ -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap"
-          media="print"
-          onload="this.media='all'">
-    <noscript>
-      <link rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap">
-    </noscript>
-
-    <!-- ═══════════════════════════════════════════════════════════
          ICONS & PWA
     ════════════════════════════════════════════════════════════ -->
     <!-- iOS / Safari Home Screen -->

@@ -15,22 +15,6 @@ export default defineConfig(() => {
       esbuild: {
         drop: ['console', 'debugger'],
       },
-      rollupOptions: {
-        output: {
-          // Split large vendor libraries into separate cached chunks.
-          // Benefits:
-          //   1. Browser caches each chunk independently — a React update
-          //      doesn't bust the motion or localforage chunk, and vice versa.
-          //   2. Reduces "unused JS" in PageSpeed: smaller, focused chunks
-          //      mean less code parsed on the critical path.
-          //   3. Smaller individual files = better per-file compression ratios.
-          manualChunks: {
-            'vendor-react':   ['react', 'react-dom', 'react-router-dom'],
-            'vendor-motion':  ['motion'],
-            'vendor-storage': ['localforage'],
-          },
-        },
-      },
     },
     plugins: [
       react(),
