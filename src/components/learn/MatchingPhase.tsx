@@ -152,7 +152,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
   const [locked1, setLocked1]     = useState(false);
   const [celebrate1, setCelebrate1] = useState(false);
 
-  // FIX #4 — Shuffle BOTH columns independently in Stage 1.
+  // Shuffle BOTH columns independently in Stage 1.
   // Previously only the right (meaning) column was shuffled. The left column
   // always showed words in their original batch order, making it trivial to
   // exploit positional memory instead of actually learning the meanings.
@@ -171,7 +171,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
   const [locked2, setLocked2]       = useState(false);
   const [celebrate2, setCelebrate2] = useState(false);
 
-  // FIX #4 — Shuffle BOTH columns independently in Stage 2.
+  // Shuffle BOTH columns independently in Stage 2.
   // Left shows word forms, right shows POS labels. Both now start in a random
   // order so the user cannot guess by position alignment.
   const [leftPos,  setLeftPos]  = useState<PosPair[]>(() => shuffle(posSubBatches[0] ?? []));
@@ -238,7 +238,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
 
   // ── Stage 2 tap ─────────────────────────────────────────────────────────────
   // Left = word forms, Right = POS labels — both tiles share the same pair.id.
-  // FIX #6 — wrong tile assignment uses sel2.side to correctly identify which
+  // Wrong tile assignment uses sel2.side to correctly identify which
   // tile is on which side, matching the same pattern as Stage 1 for consistency.
   const handleTap2 = (id: string, side: 'left' | 'right') => {
     if (locked2 || matched2.has(id)) return;
@@ -285,7 +285,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
             transition={{ duration: 0.2 }}
             className="grid grid-cols-2 gap-3"
           >
-            {/* Left: English words — FIX #4: now rendered from shuffled leftWords */}
+            {/* Left: English words now rendered from shuffled leftWords */}
             <div className="flex flex-col gap-3">
               {leftWords.map(word => {
                 const text = getPrimaryForm(word);
@@ -351,7 +351,7 @@ export const MatchingPhase: React.FC<Props> = ({ batch, batchIndex, totalBatches
             )}
 
             <div className="grid grid-cols-2 gap-3">
-              {/* Left: word forms — FIX #4: now rendered from shuffled leftPos */}
+              {/* Left: word forms now rendered from shuffled leftPos */}
               <div className="flex flex-col gap-3">
                 {leftPos.map(pair => (
                   <Tile
