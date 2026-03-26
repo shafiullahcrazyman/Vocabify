@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
-/* Google Fonts are loaded via <link> tags in index.html using the async
-   media="print" trick to avoid render-blocking. Do NOT add an @import here —
-   CSS @import is synchronous and blocks the first paint. */
+/* Google Fonts — loaded from network on first visit, then served from
+   Workbox's "google-fonts-cache" on all subsequent visits (including offline). */
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap');
 
 @theme {
   --color-primary: var(--md-sys-color-primary);
