@@ -24,7 +24,7 @@ export const getValidForms = (word: WordFamily): { form: string; pos: string }[]
  * Selects words for a session.
  * Priority: unlearned first (shuffled) → learned words for review.
  *
- * FIX #5 — Spaced Repetition for review words:
+ * Spaced Repetition for review words:
  * Learned words are now sorted by their last-reviewed date ascending so the
  * words the user studied longest ago appear first for review. Previously they
  * were shuffled randomly, giving no SRS benefit. Words with no date record
@@ -187,7 +187,7 @@ export const buildMultiFillBlank = (
   return { sentence, blanks };
 };
 
-// FIX #9: The old buildFillBlank alias was cast through `unknown`, completely
+// The old buildFillBlank alias was cast through `unknown`, completely
 // bypassing TypeScript. Any call-site accessing `.blank` (singular) would get
 // undefined at runtime since the real return shape has `.blanks` (plural).
 // The alias has been removed. Use buildMultiFillBlank directly everywhere.
