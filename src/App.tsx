@@ -35,8 +35,7 @@ function AnimatedRoutes() {
   );
 }
 
-/**
- * AppShell — lives inside HashRouter so it can call useNavigate / useLocation.
+/* AppShell — lives inside HashRouter so it can call useNavigate / useLocation.
  * The BottomNav is hidden on /learn so the session feels fully immersive.
  */
 function AppShell() {
