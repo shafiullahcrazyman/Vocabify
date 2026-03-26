@@ -86,7 +86,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const words = wordsData as WordFamily[];
 
-  // FIX #3 — Race-safe today-count tracker.
+  // Race-safe today-count tracker.
   // Using a ref avoids the stale-closure problem where rapid markLearned calls
   // all read the same snapshot of progress.learnedDates before React re-renders.
   // The ref is updated synchronously on every markLearned call, so even if 10
@@ -119,7 +119,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       lastGoalDate !== yesterday;
 
     if (streakIsBroken) {
-      // FIX #1 — spread prev so totalXP is never overwritten.
+      // Spread prev so totalXP is never overwritten.
       setStreakData(prev => ({ ...prev, current: 0 }));
     }
   }, [streakLoaded]);
@@ -206,7 +206,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
     });
 
-    // FIX #3 — Update the ref synchronously so rapid calls can't double-trigger.
+    // Update the ref synchronously so rapid calls can't double-trigger.
     if (isAdding) {
       todayCountRef.current += 1;
     } else {
@@ -225,7 +225,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           streakData.lastGoalDate === yesterday
             ? streakData.current + 1
             : 1;
-        // FIX #1 — spread prev so totalXP (and any future fields) are never lost.
+        // Spread prev so totalXP (and any future fields) are never lost.
         setStreakData(prev => ({
           ...prev,
           current: newCurrent,
@@ -243,7 +243,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setStreakData(defaultStreak);
   };
 
-  // FIX #1 — persist XP so it survives across sessions; spread prev so other
+  // Persist XP so it survives across sessions; spread prev so other
   // streak fields (current, longest, lastGoalDate) are never overwritten.
   const addXP = (amount: number) => {
     setStreakData(prev => ({ ...prev, totalXP: (prev.totalXP ?? 0) + amount }));
