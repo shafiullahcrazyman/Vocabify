@@ -55,8 +55,11 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
 
   // Initials fallback for email accounts with no photo
   const initials = user?.displayName
-    ? user.displayName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+    ? user.displayName.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()
     : null;
+
+  // True only when Firebase has no session at all
+  const isSignedOut = !user;
 
   return (
     <>
@@ -134,24 +137,34 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
         )}
 
         {/* USER AVATAR — opens AuthModal */}
-        <button
-          onClick={handleAvatarClick}
-          className="tour-user-avatar w-8 h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-surface-variant/40 hover:bg-surface-variant transition-all duration-200 active:scale-90"
-          aria-label="Open profile"
-        >
-          {avatarSrc ? (
-            <img
-              src={avatarSrc}
-              alt="User avatar"
-              className="w-full h-full object-cover"
-              referrerPolicy="no-referrer"
-            />
-          ) : initials ? (
-            <span className="text-[10px] font-bold text-primary">{initials}</span>
-          ) : (
-            <div className="w-full h-full rounded-full" />
+        <div className="relative flex-shrink-0">
+          <button
+            onClick={handleAvatarClick}
+            className="tour-user-avatar w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-surface-variant/40 hover:bg-surface-variant transition-all duration-200 active:scale-90"
+            aria-label="Open profile"
+          >
+            {avatarSrc ? (
+              <img
+                src={avatarSrc}
+                alt="User avatar"
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            ) : initials ? (
+              <span className="text-[10px] font-bold text-primary">{initials}</span>
+            ) : (
+              /* Not signed in — person silhouette, same idea as Google */
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-on-surface-variant">
+                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+              </svg>
+            )}
+          </button>
+
+          {/* Small red dot when signed out — signals "tap to sign in" */}
+          {isSignedOut && (
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-error border-2 border-background pointer-events-none" />
           )}
-        </button>
+        </div>
 
       </header>
 
