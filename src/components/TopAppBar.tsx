@@ -1,6 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Info, PlayCircle, X } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
+import { AuthModal } from './AuthModal';
 import { SettingsDrawer } from './SettingsDrawer';
 import { TipsOverlay } from './TipsOverlay';
 import { VideoTutorialModal } from './VideoTutorialModal';
@@ -12,15 +14,23 @@ interface TopAppBarProps {
 }
 
 export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
-  const { searchQuery, setSearchQuery, userAvatar, setUserAvatar, settings, isSettingsOpen, setIsSettingsOpen } = useAppContext();
+  const {
+    searchQuery,
+    setSearchQuery,
+    userAvatar,
+    settings,
+    isSettingsOpen,
+    setIsSettingsOpen,
+  } = useAppContext();
+
+  const { user } = useAuth();
 
   const [localSearch, setLocalSearch] = useState(searchQuery);
   const debouncedSearch = useDebounce(localSearch, 300);
 
-  const [isTipsOpen, setIsTipsOpen] = useState(false);
-  const [isVideoOpen, setIsVideoOpen] = useState(false);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isTipsOpen,      setIsTipsOpen]      = useState(false);
+  const [isVideoOpen,     setIsVideoOpen]     = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
     setSearchQuery(debouncedSearch);
@@ -32,7 +42,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
 
   const handleAvatarClick = () => {
     triggerHaptic(settings.hapticsEnabled);
-    fileInputRef.current?.click();
+    setIsAuthModalOpen(true);
   };
 
   const handleMenuClick = () => {
@@ -40,61 +50,13 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
     setIsSettingsOpen(true);
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    // Hold a DOM reference before any await — React may recycle the synthetic
-    // event object after the first yield, but the underlying input element stays.
-    const inputEl = event.target;
+  // Avatar display: custom upload beats provider photo beats generic ring
+  const avatarSrc = userAvatar || user?.photoURL || null;
 
-    if (!file) return;
-
-    // ── Size check first — cheap, no async I/O needed ──────────────────────
-    if (file.size > 2 * 1024 * 1024) {
-      alert('Please choose an image smaller than 2MB so it can be saved offline.');
-      inputEl.value = '';
-      return;
-    }
-
-    // ── Magic byte validation ───────────────────────────────────────────────
-    // file.type is provided by the OS based on the file extension, not the
-    // actual byte content. A user can rename evil.svg → evil.png and bypass
-    // an extension-only check. Reading the first 12 bytes of the file confirms
-    // the real format regardless of what the OS reports.
-    //
-    // Signatures used:
-    //   JPEG  : FF D8 FF  (bytes 0-2)
-    //   PNG   : 89 50 4E 47  (bytes 0-3)
-    //   GIF   : 47 49 46 38  (bytes 0-3 — shared prefix for GIF87a & GIF89a)
-    //   WebP  : 52 49 46 46 at 0-3 ("RIFF") + 57 45 42 50 at 8-11 ("WEBP")
-    try {
-      const buffer = await file.slice(0, 12).arrayBuffer();
-      const b = new Uint8Array(buffer);
-
-      const isJpeg = b[0] === 0xFF && b[1] === 0xD8 && b[2] === 0xFF;
-      const isPng  = b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47;
-      const isGif  = b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38;
-      const isWebp = b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46
-                  && b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50;
-
-      if (!isJpeg && !isPng && !isGif && !isWebp) {
-        alert('Only JPEG, PNG, GIF, or WebP images are allowed.');
-        inputEl.value = '';
-        return;
-      }
-    } catch {
-      // arrayBuffer() can theoretically throw on a corrupted or unreadable file.
-      alert('Could not read the image file. Please try a different one.');
-      inputEl.value = '';
-      return;
-    }
-
-    // ── All checks passed — read as data URL for IndexedDB storage ──────────
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setUserAvatar(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
+  // Initials fallback for email accounts with no photo
+  const initials = user?.displayName
+    ? user.displayName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+    : null;
 
   return (
     <>
@@ -107,7 +69,7 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
           aria-label="Open settings menu"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-            <rect x="3" y="6" width="18" height="2" />
+            <rect x="3" y="6"  width="18" height="2" />
             <rect x="3" y="11" width="18" height="2" />
             <rect x="3" y="16" width="18" height="2" />
           </svg>
@@ -171,32 +133,29 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({ title }) => {
           </div>
         )}
 
-        {/* USER AVATAR */}
+        {/* USER AVATAR — opens AuthModal */}
         <button
           onClick={handleAvatarClick}
           className="tour-user-avatar w-8 h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-surface-variant/40 hover:bg-surface-variant transition-all duration-200 active:scale-90"
-          aria-label="Upload user avatar"
+          aria-label="Open profile"
         >
-          {userAvatar ? (
+          {avatarSrc ? (
             <img
-              src={userAvatar}
+              src={avatarSrc}
               alt="User avatar"
               className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
             />
+          ) : initials ? (
+            <span className="text-[10px] font-bold text-primary">{initials}</span>
           ) : (
             <div className="w-full h-full rounded-full" />
           )}
         </button>
 
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          accept="image/*"
-          className="hidden"
-        />
-
       </header>
+
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
       <SettingsDrawer
         isOpen={isSettingsOpen}
