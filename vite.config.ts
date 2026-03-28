@@ -6,18 +6,16 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(() => {
   return {
-    base: '/Vocabify/',
+    // Firebase Hosting serves from root, unlike GitHub Pages which needed /Vocabify/
+    base: '/',
     build: {
       outDir: 'dist',
-      // Strip all console.* calls and debugger statements from production bundle.
-      // This prevents internal storage key names and debug info leaking to DevTools.
       minify: true,
       esbuild: {
         drop: ['console', 'debugger'],
       },
       rollupOptions: {
         output: {
-          // Split Firebase into its own chunk so the main bundle stays small.
           manualChunks: {
             firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
           },
@@ -38,8 +36,8 @@ export default defineConfig(() => {
           theme_color: '#141218',
           background_color: '#141218',
           display: 'standalone',
-          scope: '/Vocabify/',
-          start_url: '/Vocabify/',
+          scope: '/',
+          start_url: '/',
           icons: [
             { src: 'icon.png', sizes: '192x192', type: 'image/png' },
             { src: 'icon.png', sizes: '512x512', type: 'image/png' },
@@ -47,36 +45,24 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          // Raise the precache limit to 4 MB to accommodate the words.json
-          // data file and the Firebase chunk without breaking the build.
           maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
-          // Cache all built assets
           globPatterns: ['**/*.{js,css,html,ico,png,svg,mp4,json,woff2,woff}'],
-          // Runtime caching for Google Fonts so they work offline after first load
           runtimeCaching: [
             {
-              // Cache the CSS descriptor from fonts.googleapis.com
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
               handler: 'CacheFirst',
               options: {
                 cacheName: 'google-fonts-stylesheets',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-                },
+                expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
                 cacheableResponse: { statuses: [0, 200] },
               },
             },
             {
-              // Cache the actual font files from fonts.gstatic.com
               urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
               handler: 'CacheFirst',
               options: {
                 cacheName: 'google-fonts-webfonts',
-                expiration: {
-                  maxEntries: 20,
-                  maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-                },
+                expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
                 cacheableResponse: { statuses: [0, 200] },
               },
             },
