@@ -170,7 +170,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     } catch (e: unknown) {
       const code = (e as { code?: string }).code ?? '';
       const msg  = friendlyError(code);
-      if (msg) setError(msg);
+      if (msg) setError(code ? `${msg} (${code})` : msg);
+      else if (code) setError(code);
     } finally {
       setLoading(false);
     }
