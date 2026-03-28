@@ -4,10 +4,13 @@ import {
   onAuthStateChanged,
   signOut as fbSignOut,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInAnonymously as fbSignInAnonymously,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   linkWithPopup,
+  linkWithRedirect,
   updateProfile,
   GoogleAuthProvider,
   GithubAuthProvider,
@@ -32,11 +35,38 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
 
+// Mobile browsers block popups — detect and use redirect instead.
+const isMobile = () =>
+  /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+
+async function socialSignIn(provider: GoogleAuthProvider | GithubAuthProvider) {
+  if (isMobile()) {
+    await signInWithRedirect(auth, provider);
+    // Page will reload; result is picked up in useEffect below.
+  } else {
+    await signInWithPopup(auth, provider);
+  }
+}
+
+async function socialLink(provider: GoogleAuthProvider | GithubAuthProvider) {
+  if (!auth.currentUser) return;
+  if (isMobile()) {
+    await linkWithRedirect(auth.currentUser, provider);
+  } else {
+    await linkWithPopup(auth.currentUser, provider);
+  }
+}
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser]             = useState<User | null>(null);
+  const [user, setUser]               = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
+    // Handle the result that comes back after a redirect sign-in.
+    getRedirectResult(auth).catch(() => {
+      // Silently ignore — errors surface through onAuthStateChanged.
+    });
+
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setAuthLoading(false);
@@ -44,13 +74,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return unsub;
   }, []);
 
-  const signInWithGoogle = async () => {
-    await signInWithPopup(auth, googleProvider);
-  };
-
-  const signInWithGitHub = async () => {
-    await signInWithPopup(auth, githubProvider);
-  };
+  const signInWithGoogle = () => socialSignIn(googleProvider);
+  const signInWithGitHub = () => socialSignIn(githubProvider);
 
   const signInWithEmail = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password);
@@ -65,17 +90,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     await fbSignInAnonymously(auth);
   };
 
-  /** Upgrades an anonymous account to Google — keeps all existing progress. */
-  const linkWithGoogle = async () => {
-    if (!auth.currentUser) return;
-    await linkWithPopup(auth.currentUser, googleProvider);
-  };
-
-  /** Upgrades an anonymous account to GitHub — keeps all existing progress. */
-  const linkWithGitHub = async () => {
-    if (!auth.currentUser) return;
-    await linkWithPopup(auth.currentUser, githubProvider);
-  };
+  const linkWithGoogle = () => socialLink(googleProvider);
+  const linkWithGitHub = () => socialLink(githubProvider);
 
   const signOut = async () => {
     await fbSignOut(auth);
