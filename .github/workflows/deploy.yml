@@ -1,15 +1,26 @@
-name: Deploy to Firebase Hosting
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches: ["main"]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+# Opt into Node.js 24 now to silence Node.js 20 deprecation warnings.
+# GitHub will force this on June 2nd, 2026 anyway.
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,18 +39,22 @@ jobs:
 
       - name: Build
         run: npm run build
-        env:
-          VITE_FIREBASE_API_KEY:             ${{ secrets.VITE_FIREBASE_API_KEY }}
-          VITE_FIREBASE_AUTH_DOMAIN:         ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
-          VITE_FIREBASE_PROJECT_ID:          ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
-          VITE_FIREBASE_STORAGE_BUCKET:      ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
-          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
-          VITE_FIREBASE_APP_ID:              ${{ secrets.VITE_FIREBASE_APP_ID }}
 
-      - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          channelId: live
-          projectId: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          path: './dist'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
