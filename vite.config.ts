@@ -15,6 +15,14 @@ export default defineConfig(() => {
       esbuild: {
         drop: ['console', 'debugger'],
       },
+      rollupOptions: {
+        output: {
+          // Split Firebase into its own chunk so the main bundle stays small.
+          manualChunks: {
+            firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+          },
+        },
+      },
     },
     plugins: [
       react(),
@@ -39,6 +47,9 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
+          // Raise the precache limit to 4 MB to accommodate the words.json
+          // data file and the Firebase chunk without breaking the build.
+          maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
           // Cache all built assets
           globPatterns: ['**/*.{js,css,html,ico,png,svg,mp4,json,woff2,woff}'],
           // Runtime caching for Google Fonts so they work offline after first load
