@@ -40,12 +40,6 @@ interface AppContextType {
   favorites: string[];
   toggleFavorite: (id: string) => void;
   streak: StreakData;
-  // Cloud sync — called by FirestoreSync in App.tsx when a user logs in
-  overrideWithCloudData: (
-    progress:  ProgressData,
-    favorites: string[],
-    streak:    StreakData,
-  ) => void;
   // Global settings drawer state — lifted here so swipe gestures can open it
   isSettingsOpen: boolean;
   setIsSettingsOpen: (open: boolean) => void;
@@ -83,10 +77,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const settings = { ...defaultSettings, ...storedSettings };
   const [filters, setFilters] = useLocalStorage<FilterOptions>(STORAGE_KEYS.FILTERS, defaultFilters);
 
-  const [progress, setProgress, progressLoaded]     = useIndexedDB<ProgressData>(STORAGE_KEYS.PROGRESS, { learned: [], learnedDates: {} });
-  const [userAvatar, setUserAvatar, avatarLoaded]   = useIndexedDB<string | null>(STORAGE_KEYS.AVATAR, null);
-  const [favorites, setFavorites, favsLoaded]       = useIndexedDB<string[]>(STORAGE_KEYS.FAVORITES, []);
-  const [streakData, setStreakData, streakLoaded]   = useIndexedDB<StreakData>(STORAGE_KEYS.STREAK, defaultStreak);
+  const [progress, setProgress, progressLoaded] = useIndexedDB<ProgressData>(STORAGE_KEYS.PROGRESS, { learned: [], learnedDates: {} });
+  const [userAvatar, setUserAvatar, avatarLoaded] = useIndexedDB<string | null>(STORAGE_KEYS.AVATAR, null);
+  const [favorites, setFavorites, favsLoaded] = useIndexedDB<string[]>(STORAGE_KEYS.FAVORITES, []);
+  const [streakData, setStreakData, streakLoaded] = useIndexedDB<StreakData>(STORAGE_KEYS.STREAK, defaultStreak);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -114,7 +108,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // days — it only corrected itself the next time the goal was earned.
   useEffect(() => {
     if (!streakLoaded) return;
-    const today     = getLocalDateString();
+    const today = getLocalDateString();
     const yesterday = getYesterdayString();
     const { lastGoalDate, current } = streakData;
 
@@ -131,12 +125,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, [streakLoaded]);
 
   // Re-check streak whenever the user returns to the tab or app.
+  // The load-time check above only fires once; if the app stays open overnight
+  // the streak would stay stale until the next hard reload without this listener.
   useEffect(() => {
     if (!streakLoaded) return;
 
     const handleVisibilityChange = () => {
       if (document.visibilityState !== 'visible') return;
-      const today     = getLocalDateString();
+      const today = getLocalDateString();
       const yesterday = getYesterdayString();
       setStreakData(prev => {
         const broken =
@@ -181,17 +177,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const markLearned = (id: string) => {
-    const today     = getLocalDateString();
+    const today = getLocalDateString();
     const yesterday = getYesterdayString();
     const alreadyInLearned = progress.learned.includes(id);
-    const countedToday     = (progress.learnedDates ?? {})[id] === today;
+    const countedToday = (progress.learnedDates ?? {})[id] === today;
 
     // "isAdding" = this call will add to today's daily count.
     const isAdding = !countedToday;
 
     setProgress(prev => {
       const prevLearned = prev.learned || [];
-      const prevDates   = prev.learnedDates || {};
+      const prevDates = prev.learnedDates || {};
 
       if (alreadyInLearned && countedToday) {
         // Full un-learn: word was learned and counted today — remove it entirely.
@@ -232,8 +228,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         // Spread prev so totalXP (and any future fields) are never lost.
         setStreakData(prev => ({
           ...prev,
-          current:      newCurrent,
-          longest:      Math.max(newCurrent, prev.longest ?? 0),
+          current: newCurrent,
+          longest: Math.max(newCurrent, prev.longest ?? 0),
           lastGoalDate: today,
         }));
       }
@@ -254,21 +250,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const resetDailyProgress = () => {
-    const today     = getLocalDateString();
+    const today = getLocalDateString();
     const yesterday = getYesterdayString();
 
     // Roll back the streak by one day if the goal was already met today.
     if (streakData.lastGoalDate === today) {
       setStreakData(prev => ({
         ...prev,
-        current:      Math.max(0, prev.current - 1),
+        current: Math.max(0, prev.current - 1),
         lastGoalDate: yesterday,
       }));
     }
 
     setProgress(prev => {
       const prevDates = prev.learnedDates || {};
-      const newDates  = { ...prevDates };
+      const newDates = { ...prevDates };
       // Only wipe today's date entries — Total Mastery (learned array) is untouched.
       Object.keys(newDates).forEach(wordId => {
         if (newDates[wordId] === today) delete newDates[wordId];
@@ -284,24 +280,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setFavorites(prev =>
       prev.includes(id) ? prev.filter(favId => favId !== id) : [...prev, id]
     );
-  };
-
-  /**
-   * Called by FirestoreSync (App.tsx) when a user logs in.
-   * Overwrites local IndexedDB state with the merged cloud snapshot so all
-   * progress, favorites, and XP are immediately reflected in the UI.
-   */
-  const overrideWithCloudData = (
-    newProgress:  ProgressData,
-    newFavorites: string[],
-    newStreak:    StreakData,
-  ) => {
-    setProgress(newProgress);
-    setFavorites(newFavorites);
-    setStreakData(newStreak);
-    // Keep the today-count ref in sync with the incoming data.
-    const today = getLocalDateString();
-    todayCountRef.current = Object.values(newProgress.learnedDates ?? {}).filter(d => d === today).length;
   };
 
   if (!progressLoaded || !avatarLoaded || !favsLoaded || !streakLoaded) {
@@ -328,7 +306,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         favorites,
         toggleFavorite,
         streak: streakData,
-        overrideWithCloudData,
         isSettingsOpen,
         setIsSettingsOpen,
       }}
